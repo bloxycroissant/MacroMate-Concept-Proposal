@@ -1,0 +1,14 @@
+# Ignore JDK and local runtimes
+**/oracleJdk-27/
+**/jdk*/
+
+# Ignore Java build outputs and compiled classes
+target/
+build/
+*.class
+
+# Ignore IDE settings and local environment files
+.vscode/
+.idea/
+*.iml
+.DS_Store
