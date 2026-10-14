@@ -1,0 +1,26 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "MacroMate: backend",
+      "type": "shell",
+      "command": "./mvnw",
+      "args": ["spring-boot:run"],
+      "windows": { "command": ".\\mvnw.cmd" },
+      "options": { "cwd": "${workspaceFolder}/MacroMate_Concept_Proposal/Backend" },
+      "isBackground": true,
+      "problemMatcher": { "owner": "macromate-backend", "pattern": { "regexp": "^(.*):(\\d+): (.*)$", "file": 1, "line": 2, "message": 3 }, "background": { "activeOnStart": true, "beginsPattern": ".*", "endsPattern": "Started BackendApplication" } }
+    },
+    {
+      "label": "MacroMate: frontend",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev", "--", "--host", "127.0.0.1", "--port", "5173", "--strictPort"],
+      "windows": { "command": "npm.cmd" },
+      "options": { "cwd": "${workspaceFolder}/MacroMate_Concept_Proposal/Frontend" },
+      "isBackground": true,
+      "problemMatcher": { "owner": "macromate-frontend", "pattern": { "regexp": "^(.*):(\\d+): (.*)$", "file": 1, "line": 2, "message": 3 }, "background": { "activeOnStart": true, "beginsPattern": ".*", "endsPattern": "Local:" } }
+    },
+    { "label": "MacroMate: start app", "dependsOn": ["MacroMate: backend", "MacroMate: frontend"], "dependsOrder": "parallel", "problemMatcher": [] }
+  ]
+}
