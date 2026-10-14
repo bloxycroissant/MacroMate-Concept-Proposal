@@ -1,5 +1,7 @@
 package com.example.backend;
 
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,12 +13,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173"})
 public class HelloController {
     private final FoodEntryRepository foodEntryRepository;
 
@@ -33,23 +36,22 @@ public class HelloController {
     public List<FoodEntry> getFoodEntries(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         if (date == null) {
-            return foodEntryRepository.findAll();
+            return foodEntryRepository.findAll(Sort.by("entryDate", "id"));
         }
         return foodEntryRepository.findByEntryDateOrderByIdAsc(date);
     }
 
     @PostMapping("/api/food-entries")
     @ResponseStatus(HttpStatus.CREATED)
-    public FoodEntry addFoodEntry(@RequestBody FoodEntry foodEntry) {
-        if (foodEntry.getEntryDate() == null) {
-            foodEntry.setEntryDate(LocalDate.now());
-        }
-        return foodEntryRepository.save(foodEntry);
+    public FoodEntry addFoodEntry(@Valid @RequestBody FoodEntryRequest request) {
+        return foodEntryRepository.save(request.toEntity());
     }
 
     @DeleteMapping("/api/food-entries/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteFoodEntry(@PathVariable Long id) {
-        foodEntryRepository.deleteById(id);
+        FoodEntry entry = foodEntryRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Food entry not found."));
+        foodEntryRepository.delete(entry);
     }
 }

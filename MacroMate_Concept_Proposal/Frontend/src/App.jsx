@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import useFoodEntries from './hooks/useFoodEntries';
+import FoodEntryForm from './components/FoodEntryForm';
+import JournalDateSelector from './components/JournalDateSelector';
+import { localDate, shiftDate } from './utils/journalDates';
 import './App.css';
 
 export default function App() {
@@ -9,6 +13,36 @@ export default function App() {
   const [energyLevel, setEnergyLevel] = useState(4);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [foodJournalMenuOpen, setFoodJournalMenuOpen] = useState(false);
+
+  const [selectedDate, setSelectedDate] = useState(localDate);
+  const journal = useFoodEntries();
+  const entries = journal.entries.filter((entry) => entry.entryDate === selectedDate);
+  const totals = entries.reduce((sum, entry) => ({
+    calories: sum.calories + entry.calories, protein: sum.protein + entry.protein,
+    carbs: sum.carbs + entry.carbs, fat: sum.fat + entry.fat,
+  }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  const goals = { calories: 2200, protein: 150, carbs: 270, fat: 65 };
+  const meals = [
+    { meal: 'Breakfast', icon: '🥐' }, { meal: 'Lunch', icon: '🍱' },
+    { meal: 'Dinner', icon: '🍽️' }, { meal: 'Snacks', icon: '🍿' },
+  ].map((meal) => ({ ...meal, items: entries.filter((entry) => entry.meal === meal.meal) }));
+  const number = (value) => journal.loading ? '…' : journal.error ? '—' : Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 });
+  const progress = (key) => `${Math.min(100, totals[key] / goals[key] * 100)}%`;
+  const dateLabel = new Date(`${selectedDate}T12:00:00`).toLocaleDateString(undefined, {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  });
+  const week = Array.from({ length: 7 }, (_, index) => {
+    const date = shiftDate(selectedDate, index - 6);
+    return { date, calories: journal.entries.filter((entry) => entry.entryDate === date)
+      .reduce((sum, entry) => sum + entry.calories, 0) };
+  });
+  const chartMax = Math.max(goals.calories, ...week.map((day) => day.calories));
+  const chartPoints = week.map((day, index) => `${20 + index * 70},${100 - day.calories / chartMax * 90}`).join(' ');
+
+  async function saveFood(entry) {
+    const saved = await journal.save(entry);
+    setSelectedDate(saved.entryDate);
+  }
 
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: '⊞' },
@@ -59,7 +93,7 @@ export default function App() {
             </div>
           </div>
 
-          <button className="log-food-btn" onClick={() => setIsModalOpen(true)}>
+          <button className="log-food-btn" disabled={journal.loading || !!journal.error || journal.busy} onClick={() => setIsModalOpen(true)}>
             + Log Food
           </button>
         </div>
@@ -122,40 +156,40 @@ export default function App() {
             <div className="footprints">👣 👣 👣 👣</div>
           </div>
 
-          {/* TODAY'S MACROS WIDGET */}
+          {/* SELECTED DAY'S MACROS WIDGET */}
           <div className="sidebar-macros">
-            <span className="macros-title">TODAY'S MACROS</span>
+            <span className="macros-title">SELECTED DAY'S MACROS</span>
 
             <div className="macro-row">
               <div className="macro-label">
                 <span>Calories</span>
-                <b>1091 / 2200 kcal</b>
+                <b>{number(totals.calories)} / {goals.calories} kcal</b>
               </div>
-              <div className="progress-bar green"><span style={{ width: '49.5%' }}></span></div>
+              <div className="progress-bar green"><span style={{ width: journal.loading || journal.error ? '0%' : progress('calories') }}></span></div>
             </div>
 
             <div className="macro-row">
               <div className="macro-label">
                 <span>Protein</span>
-                <b>91 / 150 g</b>
+                <b>{number(totals.protein)} / {goals.protein} g</b>
               </div>
-              <div className="progress-bar blue"><span style={{ width: '60.6%' }}></span></div>
+              <div className="progress-bar blue"><span style={{ width: journal.loading || journal.error ? '0%' : progress('protein') }}></span></div>
             </div>
 
             <div className="macro-row">
               <div className="macro-label">
                 <span>Carbs</span>
-                <b>124 / 270 g</b>
+                <b>{number(totals.carbs)} / {goals.carbs} g</b>
               </div>
-              <div className="progress-bar orange"><span style={{ width: '45.9%' }}></span></div>
+              <div className="progress-bar orange"><span style={{ width: journal.loading || journal.error ? '0%' : progress('carbs') }}></span></div>
             </div>
 
             <div className="macro-row">
               <div className="macro-label">
                 <span>Fat</span>
-                <b>23 / 65 g</b>
+                <b>{number(totals.fat)} / {goals.fat} g</b>
               </div>
-              <div className="progress-bar pink"><span style={{ width: '35.3%' }}></span></div>
+              <div className="progress-bar pink"><span style={{ width: journal.loading || journal.error ? '0%' : progress('fat') }}></span></div>
             </div>
           </div>
 
@@ -167,6 +201,11 @@ export default function App() {
 
         {/* MAIN VIEW CONTENT AREA */}
         <main className="main-content">
+          {journal.loading && <p className="journal-notice" role="status">Loading saved food entries…</p>}
+          {journal.error && <div className="journal-notice journal-error" role="alert">
+            <p>{journal.error}</p><button type="button" disabled={journal.loading || journal.busy} onClick={journal.reload}>Retry</button>
+          </div>}
+          <p className="journal-selected-date">Food journal: {dateLabel}</p>
           
           {/* IMAGE 1: HEALTH JOURNAL PAGE VIEW */}
           {activeTab === 'health-journal' && (
@@ -325,9 +364,9 @@ export default function App() {
 
               <div className="overview-stats">
                 <div className="card overview-stat-card">
-                  <span className="stat-label">Daily calories</span>
-                  <div className="stat-val">1,091 / 2,200 kcal</div>
-                  <span className="stat-sub green-txt">1,109 kcal remaining</span>
+                  <span className="stat-label">Selected day calories</span>
+                  <div className="stat-val">{number(totals.calories)} / {goals.calories} kcal</div>
+                  <span className="stat-sub green-txt">{number(Math.max(0, goals.calories - totals.calories))} kcal remaining</span>
                   <span className="floating-badge">🔥 kcal</span>
                 </div>
 
@@ -353,16 +392,16 @@ export default function App() {
                       <strong>Weekly Progress</strong>
                       <div className="stat-sub">Calories logged over the past seven days</div>
                     </div>
-                    <span className="pill-badge">This Week</span>
+                    <span className="pill-badge">7 days ending {selectedDate}</span>
                   </div>
                   <svg className="chart-svg" viewBox="0 0 500 120">
                     <line x1="0" y1="30" x2="500" y2="30" stroke="#d5ebd7" strokeDasharray="4" />
                     <line x1="0" y1="60" x2="500" y2="60" stroke="#d5ebd7" strokeDasharray="4" />
                     <line x1="0" y1="90" x2="500" y2="90" stroke="#d5ebd7" strokeDasharray="4" />
-                    <polyline points="20,70 90,95 160,60 230,80 300,45 370,85 440,25" fill="none" stroke="#0b9b56" strokeWidth="3" />
+                    <polyline points={journal.loading || journal.error ? '' : chartPoints} fill="none" stroke="#0b9b56" strokeWidth="3" />
                   </svg>
                   <div className="chart-days">
-                    <span>Sunday</span><span>Monday</span><span>Tuesday</span><span>Wednesday</span><span>Thursday</span><span>Friday</span><span>Saturday</span>
+                    {week.map((day) => <span key={day.date} title={`${day.date}: ${number(day.calories)} kcal`}>{new Date(`${day.date}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short' })}<br />{number(day.calories)} kcal</span>)}
                   </div>
                 </div>
 
@@ -402,24 +441,20 @@ export default function App() {
               <div className="card recent-activity-card">
                 <div className="recent-header">
                   <strong>Recent activity</strong>
-                  <span className="link-green">View All</span>
+                  <button className="entry-delete-btn" onClick={() => { setActiveTab('food-journal'); setFoodSubTab('daily'); }}>View journal</button>
                 </div>
-                {[
-                  { name: 'Oatmeal with banana', meal: 'Breakfast', icon: '🥣', time: '07:35' },
-                  { name: 'Black Coffee', meal: 'Breakfast', icon: '☕', time: '07:35' },
-                  { name: 'Grilled Chicken Breast', meal: 'Lunch', icon: '🍗', time: '12:15' },
-                  { name: 'Brown rice (1 cup)', meal: 'Lunch', icon: '🍚', time: '12:15' },
-                ].map((act, i) => (
-                  <div key={i} className="activity-row">
+                {entries.length === 0 && <p className="stat-sub">{journal.loading ? 'Loading…' : journal.error ? 'Journal unavailable' : 'No food logged for this date yet.'}</p>}
+                {entries.slice(-4).reverse().map((act) => (
+                  <div key={act.id} className="activity-row">
                     <div className="act-left">
-                      <span className="act-icon">{act.icon}</span>
+                      <span className="act-icon">🍴</span>
                       <div>
-                        <strong>{act.name}</strong>
+                        <strong>{act.foodName}</strong>
                         <div className="stat-sub">{act.meal}</div>
                       </div>
                     </div>
                     <div className="act-right">
-                      <span>{act.time}</span>
+                      <span>{number(act.calories)} kcal</span>
                       <span className="logged-tag">Logged</span>
                     </div>
                   </div>
@@ -461,29 +496,11 @@ export default function App() {
               <h1 className="page-title">Daily Food Journal</h1>
 
               {/* Date Navigation Bar */}
-              <div className="date-strip-card">
-                <button className="arrow-btn">‹</button>
-                <span className="date-center">10/03/26</span>
-                <div className="days-strip">
-                  {['WED 30', 'THU 01', 'FRI 02', 'SAT 03', 'SUN 04', 'MON 05', 'TUE 06'].map((d, i) => (
-                    <div key={i} className={`strip-day ${i === 3 ? 'active' : ''}`}>
-                      <span className="day-name">{d.split(' ')[0]}</span>
-                      <span className="day-num">{d.split(' ')[1]}</span>
-                      {i === 3 && <span className="active-dot">•</span>}
-                    </div>
-                  ))}
-                </div>
-                <button className="arrow-btn">›</button>
-              </div>
+              <JournalDateSelector value={selectedDate} onChange={setSelectedDate} />
 
               <div className="daily-journal-grid">
                 <div className="meal-tables-column">
-                  {[
-                    { meal: 'Breakfast', icon: '🥐', items: [{ name: 'Hashbrowns', cal: '272 kcal', p: '2g', f: '10g', c: '20g' }, { name: 'Black Coffee (240mL)', cal: '2.4 kcal', p: '0.1g', f: '0g', c: '0g' }] },
-                    { meal: 'Lunch', icon: '⏰', items: [] },
-                    { meal: 'Dinner', icon: '🍽️', items: [] },
-                    { meal: 'Snacks', icon: '🍿', items: [] },
-                  ].map((m, idx) => (
+                  {meals.map((m, idx) => (
                     <div key={idx} className="meal-block">
                       <div className="meal-sidebar-tab">
                         <span className="tab-icon">{m.icon}</span>
@@ -493,18 +510,19 @@ export default function App() {
                         <table className="daily-table">
                           <thead>
                             <tr>
-                              <th>Food</th><th>CALORIES</th><th>PROTEIN</th><th>FAT</th><th>CARBS</th>
+                              <th>Food</th><th>CALORIES</th><th>PROTEIN</th><th>FAT</th><th>CARBS</th><th>Actions</th>
                             </tr>
                           </thead>
                           <tbody>
                             {m.items.length > 0 ? (
-                              m.items.map((it, i) => (
-                                <tr key={i}>
-                                  <td>{it.name}</td><td>{it.cal}</td><td>{it.p}</td><td>{it.f}</td><td>{it.c}</td>
+                              m.items.map((it) => (
+                                <tr key={it.id}>
+                                  <td>{it.foodName}</td><td>{number(it.calories)} kcal</td><td>{number(it.protein)} g</td><td>{number(it.fat)} g</td><td>{number(it.carbs)} g</td>
+                                  <td><button className="entry-delete-btn" disabled={journal.busy} onClick={() => journal.remove(it.id)} aria-label={`Delete ${it.foodName}`}>Delete</button></td>
                                 </tr>
                               ))
                             ) : (
-                              <tr><td colSpan="5" className="empty-td">&nbsp;</td></tr>
+                              <tr><td colSpan="6" className="empty-td">{journal.loading ? 'Loading…' : journal.error ? 'Journal unavailable' : 'No entries for this meal'}</td></tr>
                             )}
                           </tbody>
                         </table>
@@ -514,10 +532,10 @@ export default function App() {
 
                   <div className="daily-total-bar">
                     <div className="total-label">📋 Daily Total</div>
-                    <div className="total-cell">CALORIES</div>
-                    <div className="total-cell">PROTEIN</div>
-                    <div className="total-cell">FAT</div>
-                    <div className="total-cell">CARBS</div>
+                    <div className="total-cell">CALORIES<br />{number(totals.calories)} kcal</div>
+                    <div className="total-cell">PROTEIN<br />{number(totals.protein)} g</div>
+                    <div className="total-cell">FAT<br />{number(totals.fat)} g</div>
+                    <div className="total-cell">CARBS<br />{number(totals.carbs)} g</div>
                   </div>
                 </div>
 
@@ -525,7 +543,7 @@ export default function App() {
                   <div className="card right-widget">
                     <div className="widget-title">TODAY'S GOALS 🎯</div>
                     <div className="goals-mini-grid">
-                      <div>CALORIES</div><div>PROTEIN</div><div>FAT</div><div>CARBS</div>
+                      <div>{goals.calories} kcal</div><div>{goals.protein} g protein</div><div>{goals.fat} g fat</div><div>{goals.carbs} g carbs</div>
                     </div>
                   </div>
 
@@ -562,69 +580,53 @@ export default function App() {
               <div className="overall-header">
                 <div>
                   <h1 className="page-title">Food Journal</h1>
-                  <div className="stat-sub">Saturday, October 03, 2026</div>
+                  <div className="stat-sub">{dateLabel}</div>
                 </div>
-                <button className="primary-green-btn" onClick={() => setIsModalOpen(true)}>+ Add Food</button>
+                <button className="primary-green-btn" disabled={journal.loading || !!journal.error || journal.busy} onClick={() => setIsModalOpen(true)}>+ Add Food</button>
               </div>
 
               {/* Date Bar */}
-              <div className="date-strip-card" style={{ margin: '16px 0' }}>
-                <button className="arrow-btn">‹</button>
-                <span className="date-center">10/03/26</span>
-                <div className="days-strip">
-                  {['WED 30', 'THU 01', 'FRI 02', 'SAT 03', 'SUN 04', 'MON 05', 'TUE 06'].map((d, i) => (
-                    <div key={i} className={`strip-day ${i === 3 ? 'active' : ''}`}>
-                      <span className="day-name">{d.split(' ')[0]}</span>
-                      <span className="day-num">{d.split(' ')[1]}</span>
-                      {i === 3 && <span className="active-dot">•</span>}
-                    </div>
-                  ))}
-                </div>
-                <button className="arrow-btn">›</button>
-              </div>
+              <JournalDateSelector value={selectedDate} onChange={setSelectedDate} />
 
               {/* Top Macros Progress Cards */}
               <div className="overall-macros-grid">
                 <div className="card macro-stat-box">
                   <span className="stat-label">Calories</span>
-                  <div className="progress-bar green"><span style={{ width: '49.5%' }}></span></div>
-                  <span className="stat-sub align-right">1091 / 2200 kcal</span>
+                  <div className="progress-bar green"><span style={{ width: journal.loading || journal.error ? '0%' : progress('calories') }}></span></div>
+                  <span className="stat-sub align-right">{number(totals.calories)} / {goals.calories} kcal</span>
                 </div>
                 <div className="card macro-stat-box">
                   <span className="stat-label">Protein</span>
-                  <div className="progress-bar blue"><span style={{ width: '60.6%' }}></span></div>
-                  <span className="stat-sub align-right">91 / 150 g</span>
+                  <div className="progress-bar blue"><span style={{ width: journal.loading || journal.error ? '0%' : progress('protein') }}></span></div>
+                  <span className="stat-sub align-right">{number(totals.protein)} / {goals.protein} g</span>
                 </div>
                 <div className="card macro-stat-box">
                   <span className="stat-label">Carbs</span>
-                  <div className="progress-bar orange"><span style={{ width: '45.9%' }}></span></div>
-                  <span className="stat-sub align-right">124 / 240 g</span>
+                  <div className="progress-bar orange"><span style={{ width: journal.loading || journal.error ? '0%' : progress('carbs') }}></span></div>
+                  <span className="stat-sub align-right">{number(totals.carbs)} / {goals.carbs} g</span>
                 </div>
                 <div className="card macro-stat-box">
                   <span className="stat-label">Fat</span>
-                  <div className="progress-bar pink"><span style={{ width: '35.3%' }}></span></div>
-                  <span className="stat-sub align-right">23 / 65 g</span>
+                  <div className="progress-bar pink"><span style={{ width: journal.loading || journal.error ? '0%' : progress('fat') }}></span></div>
+                  <span className="stat-sub align-right">{number(totals.fat)} / {goals.fat} g</span>
                 </div>
               </div>
 
               {/* Meal Column Cards */}
               <div className="overall-columns-grid">
-                {[
-                  { title: 'Breakfast', icon: '🥐', items: [{ name: 'Hashbrowns', val: '272 kcal' }, { name: 'Black Coffee (240mL)', val: '2.4 kcal' }] },
-                  { title: 'Lunch', icon: '🍱', items: [] },
-                  { title: 'Dinner', icon: '🍽️', items: [] },
-                  { title: 'Snacks', icon: '⏰', items: [] },
-                ].map((col, idx) => (
+                {meals.map((col, idx) => (
                   <div key={idx} className="card column-card">
                     <div className="column-header-banner">
-                      <span>{col.title}</span>
+                      <span>{col.meal}</span>
                       <span>{col.icon}</span>
                     </div>
                     <div className="column-body">
-                      {col.items.map((it, i) => (
-                        <div key={i} className="column-item-row">
-                          <span>{it.name}</span>
-                          <b>{it.val}</b>
+                      {col.items.length === 0 && <p className="stat-sub">{journal.loading ? 'Loading…' : journal.error ? 'Journal unavailable' : 'No entries for this meal'}</p>}
+                      {col.items.map((it) => (
+                        <div key={it.id} className="column-item-row">
+                          <span>{it.foodName}</span>
+                          <b>{number(it.calories)} kcal</b>
+                          <button className="entry-delete-btn" disabled={journal.busy} onClick={() => journal.remove(it.id)} aria-label={`Delete ${it.foodName}`}>Delete</button>
                         </div>
                       ))}
                     </div>
@@ -813,31 +815,8 @@ export default function App() {
       </div>
 
       {/* LOG FOOD MODAL */}
-      {isModalOpen && (
-        <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Log Food Item</h3>
-              <button className="close-btn" onClick={() => setIsModalOpen(false)}>✕</button>
-            </div>
-            <input type="text" placeholder="Food name (e.g. Avocado Toast)" className="grey-input" />
-            
-            {/* MEAL CATEGORY SELECT */}
-            <select className="grey-input" defaultValue="Breakfast">
-              <option value="Breakfast">Breakfast</option>
-              <option value="Lunch">Lunch</option>
-              <option value="Dinner">Dinner</option>
-              <option value="Snacks">Snacks</option>
-            </select>
+      {isModalOpen && <FoodEntryForm date={selectedDate} busy={journal.busy} onSave={saveFood} onClose={() => setIsModalOpen(false)} />}
 
-            <input type="number" placeholder="Calories (kcal)" className="grey-input" />
-            <input type="number" placeholder="Protein (g)" className="grey-input" min="0" step="0.1" />
-            <input type="number" placeholder="Carbs (g)" className="grey-input" min="0" step="0.1" />
-            <input type="number" placeholder="Fats (g)" className="grey-input" min="0" step="0.1" />
-            <button className="primary-green-btn" onClick={() => setIsModalOpen(false)}>Add Entry</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
