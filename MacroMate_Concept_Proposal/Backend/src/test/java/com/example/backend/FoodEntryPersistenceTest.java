@@ -20,6 +20,7 @@ class FoodEntryPersistenceTest {
 
     @Test void entriesSurviveApplicationRestart() {
         long id;
+        long workoutId;
         try (ConfigurableApplicationContext first = openDatabase()) {
             FoodEntry entry = new FoodEntry();
             entry.setMeal("Lunch");
@@ -30,12 +31,23 @@ class FoodEntryPersistenceTest {
             entry.setFat(0.5);
             entry.setEntryDate(LocalDate.of(2026, 10, 14));
             id = first.getBean(FoodEntryRepository.class).saveAndFlush(entry).getId();
+
+            WorkoutEntry workout = new WorkoutEntry();
+            workout.setWorkoutType("Walking");
+            workout.setDistanceKm(2.5);
+            workout.setWorkoutDate(LocalDate.of(2026, 10, 14));
+            workoutId = first.getBean(WorkoutEntryRepository.class).saveAndFlush(workout).getId();
         }
         try (ConfigurableApplicationContext second = openDatabase()) {
             FoodEntry saved = second.getBean(FoodEntryRepository.class).findById(id).orElseThrow();
             assertThat(saved.getFoodName()).isEqualTo("Rice");
             assertThat(saved.getCalories()).isEqualTo(200);
             assertThat(saved.getEntryDate()).isEqualTo(LocalDate.of(2026, 10, 14));
+
+            WorkoutEntry savedWorkout = second.getBean(WorkoutEntryRepository.class).findById(workoutId).orElseThrow();
+            assertThat(savedWorkout.getWorkoutType()).isEqualTo("Walking");
+            assertThat(savedWorkout.getDistanceKm()).isEqualTo(2.5);
+            assertThat(savedWorkout.getWorkoutDate()).isEqualTo(LocalDate.of(2026, 10, 14));
         }
     }
 }
