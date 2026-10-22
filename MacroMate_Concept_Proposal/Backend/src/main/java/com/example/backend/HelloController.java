@@ -22,9 +22,11 @@ import java.util.Map;
 @CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173"})
 public class HelloController {
     private final FoodEntryRepository foodEntryRepository;
+    private final WorkoutEntryRepository workoutEntryRepository;
 
-    public HelloController(FoodEntryRepository foodEntryRepository) {
+    public HelloController(FoodEntryRepository foodEntryRepository, WorkoutEntryRepository workoutEntryRepository) {
         this.foodEntryRepository = foodEntryRepository;
+        this.workoutEntryRepository = workoutEntryRepository;
     }
 
     @GetMapping("/api/hello")
@@ -53,5 +55,24 @@ public class HelloController {
         FoodEntry entry = foodEntryRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Food entry not found."));
         foodEntryRepository.delete(entry);
+    }
+
+    @GetMapping("/api/workouts")
+    public List<WorkoutEntry> getWorkouts() {
+        return workoutEntryRepository.findAll(Sort.by(Sort.Direction.DESC, "workoutDate", "id"));
+    }
+
+    @PostMapping("/api/workouts")
+    @ResponseStatus(HttpStatus.CREATED)
+    public WorkoutEntry addWorkout(@Valid @RequestBody WorkoutEntryRequest request) {
+        return workoutEntryRepository.save(request.toEntity());
+    }
+
+    @DeleteMapping("/api/workouts/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteWorkout(@PathVariable Long id) {
+        WorkoutEntry workout = workoutEntryRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout not found."));
+        workoutEntryRepository.delete(workout);
     }
 }

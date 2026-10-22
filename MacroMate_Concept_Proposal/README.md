@@ -1,8 +1,8 @@
 # MacroMate
 
-The food journal connects React to Spring Boot and a file-based H2 database. Meals, dates, calories, and macros are saved on disk. Both food views, sidebar totals, recent food activity, and the weekly calorie chart use saved entries.
+The food journal and workout tracker connect React to Spring Boot and a file-based H2 database. Meals, dates, calories, macros, and walking, jogging, or running workouts (distance and date) are saved on disk. The food views, sidebar totals, recent food activity, weekly calorie chart, workout list, weekly distance chart, and best workout day use saved entries.
 
-Mood, water, energy, profile, workout, and accessibility remain prototype features and are not stored yet. Nutrition goals are fixed demonstration targets.
+Mood, water, energy, profile, and accessibility remain prototype features and are not stored yet. Nutrition goals are fixed demonstration targets.
 
 ## Run in VS Code
 
@@ -35,7 +35,7 @@ On macOS/Linux use `./mvnw` and `npm` instead.
 
 ## Database
 
-Started from `Backend`, H2 creates `Backend/data/macromate.mv.db`. Entries survive refreshing the browser and restarting the backend. This file is ignored by Git; each developer has their own local database. Keep starting the backend from the same folder so it opens the same file.
+Started from `Backend`, H2 creates `Backend/data/macromate.mv.db`. Food and workout entries survive refreshing the browser and restarting the backend. This file is ignored by Git; each developer has their own local database. Keep starting the backend from the same folder so it opens the same file.
 
 Choose **Food Journal → Daily Food Journal**, select a date, and use **Log Food**. Enter calories and all three macros (use zero where appropriate). Entries appear in both journal views. Delete removes an entry from the database. A failed save keeps the form open and displays an error.
 
@@ -73,6 +73,24 @@ Vite forwards `/api` to port 8080 during development. A production build needs a
 ```
 
 Meals must be Breakfast, Lunch, Dinner, or Snacks. Validation rejects missing fields, blank names, invalid dates, negative numbers, and excessive values. A submitted ID cannot overwrite an entry.
+
+### Workouts
+
+Choose **My Goals → Log workout** to save a walk, jog, or run. Each workout records its type, distance in kilometers, and date. The recent-workout list, current week's distance bars, and best day are calculated from saved workouts. You can delete a workout from the list.
+
+- `GET /api/workouts` — workouts ordered newest date first.
+- `POST /api/workouts` — create a workout with `workoutType`, `distanceKm`, and `workoutDate`.
+- `DELETE /api/workouts/{id}` — delete; returns 404 if not found.
+
+Workout types must be Walking, Jogging, or Running. Distance must be greater than zero and can have up to two decimal places; dates use `YYYY-MM-DD`.
+
+```json
+{
+  "workoutType": "Walking",
+  "distanceKm": 2.5,
+  "workoutDate": "2026-10-14"
+}
+```
 
 ## Checks
 
