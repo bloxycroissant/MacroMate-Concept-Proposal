@@ -1,5 +1,6 @@
 # MacroMate
 
-React + Spring Boot wellness prototype with a persistent local food journal.
+React + Spring Boot wellness app. Food and workouts use H2; Firebase mode adds account login and per-user cloud saving for wellness check-ins, goals, profiles, and accessibility preferences.
 
-Open this repository's root folder in VS Code. See [setup and database instructions](MacroMate_Concept_Proposal/README.md).
+- [Run locally](MacroMate_Concept_Proposal/README.md)
+- [Connect Firebase](FIREBASE_SETUP.md)

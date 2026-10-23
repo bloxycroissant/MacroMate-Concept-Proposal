@@ -1,7 +1,8 @@
+import { authenticatedOptions } from '../firebase/client';
 const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
 async function request(path, options = {}) {
-  const response = await fetch(`${apiBase}/api/food-entries${path}`, options);
+  const response = await fetch(`${apiBase}/api/food-entries${path}`, await authenticatedOptions(options));
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throw new Error(error.message || `Food journal request failed (${response.status}).`);

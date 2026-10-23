@@ -11,12 +11,12 @@ export default function OverviewPage({
   error,
   entries,
   formatNumber,
-  onViewJournal,
+  onViewJournal, displayName, sleepMinutes, completedGoals, onGoalChange, wellnessDisabled,
 }) {
   return (
     <div className="page-view">
       <span className="sub-heading">Track your daily progress</span>
-      <h1 className="page-title">Welcome Back, Aaron</h1>
+      <h1 className="page-title">Welcome back, {displayName}</h1>
 
       <div className="overview-stats">
         <div className="card overview-stat-card">
@@ -28,13 +28,13 @@ export default function OverviewPage({
         <div className="card overview-stat-card">
           <span className="stat-label">Mood Score</span>
           <div className="stat-val">{mood}</div>
-          <span className="stat-sub">{energyLevel}/5 energy today</span>
+          <span className="stat-sub">{energyLevel}/5 energy for the selected day</span>
           <span className="floating-badge">😊</span>
         </div>
         <div className="card overview-stat-card">
           <span className="stat-label">Water intake</span>
           <div className="stat-val">{waterGlasses} glasses</div>
-          <span className="stat-sub">7.5 hrs of Sleep</span>
+          <span className="stat-sub">{(sleepMinutes / 60).toFixed(1)} hrs of sleep</span>
           <span className="floating-badge">💧</span>
         </div>
       </div>
@@ -65,11 +65,14 @@ export default function OverviewPage({
         </div>
 
         <div className="card goals-checklist-card">
-          <strong className="card-heading">Today's goals</strong>
-          <div className="goal-item done"><span className="chk">✓</span><div><div>Log breakfast</div><span className="goal-sub">7.5 hrs of Sleep</span></div></div>
-          <div className="goal-item"><span className="chk"></span><div><div>Drink 8 glasses of water</div><span className="goal-sub">All day</span></div></div>
-          <div className="goal-item done"><span className="chk">✓</span><div><div>30 min activity</div><span className="goal-sub">05:30 PM</span></div></div>
-          <div className="goal-item"><span className="chk"></span><div><div>Evening reflection</div><span className="goal-sub">09:00 PM</span></div></div>
+          <strong className="card-heading">Goals for the selected day</strong>
+          {[
+            ['breakfast', 'Log breakfast'], ['water', 'Drink 8 glasses of water'],
+            ['activity', '30 min activity'], ['reflection', 'Evening reflection'],
+          ].map(([id, label]) => <label key={id} className={`goal-item ${completedGoals.includes(id) ? 'done' : ''}`}>
+            <input type="checkbox" checked={completedGoals.includes(id)} disabled={wellnessDisabled} onChange={() => onGoalChange(id)} />
+            <span>{label}</span>
+          </label>)}
         </div>
       </div>
 

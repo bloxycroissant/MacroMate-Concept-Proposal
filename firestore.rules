@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+    function optionalNumber(d, k, low, high) {
+      return !(k in d) || (d[k] is int && d[k] >= low && d[k] <= high);
+    }
+    match /users/{uid}/days/{date} {
+      allow read: if owner(uid);
+      allow create, update: if owner(uid) && date.matches('^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')
+        && request.resource.data.keys().hasOnly(['mood', 'energyLevel', 'sleepMinutes', 'waterGlasses', 'completedGoals'])
+        && (!('mood' in request.resource.data) || request.resource.data.mood in ['Low', 'Okay', 'Good', 'Great'])
+        && optionalNumber(request.resource.data, 'energyLevel', 1, 5)
+        && optionalNumber(request.resource.data, 'sleepMinutes', 0, 1440)
+        && optionalNumber(request.resource.data, 'waterGlasses', 0, 8)
+        && (!('completedGoals' in request.resource.data) || (request.resource.data.completedGoals is list
+          && request.resource.data.completedGoals.size() <= 4
+          && request.resource.data.completedGoals.hasOnly(['breakfast', 'water', 'activity', 'reflection'])));
+    }
+    match /users/{uid}/settings/profile {
+      allow read: if owner(uid);
+      allow create, update: if owner(uid)
+        && request.resource.data.keys().hasAll(['fullName', 'age', 'heightCm', 'weightKg', 'activityLevel', 'wellnessGoal'])
+        && request.resource.data.keys().hasOnly(['fullName', 'age', 'heightCm', 'weightKg', 'activityLevel', 'wellnessGoal'])
+        && request.resource.data.fullName is string && request.resource.data.fullName.size() > 0 && request.resource.data.fullName.size() <= 120
+        && request.resource.data.wellnessGoal is string && request.resource.data.wellnessGoal.size() > 0 && request.resource.data.wellnessGoal.size() <= 300
+        && request.resource.data.age is int && request.resource.data.age >= 1 && request.resource.data.age <= 120
+        && request.resource.data.heightCm is number && request.resource.data.heightCm >= 30 && request.resource.data.heightCm <= 300
+        && request.resource.data.weightKg is number && request.resource.data.weightKg >= 1 && request.resource.data.weightKg <= 700
+        && request.resource.data.activityLevel in ['Sedentary', 'Lightly Active', 'Moderately Active', 'Very Active'];
+    }
+    match /users/{uid}/settings/preferences {
+      allow read: if owner(uid);
+      allow create, update: if owner(uid)
+        && request.resource.data.keys().hasOnly(['highContrast', 'reduceMotion', 'enhancedFocus', 'announcements'])
+        && (!('highContrast' in request.resource.data) || request.resource.data.highContrast is bool)
+        && (!('reduceMotion' in request.resource.data) || request.resource.data.reduceMotion is bool)
+        && (!('enhancedFocus' in request.resource.data) || request.resource.data.enhancedFocus is bool)
+        && (!('announcements' in request.resource.data) || request.resource.data.announcements is bool);
+    }
+  }
+}
