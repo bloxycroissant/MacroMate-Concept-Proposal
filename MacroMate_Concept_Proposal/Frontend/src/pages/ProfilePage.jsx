@@ -1,74 +1,33 @@
-export default function ProfilePage() {
-  return (
-    <div className="page-view">
-      <span className="sub-heading">Manage your personal wellness details</span>
-      <h1 className="page-title">My Profile</h1>
+import { useState } from 'react';
 
-      <div className="profile-grid">
-        <div className="profile-left-col">
-          <div className="card profile-badge-card">
-            <div className="avatar-circle">AL<span className="cam-icon">📷</span></div>
-            <h2>Aaron Layman</h2>
-            <span className="stat-sub">Wellness Member</span>
-            <div className="complete-pill">Profile Complete</div>
-          </div>
-
-          <div className="card goal-highlight-card">
-            <div className="heart-icon-badge">🤍</div>
-            <h3>Your Wellness Goal</h3>
-            <p className="stat-sub">Maintain a balanced lifestyle</p>
-          </div>
+export default function ProfilePage({ profile, email, onSave, busy }) {
+  const [message, setMessage] = useState('');
+  const [saving, setSaving] = useState(false);
+  async function submit(event) {
+    event.preventDefault(); setMessage(''); setSaving(true);
+    const form = new FormData(event.currentTarget);
+    const data = { fullName: form.get('fullName').trim(), age: Number(form.get('age')), heightCm: Number(form.get('heightCm')),
+      weightKg: Number(form.get('weightKg')), activityLevel: form.get('activityLevel'), wellnessGoal: form.get('wellnessGoal').trim() };
+    if (!data.fullName || !data.wellnessGoal) { setMessage('Enter your name and wellness goal.'); setSaving(false); return; }
+    try { await onSave(data); setMessage('Profile saved.'); }
+    catch { setMessage('Profile was not saved. Please try again.'); }
+    finally { setSaving(false); }
+  }
+  return <div className="page-view"><h1 className="page-title">My Profile</h1>
+    <form className="card profile-form-card" onSubmit={submit}><h2>Personal information</h2>
+      <fieldset disabled={busy || saving} className="food-form-fields">
+        <label>Full name<input name="fullName" defaultValue={profile.fullName || ''} required maxLength="120" className="grey-input" /></label>
+        <label>Email<input value={email || 'Local demo'} readOnly className="grey-input" /></label>
+        <div className="form-row-2">
+          <label>Age<input name="age" type="number" required min="1" max="120" step="1" defaultValue={profile.age || ''} className="grey-input" /></label>
+          <label>Height (cm)<input name="heightCm" type="number" required min="30" max="300" step="0.1" defaultValue={profile.heightCm || ''} className="grey-input" /></label>
         </div>
-
-        <div className="card profile-form-card">
-          <h3>Personal Information</h3>
-          <p className="stat-sub">Used to personalize your nutrition and wellness targets.</p>
-
-          <div className="form-group">
-            <label>FULL NAME</label>
-            <input type="text" defaultValue="Aaron Layman" className="grey-input" />
-          </div>
-          <div className="form-group">
-            <label>EMAIL ADDRESS</label>
-            <input type="email" defaultValue="aaronlayman@gmail.com" className="grey-input" />
-          </div>
-
-          <div className="form-row-2">
-            <div className="form-group">
-              <label>AGE</label>
-              <input type="text" defaultValue="23" className="grey-input" />
-            </div>
-            <div className="form-group">
-              <label>HEIGHT</label>
-              <input type="text" defaultValue="154cm" className="grey-input" />
-            </div>
-          </div>
-
-          <div className="form-row-2">
-            <div className="form-group">
-              <label>WEIGHT (KG)</label>
-              <input type="text" defaultValue="51" className="grey-input" />
-            </div>
-            <div className="form-group">
-              <label>ACTIVITY LEVEL</label>
-              <select defaultValue="Moderately Active" className="grey-input">
-                <option>Moderately Active</option>
-                <option>Very Active</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label>PRIMARY WELLNESS GOAL</label>
-            <input type="text" defaultValue="Maintain a balanced lifestyle" className="grey-input" />
-          </div>
-
-          <div className="reminders-banner">
-            <strong>Daily Reminders</strong>
-            <p className="stat-sub">Receive gentle prompts to log meals and wellness.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+        <label>Weight (kg)<input name="weightKg" type="number" required min="1" max="700" step="0.1" defaultValue={profile.weightKg || ''} className="grey-input" /></label>
+        <label>Activity level<select name="activityLevel" aria-label="Activity level" defaultValue={profile.activityLevel || 'Moderately Active'} className="grey-input">
+          <option>Sedentary</option><option>Lightly Active</option><option>Moderately Active</option><option>Very Active</option>
+        </select></label>
+        <label>Wellness goal<input name="wellnessGoal" defaultValue={profile.wellnessGoal || ''} required maxLength="300" className="grey-input" /></label>
+        <button className="primary-green-btn">{saving ? 'Saving…' : 'Save profile'}</button>
+      </fieldset><p role="status">{message}</p>
+    </form></div>;
 }

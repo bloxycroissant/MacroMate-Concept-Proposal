@@ -1,6 +1,8 @@
 package com.example.backend;
 
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,42 +38,50 @@ public class HelloController {
 
     @GetMapping("/api/food-entries")
     public List<FoodEntry> getFoodEntries(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        if (date == null) {
-            return foodEntryRepository.findAll(Sort.by("entryDate", "id"));
-        }
-        return foodEntryRepository.findByEntryDateOrderByIdAsc(date);
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, @AuthenticationPrincipal Jwt jwt) {
+        Sort sort = Sort.by("entryDate", "id");
+        List<FoodEntry> entries = jwt == null ? foodEntryRepository.findByUserIdIsNull(sort)
+                : foodEntryRepository.findByUserId(jwt.getSubject(), sort);
+        return date == null ? entries : entries.stream().filter(entry -> date.equals(entry.getEntryDate())).toList();
     }
 
     @PostMapping("/api/food-entries")
     @ResponseStatus(HttpStatus.CREATED)
-    public FoodEntry addFoodEntry(@Valid @RequestBody FoodEntryRequest request) {
-        return foodEntryRepository.save(request.toEntity());
+    public FoodEntry addFoodEntry(@Valid @RequestBody FoodEntryRequest request, @AuthenticationPrincipal Jwt jwt) {
+        FoodEntry entry = request.toEntity();
+        entry.setUserId(jwt == null ? null : jwt.getSubject());
+        return foodEntryRepository.save(entry);
     }
 
     @DeleteMapping("/api/food-entries/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteFoodEntry(@PathVariable Long id) {
-        FoodEntry entry = foodEntryRepository.findById(id)
+    public void deleteFoodEntry(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        FoodEntry entry = (jwt == null ? foodEntryRepository.findByIdAndUserIdIsNull(id)
+                : foodEntryRepository.findByIdAndUserId(id, jwt.getSubject()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Food entry not found."));
         foodEntryRepository.delete(entry);
     }
 
     @GetMapping("/api/workouts")
-    public List<WorkoutEntry> getWorkouts() {
-        return workoutEntryRepository.findAll(Sort.by(Sort.Direction.DESC, "workoutDate", "id"));
+    public List<WorkoutEntry> getWorkouts(@AuthenticationPrincipal Jwt jwt) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "workoutDate", "id");
+        return jwt == null ? workoutEntryRepository.findByUserIdIsNull(sort)
+                : workoutEntryRepository.findByUserId(jwt.getSubject(), sort);
     }
 
     @PostMapping("/api/workouts")
     @ResponseStatus(HttpStatus.CREATED)
-    public WorkoutEntry addWorkout(@Valid @RequestBody WorkoutEntryRequest request) {
-        return workoutEntryRepository.save(request.toEntity());
+    public WorkoutEntry addWorkout(@Valid @RequestBody WorkoutEntryRequest request, @AuthenticationPrincipal Jwt jwt) {
+        WorkoutEntry entry = request.toEntity();
+        entry.setUserId(jwt == null ? null : jwt.getSubject());
+        return workoutEntryRepository.save(entry);
     }
 
     @DeleteMapping("/api/workouts/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteWorkout(@PathVariable Long id) {
-        WorkoutEntry workout = workoutEntryRepository.findById(id)
+    public void deleteWorkout(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        WorkoutEntry workout = (jwt == null ? workoutEntryRepository.findByIdAndUserIdIsNull(id)
+                : workoutEntryRepository.findByIdAndUserId(id, jwt.getSubject()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Workout not found."));
         workoutEntryRepository.delete(workout);
     }

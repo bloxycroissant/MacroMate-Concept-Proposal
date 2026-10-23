@@ -25,6 +25,11 @@ class FoodEntryApiTest {
 
     @BeforeEach void resetDatabase() { repository.deleteAll(); }
 
+    @Test void localModeRefusesSignedInRequestsUntilFirebaseProfileIsEnabled() throws Exception {
+        mvc.perform(get("/api/food-entries").header("Authorization", "Bearer example-token"))
+                .andExpect(status().isServiceUnavailable()).andExpect(jsonPath("$.message").exists());
+    }
+
     private ObjectNode entry(String date) {
         return mapper.createObjectNode().put("meal", "Breakfast").put("foodName", "  Oatmeal  ")
                 .put("calories", 250).put("protein", 8.5).put("carbs", 40.0).put("fat", 5.0).put("entryDate", date);

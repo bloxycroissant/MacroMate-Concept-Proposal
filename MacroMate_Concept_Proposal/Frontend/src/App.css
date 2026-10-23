@@ -1,4 +1,19 @@
 /* GLOBAL RESET & BASE STYLES */
+.account-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.account-card { width: min(420px, 95vw); display: grid; gap: 18px; text-align: left; }
+.account-card label { display: grid; gap: 6px; }
+.cloud-status { padding: 10px 20px; background: #e4f3e6; color: #1a251e; text-align: left; font-size: 13px; }
+.wellness-history { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.wellness-history button { display: grid; gap: 6px; padding: 10px; border: 1px solid #abc4b2; border-radius: 8px; background: #fff; cursor: pointer; }
+.wellness-weekdays { display: grid; grid-template-columns: repeat(7, minmax(65px, 1fr)); gap: 10px; margin-top: 20px; overflow-x: auto; }
+.wellness-weekdays > div { display: grid; gap: 8px; text-align: center; }
+.wellness-high-contrast, .wellness-high-contrast * { color: #fff !important; background-color: #000 !important; border-color: #fff !important; box-shadow: none !important; }
+.wellness-high-contrast input:checked + .slider { border: 3px solid #fff; }
+.wellness-high-contrast .slider:before { background: #fff !important; }
+.wellness-high-contrast .progress-bar > span, .wellness-high-contrast .bar-fill { background-color: #fff !important; }
+.wellness-enhanced-focus :focus-visible { outline: 4px solid #005fcc !important; outline-offset: 4px; }
+.wellness-high-contrast.wellness-enhanced-focus :focus-visible { outline-color: #ffdf00 !important; }
+body.wellness-reduce-motion, body.wellness-reduce-motion *, body.wellness-reduce-motion *::before, body.wellness-reduce-motion *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 * {
   box-sizing: border-box;
   margin: 0;
