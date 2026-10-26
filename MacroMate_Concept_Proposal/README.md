@@ -2,7 +2,7 @@
 
 The food journal and workout tracker connect React to Spring Boot and a file-based H2 database. Meals, dates, calories, macros, and walking, jogging, or running workouts (distance and date) are saved on disk. The food views, sidebar totals, recent food activity, weekly calorie chart, workout list, weekly distance chart, and best workout day use saved entries.
 
-Daily mood, sleep, water, energy, checklist completion, profile details, and accessibility preferences use temporary React state and reset on refresh. The app opens directly without signup or login. Nutrition targets remain fixed demonstration values.
+Daily mood, sleep, water, energy, checklist completion, profile details, and accessibility preferences use temporary React state and reset on refresh. Choose **Open local demo** on the welcome screen to enter without signup or login. The welcome, login and sign-up designs remain as prototypes; they do not create accounts, verify passwords or separate user data. Nutrition targets remain fixed demonstration values.
 
 ## Run in VS Code
 
