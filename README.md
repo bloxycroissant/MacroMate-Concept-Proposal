@@ -1,6 +1,6 @@
 # MacroMate
 
-React + Spring Boot wellness app. Food and workouts use H2; Firebase mode adds account login and per-user cloud saving for wellness check-ins, goals, profiles, and accessibility preferences.
+Wellness app with Supabase Authentication and private PostgreSQL storage for food, workouts, health check-ins, daily goals, profiles and accessibility settings. The original Spring Boot/H2 backend remains available as an optional local demo.
 
 - [Run locally](MacroMate_Concept_Proposal/README.md)
-- [Connect Firebase](FIREBASE_SETUP.md)
+- [Connect and verify Supabase](SUPABASE_SETUP.md)

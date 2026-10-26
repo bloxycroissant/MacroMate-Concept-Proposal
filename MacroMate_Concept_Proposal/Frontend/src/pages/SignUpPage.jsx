@@ -1,32 +1,29 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function SignUpPage({ onNavigate, onSignUp }) {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', agreed: true });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', agreed: false });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const logoUrl = new URL('../assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     if (!formData.agreed) {
-      alert('Please agree to our Terms and Privacy Policy to continue.');
+      setError('Please review and agree to the terms before creating an account.');
       return;
     }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      // Pass registered user data (Full Name, Email, Password) to App.jsx
-      if (onSignUp) {
-        onSignUp({
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          password: formData.password,
-        });
-      } else if (onNavigate) {
-        onNavigate('login');
-      }
-    }, 600);
+    if (!formData.name.trim()) { setError('Enter your name.'); return; }
+    setLoading(true); setError(''); setMessage('');
+    try {
+      const result = await onSignUp({ name: formData.name.trim(), email: formData.email.trim(), password: formData.password });
+      setMessage(result || 'Account created.');
+      setFormData((current) => ({ ...current, password: '' }));
+    } catch (err) { setError(err.message || 'Could not create your account. Please try again.'); }
+    finally { setLoading(false); }
   };
 
   return (
@@ -356,10 +353,13 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
           </div>
 
           <form onSubmit={handleSubmit}>
+            {error && <p className="auth-error" role="alert">{error}</p>}
+            {message && <p role="status">{message}</p>}
             <div className="mm-field-group">
               <label className="mm-field-label">Name</label>
               <input
                 type="text"
+                aria-label="Name" maxLength="120" autoComplete="name" disabled={loading}
                 className="mm-form-input"
                 placeholder="Full Name"
                 required
@@ -372,6 +372,7 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
               <label className="mm-field-label">Email</label>
               <input
                 type="email"
+                aria-label="Email" autoComplete="email" disabled={loading}
                 className="mm-form-input"
                 placeholder="you@gmail.com"
                 required
@@ -385,6 +386,7 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
               <div className="mm-input-box">
                 <input
                   type={showPassword ? 'text' : 'password'}
+                  aria-label="Password" minLength="8" maxLength="128" autoComplete="new-password" disabled={loading}
                   className="mm-form-input"
                   placeholder="••••••••••"
                   required

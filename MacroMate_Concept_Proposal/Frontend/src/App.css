@@ -1,8 +1,9 @@
 /* GLOBAL RESET & BASE STYLES */
-.account-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.account-page { min-height: 100vh; display: grid; place-content: center; padding: 24px; }
 .account-card { width: min(420px, 95vw); display: grid; gap: 18px; text-align: left; }
 .account-card label { display: grid; gap: 6px; }
-.cloud-status { padding: 10px 20px; background: #e4f3e6; color: #1a251e; text-align: left; font-size: 13px; }
+.auth-error { color: #9c2020; padding: 10px; background: #fff2f2; border-radius: 8px; }
+.session-status { padding: 10px 20px; background: #e4f3e6; color: #1a251e; text-align: left; font-size: 13px; }
 .wellness-history { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
 .wellness-history button { display: grid; gap: 6px; padding: 10px; border: 1px solid #abc4b2; border-radius: 8px; background: #fff; cursor: pointer; }
 .wellness-weekdays { display: grid; grid-template-columns: repeat(7, minmax(65px, 1fr)); gap: 10px; margin-top: 20px; overflow-x: auto; }
