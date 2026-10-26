@@ -173,16 +173,36 @@ body {
   color: #687a6d;
 }
 
+/* SMALL CIRCULAR PROFILE AVATAR CONSTRAINT */
+.user-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  background-color: #dceada;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #145a32;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
 .user-avatar img {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  object-fit: cover;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  display: block;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
 }
 
 .user-avatar img:hover {
-  transform: scale(1.15) rotate(4deg);
+  transform: scale(1.1) rotate(4deg);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
