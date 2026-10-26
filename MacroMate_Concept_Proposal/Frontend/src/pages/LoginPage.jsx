@@ -1,43 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { cloudEnabled, supabase } from '../supabase/client';
 
-export default function LoginPage({ onNavigate, onLogin, savedAuth }) {
-  // Pre-fill email dynamically from savedAuth state if available
-  const [formData, setFormData] = useState({
-    email: savedAuth?.email || '',
-    password: savedAuth?.password || '',
-    agreed: true,
-  });
+export default function LoginPage({ onNavigate, onLogin }) {
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Sync state if savedAuth updates dynamically
-  useEffect(() => {
-    if (savedAuth?.email) {
-      setFormData((prev) => ({
-        ...prev,
-        email: savedAuth.email,
-        password: savedAuth.password || prev.password,
-      }));
-    }
-  }, [savedAuth]);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const logoUrl = new URL('../assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      if (onLogin) {
-        onLogin({
-          email: formData.email.trim(),
-          password: formData.password,
-        });
-      } else if (onNavigate) {
-        onNavigate('dashboard');
-      }
-    }, 600);
+    if (loading) return;
+    setLoading(true); setError(''); setMessage('');
+    try { await onLogin({ email: formData.email.trim(), password: formData.password }); }
+    catch (err) { setError(err.message || 'Could not log in. Check your details and connection.'); }
+    finally { setLoading(false); }
   };
+
+  async function requestPasswordReset(event) {
+    event.preventDefault();
+    if (loading) return;
+    if (!formData.email.trim()) { setError('Enter your email first, then choose Forgot Password.'); return; }
+    if (!cloudEnabled) { setError('Password reset requires Supabase mode.'); return; }
+    setLoading(true); setError(''); setMessage('');
+    try {
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(formData.email.trim(), { redirectTo: window.location.origin });
+      if (resetError) throw resetError;
+      setMessage('If an account exists for that email, a password reset link has been sent.');
+    } catch (err) { setError(err.message || 'Could not request a reset link.'); }
+    finally { setLoading(false); }
+  }
 
   return (
     <div className="mm-fullscreen-auth">
@@ -298,10 +293,13 @@ export default function LoginPage({ onNavigate, onLogin, savedAuth }) {
           </div>
 
           <form onSubmit={handleLogin}>
+            {error && <p className="auth-error" role="alert">{error}</p>}
+            {message && <p role="status">{message}</p>}
             <div className="mm-field-group">
               <label className="mm-field-label">Email</label>
               <input
                 type="email"
+                aria-label="Email" autoComplete="email" disabled={loading}
                 className="mm-form-input"
                 placeholder="you@gmail.com"
                 required
@@ -315,6 +313,7 @@ export default function LoginPage({ onNavigate, onLogin, savedAuth }) {
               <div className="mm-input-box">
                 <input
                   type={showPassword ? 'text' : 'password'}
+                  aria-label="Password" autoComplete="current-password" disabled={loading}
                   className="mm-form-input"
                   placeholder="••••••••••"
                   required
@@ -325,21 +324,9 @@ export default function LoginPage({ onNavigate, onLogin, savedAuth }) {
                   👁️
                 </span>
               </div>
-              <a href="#forgot" className="mm-forgot-link" onClick={(e) => { e.preventDefault(); alert('Password reset email sent!'); }}>
+              <a href="#forgot" className="mm-forgot-link" onClick={requestPasswordReset}>
                 Forgot Password
               </a>
-            </div>
-
-            <div className="mm-terms-line">
-              <input
-                type="checkbox"
-                id="chkTermsLogin"
-                checked={formData.agreed}
-                onChange={(e) => setFormData({ ...formData, agreed: e.target.checked })}
-              />
-              <label htmlFor="chkTermsLogin">
-                By signing up, you agree to our <a href="#terms">Terms</a> and <a href="#privacy">Privacy Policy</a>
-              </label>
             </div>
 
             <button type="submit" className="mm-btn-green-submit" disabled={loading}>

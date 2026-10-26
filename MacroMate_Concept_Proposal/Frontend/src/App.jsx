@@ -15,19 +15,14 @@ import LoginPage from './pages/LoginPage';
 import { localDate, shiftDate } from './utils/journalDates';
 import './App.css';
 import useWellness from './hooks/useWellness';
-import { auth, cloudEnabled } from './firebase/client';
-import { signOut } from 'firebase/auth';
+import { cloudEnabled, supabase } from './supabase/client';
+import { useAuth } from './supabase/authContext';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState('welcome');
-
-  // Unified Centralized Auth & Profile State
-  const [userAuth, setUserAuth] = useState({
-    fullName: 'Sabando, Christianne Denise S.',
-    email: 'denise@gmail.com',
-    password: '',
-    pfpUrl: null, // Dynamically holds base64/blob URL or fallback
-  });
+  const { user, recovery, finishRecovery } = useAuth();
+  const [currentScreen, setCurrentScreen] = useState(user ? 'dashboard' : 'welcome');
+  const [accountError, setAccountError] = useState('');
 
   const [activeTab, setActiveTab] = useState('overview');
   const [foodSubTab, setFoodSubTab] = useState('hub');
@@ -38,13 +33,13 @@ export default function App() {
   const wellness = useWellness(selectedDate);
   const { mood, waterGlasses, energyLevel, sleepMinutes, completedGoals } = wellness.day;
 
-  const setWaterGlasses = (value) => wellness.ready && wellness.updateDay({ waterGlasses: Math.max(0, Math.min(8, value)) });
-  const setEnergyLevel = (value) => wellness.ready && wellness.updateDay({ energyLevel: value });
+  const setWaterGlasses = (value) => wellness.ready && !wellness.pending && wellness.updateDay({ waterGlasses: Math.max(0, Math.min(8, value)) });
+  const setEnergyLevel = (value) => wellness.ready && !wellness.pending && wellness.updateDay({ energyLevel: value });
 
   // 🌟 Universal Full Name and Profile Picture Sync Across Website
-  const displayName = userAuth.fullName || wellness.profile.fullName || 'Sabando, Christianne Denise S.';
-  const displayEmail = userAuth.email || auth?.currentUser?.email || 'denise@gmail.com';
-  const displayPfp = userAuth.pfpUrl || wellness.profile.pfpUrl || 'https://i.pravatar.cc/100?img=12';
+  const displayName = wellness.profile.fullName || user?.user_metadata?.full_name || 'Wellness member';
+  const displayEmail = user?.email || 'Local demo';
+  const displayPfp = wellness.profile.pfpUrl || new URL('./assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
 
   useEffect(() => {
     document.body.classList.toggle('wellness-reduce-motion', wellness.preferences.reduceMotion);
@@ -84,43 +79,37 @@ export default function App() {
   }
 
   const handleNavigate = (targetScreen) => {
+    if (cloudEnabled && !user && targetScreen === 'dashboard') targetScreen = 'login';
+    if (cloudEnabled && user && ['login', 'signup'].includes(targetScreen)) targetScreen = 'dashboard';
     setCurrentScreen(targetScreen);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSignUpData = (newUserData) => {
-    setUserAuth({
-      fullName: newUserData.name,
-      email: newUserData.email,
-      password: newUserData.password,
-      pfpUrl: null,
-    });
-    if (wellness.ready) {
-      wellness.saveProfile({ ...wellness.profile, fullName: newUserData.name });
-    }
-    handleNavigate('login');
+  const handleSignUpData = async (newUserData) => {
+    if (!cloudEnabled) throw new Error('Use Open local demo. Accounts require Supabase mode.');
+    const { data, error } = await supabase.auth.signUp({ email: newUserData.email, password: newUserData.password,
+      options: { data: { full_name: newUserData.name }, emailRedirectTo: window.location.origin } });
+    if (error) throw error;
+    return data.session ? '' : 'Check your email to confirm your account, then log in.';
   };
 
-  const handleLoginSubmit = (loginData) => {
-    setUserAuth((prev) => ({
-      ...prev,
-      email: loginData.email,
-      password: loginData.password,
-    }));
-    handleNavigate('dashboard');
+  const handleLoginSubmit = async (loginData) => {
+    if (!cloudEnabled) throw new Error('Use Open local demo. Accounts require Supabase mode.');
+    const { error } = await supabase.auth.signInWithPassword(loginData);
+    if (error) throw error;
   };
 
   // 🌟 Handles real-time updates for Name AND Profile Picture
   const handleSaveProfile = async (profileData) => {
-    setUserAuth((prev) => ({
-      ...prev,
-      fullName: profileData.fullName,
-      pfpUrl: profileData.pfpUrl || prev.pfpUrl,
-    }));
-    if (wellness.ready) {
-      await wellness.saveProfile(profileData);
-    }
+    await wellness.saveProfile(profileData);
   };
+
+  async function logOut() {
+    if (!cloudEnabled) { handleNavigate('welcome'); return; }
+    setAccountError('');
+    const { error } = await supabase.auth.signOut();
+    if (error) setAccountError('Could not log out. Check your connection and try again.');
+  }
 
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: '⊞' },
@@ -131,14 +120,15 @@ export default function App() {
     { id: 'accessibility', label: 'Accessibility', icon: '♿' },
   ];
 
-  if (currentScreen === 'welcome') return <WelcomePage onNavigate={handleNavigate} />;
+  if (recovery) return <ResetPasswordPage onDone={finishRecovery} />;
+  if (currentScreen === 'welcome') return <WelcomePage onNavigate={handleNavigate} allowDemo={!cloudEnabled} />;
   if (currentScreen === 'signup') return <SignUpPage onNavigate={handleNavigate} onSignUp={handleSignUpData} />;
-  if (currentScreen === 'login') return <LoginPage onNavigate={handleNavigate} onLogin={handleLoginSubmit} savedAuth={userAuth} />;
+  if (currentScreen === 'login') return <LoginPage onNavigate={handleNavigate} onLogin={handleLoginSubmit} />;
 
   return (
     <div className={`app-shell ${wellness.preferences.highContrast ? 'wellness-high-contrast' : ''} ${wellness.preferences.enhancedFocus ? 'wellness-enhanced-focus' : ''}`}>
-      <div className="cloud-status" role="status" aria-live={wellness.preferences.announcements ? 'polite' : 'off'}>
-        {cloudEnabled ? (wellness.error ? 'Cloud records need attention' : wellness.pending ? 'Saving to Firebase…' : wellness.ready ? 'Firebase mode · No pending changes' : 'Loading Firebase records…') : 'Local demo · Wellness changes are temporary until Firebase is enabled'}
+      <div className="session-status" role="status" aria-live={wellness.preferences.announcements ? 'polite' : 'off'}>
+        {cloudEnabled ? (wellness.error ? 'Saved records need attention' : wellness.pending ? 'Saving your changes…' : wellness.ready ? 'Supabase connected · No pending changes' : 'Loading your records…') : 'Local demo · Food and workouts use H2. Other changes reset on refresh.'}
       </div>
       
       {/* TOPBAR */}
@@ -279,12 +269,8 @@ export default function App() {
 
           <button 
             className="logout-btn" 
-            onClick={() => {
-              if (cloudEnabled) {
-                signOut(auth).catch(() => window.alert('Could not log out. Please try again.'));
-              }
-              setCurrentScreen('welcome');
-            }}
+            disabled={wellness.pending > 0 || journal.busy}
+            onClick={logOut}
           >
             🚪 Log out
           </button>
@@ -292,7 +278,8 @@ export default function App() {
 
         {/* MAIN PAGE VIEW */}
         <main className="main-content">
-          {wellness.error && <p className="journal-notice journal-error" role="alert">{wellness.error}</p>}
+          {accountError && <p className="journal-notice journal-error" role="alert">{accountError}</p>}
+          {wellness.error && <div className="journal-notice journal-error" role="alert"><p>{wellness.error}</p><button onClick={wellness.reload} disabled={wellness.pending > 0}>Reload saved records</button></div>}
           {journal.loading && <p className="journal-notice" role="status">Loading saved food entries…</p>}
           {journal.error && <div className="journal-notice journal-error" role="alert">
             <p>{journal.error}</p><button type="button" disabled={journal.loading || journal.busy} onClick={journal.reload}>Retry</button>
@@ -302,7 +289,7 @@ export default function App() {
           {activeTab === 'health-journal' && (
             <HealthJournalPage
               date={selectedDate} onDateChange={setSelectedDate} day={wellness.day} days={wellness.days}
-              onChange={wellness.updateDay} disabled={!wellness.ready}
+              onChange={wellness.updateDay} disabled={!wellness.ready || wellness.pending > 0}
             />
           )}
 
@@ -325,7 +312,7 @@ export default function App() {
               sleepMinutes={sleepMinutes} 
               completedGoals={completedGoals}
               onGoalChange={(goal) => wellness.updateDay({ completedGoals: completedGoals.includes(goal) ? completedGoals.filter((item) => item !== goal) : [...completedGoals, goal] })}
-              wellnessDisabled={!wellness.ready}
+              wellnessDisabled={!wellness.ready || wellness.pending > 0}
               onViewJournal={() => { setActiveTab('food-journal'); setFoodSubTab('daily'); }}
             />
           )}
@@ -376,16 +363,17 @@ export default function App() {
           {activeTab === 'my-goals' && <GoalsPage />}
           
           {/* 🌟 Live Synced Name & Profile Picture in Profile Page */}
-          {activeTab === 'profile' && (
+          {activeTab === 'profile' && !wellness.ready && <p>Loading your profile…</p>}
+          {activeTab === 'profile' && wellness.ready && (
             <ProfilePage 
-              profile={{ ...wellness.profile, fullName: displayName, pfpUrl: displayPfp }} 
+              profile={{ ...wellness.profile, fullName: displayName }}
               email={displayEmail} 
               onSave={handleSaveProfile} 
-              busy={!wellness.ready} 
+              busy={!wellness.ready || wellness.pending > 0}
             />
           )}
           
-          {activeTab === 'accessibility' && <AccessibilityPage preferences={wellness.preferences} onChange={wellness.updatePreference} busy={!wellness.ready} />}
+          {activeTab === 'accessibility' && <AccessibilityPage preferences={wellness.preferences} onChange={wellness.updatePreference} busy={!wellness.ready || wellness.pending > 0} />}
 
         </main>
       </div>

@@ -1,6 +1,4 @@
-import React from 'react';
-
-export default function WelcomePage({ onNavigate }) {
+export default function WelcomePage({ onNavigate, allowDemo = false }) {
   // Vite-compatible asset URL resolvers
   const getAsset = (fileName) => 
     new URL(`../assets/MacroMate Assets/MacroMate Icon and Assets/${fileName}`, import.meta.url).href;
@@ -460,6 +458,7 @@ export default function WelcomePage({ onNavigate }) {
           <a href="#team" className="mm-nav-link">Team 👥</a>
         </nav>
         <div className="mm-header-actions">
+          {allowDemo && <button className="mm-btn-header-login" onClick={() => onNavigate && onNavigate('dashboard')}>Open local demo</button>}
           <button className="mm-btn-header-signup" onClick={() => onNavigate && onNavigate('signup')}>Sign Up</button>
           <button className="mm-btn-header-login" onClick={() => onNavigate && onNavigate('login')}>Log In</button>
         </div>

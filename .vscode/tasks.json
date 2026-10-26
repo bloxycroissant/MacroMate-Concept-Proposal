@@ -48,7 +48,10 @@
         "command": "npm.cmd"
       },
       "options": {
-        "cwd": "${workspaceFolder}/MacroMate_Concept_Proposal/Frontend"
+        "cwd": "${workspaceFolder}/MacroMate_Concept_Proposal/Frontend",
+        "env": {
+          "VITE_STORAGE_MODE": "local"
+        }
       },
       "isBackground": true,
       "problemMatcher": {
@@ -76,22 +79,31 @@
       "problemMatcher": []
     },
     {
-      "label": "MacroMate: backend (Firebase)",
+      "label": "MacroMate: frontend (Supabase)",
       "type": "shell",
-      "command": "./mvnw",
+      "command": "npm",
       "args": [
-        "spring-boot:run",
-        "-Dspring-boot.run.profiles=firebase"
+        "run",
+        "dev",
+        "--",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "5173",
+        "--strictPort"
       ],
       "windows": {
-        "command": ".\\mvnw.cmd"
+        "command": "npm.cmd"
       },
       "options": {
-        "cwd": "${workspaceFolder}/MacroMate_Concept_Proposal/Backend"
+        "cwd": "${workspaceFolder}/MacroMate_Concept_Proposal/Frontend",
+        "env": {
+          "VITE_STORAGE_MODE": "supabase"
+        }
       },
       "isBackground": true,
       "problemMatcher": {
-        "owner": "macromate-backend",
+        "owner": "macromate-frontend",
         "pattern": {
           "regexp": "^(.*):(\\d+): (.*)$",
           "file": 1,
@@ -101,17 +113,15 @@
         "background": {
           "activeOnStart": true,
           "beginsPattern": ".*",
-          "endsPattern": "Started BackendApplication"
+          "endsPattern": "Local:"
         }
       }
     },
     {
-      "label": "MacroMate: start Firebase app",
+      "label": "MacroMate: start Supabase app",
       "dependsOn": [
-        "MacroMate: backend (Firebase)",
-        "MacroMate: frontend"
+        "MacroMate: frontend (Supabase)"
       ],
-      "dependsOrder": "parallel",
       "problemMatcher": []
     }
   ]

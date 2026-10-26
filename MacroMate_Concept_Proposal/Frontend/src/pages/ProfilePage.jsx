@@ -1,16 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 
 export default function ProfilePage({ profile, email, onSave, busy }) {
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const [profileImage, setProfileImage] = useState(profile?.pfpUrl || null);
   const fileInputRef = useRef(null);
-
-  useEffect(() => {
-    if (profile?.pfpUrl) {
-      setProfileImage(profile.pfpUrl);
-    }
-  }, [profile?.pfpUrl]);
 
   const getInitials = (name) => {
     if (!name) return 'MM';
@@ -24,6 +18,11 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 1048576) {
+        setMessage('Choose a PNG, JPEG or WebP image up to 1 MB.');
+        e.target.value = '';
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result);
@@ -65,7 +64,7 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
     }
   }
 
-  const currentName = profile?.fullName || 'Sabando, Christianne Denise S.';
+  const currentName = profile?.fullName || 'Wellness member';
   const currentGoal = profile?.wellnessGoal || 'Maintain a balanced lifestyle';
 
   return (
@@ -375,7 +374,7 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
                 type="file"
                 ref={fileInputRef}
                 onChange={handleImageChange}
-                accept="image/*"
+                accept="image/png,image/jpeg,image/webp"
                 style={{ display: 'none' }}
               />
             </div>
@@ -414,7 +413,7 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
               <div className="mm-form-field-item">
                 <label>Email Address</label>
                 <input
-                  value={email || 'denise@gmail.com'}
+                  value={email || 'Local demo'}
                   readOnly
                   className="mm-profile-input-styled"
                 />
@@ -430,7 +429,7 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
                     min="1"
                     max="120"
                     step="1"
-                    defaultValue={profile?.age || '23'}
+                    defaultValue={profile?.age || ''}
                     className="mm-profile-input-styled"
                   />
                 </div>
@@ -444,7 +443,7 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
                     min="30"
                     max="300"
                     step="0.1"
-                    defaultValue={profile?.heightCm || '154'}
+                    defaultValue={profile?.heightCm || ''}
                     className="mm-profile-input-styled"
                   />
                 </div>
@@ -460,7 +459,7 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
                     min="1"
                     max="700"
                     step="0.1"
-                    defaultValue={profile?.weightKg || '51'}
+                    defaultValue={profile?.weightKg || ''}
                     className="mm-profile-input-styled"
                   />
                 </div>

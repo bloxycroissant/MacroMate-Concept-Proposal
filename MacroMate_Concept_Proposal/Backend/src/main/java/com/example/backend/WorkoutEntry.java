@@ -11,10 +11,6 @@ public class WorkoutEntry {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String userId;
-
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
 
     private String workoutType;
     private Double distanceKm;

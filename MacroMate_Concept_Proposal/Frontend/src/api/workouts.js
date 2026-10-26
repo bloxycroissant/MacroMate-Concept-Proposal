@@ -1,19 +1,21 @@
-import { authenticatedOptions } from '../firebase/client';
-const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+import { cloudEnabled, supabase } from '../supabase/client';
+import { allRows, requireUserId, unwrap, workoutColumns } from '../supabase/database';
+import * as local from './localWorkouts';
 
-async function request(path, options = {}) {
-  const response = await fetch(`${apiBase}/api/workouts${path}`, await authenticatedOptions(options));
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.message || `Workout request failed (${response.status}).`);
-  }
-  return response.status === 204 ? null : response.json();
+export async function listWorkouts(signal) {
+  if (!cloudEnabled) return local.listWorkouts(signal);
+  const uid = await requireUserId();
+  return allRows(() => supabase.from('workouts').select(workoutColumns).eq('user_id', uid).order('workout_date', { ascending: false }).order('id', { ascending: false }), signal);
 }
-
-export const listWorkouts = (signal) => request('', { signal });
-export const addWorkout = (workout) => request('', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(workout),
-});
-export const deleteWorkout = (id) => request(`/${id}`, { method: 'DELETE' });
+export async function addWorkout(workout) {
+  if (!cloudEnabled) return local.addWorkout(workout);
+  const uid = await requireUserId();
+  return unwrap(await supabase.from('workouts').insert({ user_id: uid, workout_type: workout.workoutType,
+    distance_km: workout.distanceKm, workout_date: workout.workoutDate }).select(workoutColumns).single());
+}
+export async function deleteWorkout(id) {
+  if (!cloudEnabled) return local.deleteWorkout(id);
+  const uid = await requireUserId();
+  const rows = unwrap(await supabase.from('workouts').delete().eq('id', id).eq('user_id', uid).select('id'));
+  if (!rows.length) throw new Error('Workout not found.');
+}
