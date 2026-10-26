@@ -32,9 +32,6 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState(localDate);
   const wellness = useWellness(selectedDate);
   const { mood, waterGlasses, energyLevel, sleepMinutes, completedGoals } = wellness.day;
-  const setWaterGlasses = (value) => wellness.updateDay({ waterGlasses: Math.max(0, Math.min(8, value)) });
-  const setEnergyLevel = (value) => wellness.updateDay({ energyLevel: value });
-  const displayName = wellness.profile.fullName || 'Wellness member';
 
   const setWaterGlasses = (value) => wellness.ready && !wellness.pending && wellness.updateDay({ waterGlasses: Math.max(0, Math.min(8, value)) });
   const setEnergyLevel = (value) => wellness.ready && !wellness.pending && wellness.updateDay({ energyLevel: value });
@@ -271,8 +268,6 @@ export default function App() {
             </div>
           </div>
 
-          <button className="logout-btn" onClick={() => handleNavigate('welcome')}>
-            Back to welcome
           <button 
             className="logout-btn" 
             disabled={wellness.pending > 0 || journal.busy}
@@ -295,7 +290,6 @@ export default function App() {
           {activeTab === 'health-journal' && (
             <HealthJournalPage
               date={selectedDate} onDateChange={setSelectedDate} day={wellness.day} days={wellness.days}
-              onChange={wellness.updateDay}
               onChange={wellness.updateDay} disabled={!wellness.ready || wellness.pending > 0}
             />
           )}
@@ -368,8 +362,6 @@ export default function App() {
           )}
 
           {activeTab === 'my-goals' && <GoalsPage />}
-          {activeTab === 'profile' && <ProfilePage profile={wellness.profile} onSave={wellness.saveProfile} />}
-          {activeTab === 'accessibility' && <AccessibilityPage preferences={wellness.preferences} onChange={wellness.updatePreference} />}
           
           {/* 🌟 Live Synced Name & Profile Picture in Profile Page */}
           {activeTab === 'profile' && !wellness.ready && <p>Loading your profile…</p>}
@@ -382,7 +374,13 @@ export default function App() {
             />
           )}
           
-          {activeTab === 'accessibility' && <AccessibilityPage preferences={wellness.preferences} onChange={wellness.updatePreference} busy={!wellness.ready || wellness.pending > 0} />}
+          {activeTab === 'accessibility' && (
+            <AccessibilityPage 
+              preferences={wellness.preferences} 
+              onChange={wellness.updatePreference} 
+              busy={!wellness.ready || wellness.pending > 0} 
+            />
+          )}
 
         </main>
       </div>
