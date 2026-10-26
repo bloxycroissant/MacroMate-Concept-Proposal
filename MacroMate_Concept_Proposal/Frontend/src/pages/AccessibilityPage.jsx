@@ -2,7 +2,7 @@ const options = [
   ['highContrast', 'High Contrast Mode', 'Use a strong light-on-dark theme.'],
   ['reduceMotion', 'Reduce Motion', 'Reduce animations and transitions.'],
   ['enhancedFocus', 'Enhanced keyboard focus', 'Show a stronger outline on focused controls.'],
-  ['announcements', 'Screen-reader announcements', 'Announce cloud save status.'],
+  ['announcements', 'Screen-reader announcements', 'Announce the session status message.'],
 ];
 export default function AccessibilityPage({ preferences, onChange, busy }) {
   return <div className="page-view"><h1 className="page-title">Accessibility</h1>

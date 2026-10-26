@@ -7,6 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
     "preview": "vite preview",
     "test:database": "node --test test/supabase-database.test.js",
     "test": "node --test test/supabase-*.test.js"

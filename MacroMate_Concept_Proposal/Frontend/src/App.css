@@ -8,10 +8,207 @@
 .wellness-history button { display: grid; gap: 6px; padding: 10px; border: 1px solid #abc4b2; border-radius: 8px; background: #fff; cursor: pointer; }
 .wellness-weekdays { display: grid; grid-template-columns: repeat(7, minmax(65px, 1fr)); gap: 10px; margin-top: 20px; overflow-x: auto; }
 .wellness-weekdays > div { display: grid; gap: 8px; text-align: center; }
-.wellness-high-contrast, .wellness-high-contrast * { color: #fff !important; background-color: #000 !important; border-color: #fff !important; box-shadow: none !important; }
-.wellness-high-contrast input:checked + .slider { border: 3px solid #fff; }
-.wellness-high-contrast .slider:before { background: #fff !important; }
-.wellness-high-contrast .progress-bar > span, .wellness-high-contrast .bar-fill { background-color: #fff !important; }
+
+/* REFINED DARK / HIGH CONTRAST MODE THEME */
+.wellness-high-contrast,
+.wellness-high-contrast body,
+.wellness-high-contrast .app-shell,
+.wellness-high-contrast .main-content {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+.wellness-high-contrast .topbar,
+.wellness-high-contrast .sidebar {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.wellness-high-contrast .card,
+.wellness-high-contrast .modal-content,
+.wellness-high-contrast .overview-stat-card,
+.wellness-high-contrast .sidebar-macros,
+.wellness-high-contrast .sidebar-inspo-card,
+.wellness-high-contrast .metric-box,
+.wellness-high-contrast .checkin-card,
+.wellness-high-contrast .snapshot-card,
+.wellness-high-contrast .mood-history-card,
+.wellness-high-contrast .avg-mood-card,
+.wellness-high-contrast .column-card,
+.wellness-high-contrast .best-day-card,
+.wellness-high-contrast .right-widget,
+.wellness-high-contrast .motivation-box,
+.wellness-high-contrast .date-strip-card,
+.wellness-high-contrast .profile-badge-card,
+.wellness-high-contrast .goal-highlight-card,
+.wellness-high-contrast .reminders-banner {
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.wellness-high-contrast h1,
+.wellness-high-contrast h2,
+.wellness-high-contrast h3,
+.wellness-high-contrast h4,
+.wellness-high-contrast .page-title,
+.wellness-high-contrast .giant-title,
+.wellness-high-contrast .brand-text,
+.wellness-high-contrast .dashboard-title,
+.wellness-high-contrast .user-handle,
+.wellness-high-contrast .stat-val,
+.wellness-high-contrast .macro-label,
+.wellness-high-contrast .widget-title,
+.wellness-high-contrast .menu-header,
+.wellness-high-contrast .macros-title,
+.wellness-high-contrast .card-subtext,
+.wellness-high-contrast .date-center,
+.wellness-high-contrast .sidebar-inspo-card strong,
+.wellness-high-contrast .sidebar-inspo-card p,
+.wellness-high-contrast .footprints,
+.wellness-high-contrast .profile-badge-card h2,
+.wellness-high-contrast .profile-badge-card h3,
+.wellness-high-contrast .profile-badge-card h4,
+.wellness-high-contrast .form-group label,
+.wellness-high-contrast span,
+.wellness-high-contrast p,
+.wellness-high-contrast label,
+.wellness-high-contrast div,
+.wellness-high-contrast strong,
+.wellness-high-contrast b,
+.wellness-high-contrast small,
+.wellness-high-contrast a,
+.wellness-high-contrast li {
+  color: #f8fafc !important;
+}
+
+.wellness-high-contrast .stat-sub,
+.wellness-high-contrast .user-role,
+.wellness-high-contrast .sub-heading,
+.wellness-high-contrast .daily-table th,
+.wellness-high-contrast .bar-day,
+.wellness-high-contrast .bar-val,
+.wellness-high-contrast .journal-selected-date,
+.wellness-high-contrast .card-subtext {
+  color: #cbd5e1 !important;
+}
+
+.wellness-high-contrast .search-box,
+.wellness-high-contrast .metric-select,
+.wellness-high-contrast .water-counter,
+.wellness-high-contrast .grey-input,
+.wellness-high-contrast .date-badge,
+.wellness-high-contrast select.grey-input,
+.wellness-high-contrast input,
+.wellness-high-contrast select,
+.wellness-high-contrast textarea,
+.wellness-high-contrast option {
+  background-color: #334155 !important;
+  border: 1px solid #475569 !important;
+  color: #f8fafc !important;
+}
+
+.wellness-high-contrast .search-box input {
+  color: #f8fafc !important;
+}
+
+.wellness-high-contrast .search-box input::placeholder,
+.wellness-high-contrast .grey-input::placeholder,
+.wellness-high-contrast input::placeholder,
+.wellness-high-contrast textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+.wellness-high-contrast .avatar-circle {
+  background-color: #334155 !important;
+  color: #f8fafc !important;
+  border: 1px solid #475569 !important;
+}
+
+.wellness-high-contrast .complete-pill {
+  background-color: #059669 !important;
+  color: #ffffff !important;
+}
+
+.wellness-high-contrast .nav-item {
+  color: #cbd5e1 !important;
+}
+
+.wellness-high-contrast .nav-item:hover {
+  background-color: #334155 !important;
+  color: #34d399 !important;
+}
+
+.wellness-high-contrast .nav-item.active {
+  background-color: #10b981 !important;
+  color: #022c22 !important;
+}
+
+.wellness-high-contrast .submenu-item {
+  color: #cbd5e1 !important;
+}
+
+.wellness-high-contrast .submenu-item:hover,
+.wellness-high-contrast .submenu-item.active {
+  color: #34d399 !important;
+}
+
+.wellness-high-contrast .daily-table td,
+.wellness-high-contrast .activity-row,
+.wellness-high-contrast .toggle-row,
+.wellness-high-contrast .workout-row {
+  border-bottom-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+.wellness-high-contrast .daily-table tr:hover td,
+.wellness-high-contrast .activity-row:hover,
+.wellness-high-contrast .toggle-row:hover,
+.wellness-high-contrast .workout-row:hover {
+  background-color: #334155 !important;
+}
+
+.wellness-high-contrast .daily-total-bar {
+  background-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+.wellness-high-contrast .log-food-btn,
+.wellness-high-contrast .primary-green-btn {
+  background-color: #10b981 !important;
+  color: #022c22 !important;
+}
+
+.wellness-high-contrast .log-food-btn:hover,
+.wellness-high-contrast .primary-green-btn:hover {
+  background-color: #059669 !important;
+}
+
+.wellness-high-contrast input:checked + .slider {
+  background-color: #10b981 !important;
+  border-color: #10b981 !important;
+}
+
+.wellness-high-contrast .slider {
+  background-color: #475569 !important;
+}
+
+.wellness-high-contrast .slider:before {
+  background-color: #ffffff !important;
+}
+
+.wellness-high-contrast .progress-bar > span,
+.wellness-high-contrast .bar-fill {
+  background-color: #10b981 !important;
+}
+
+.wellness-high-contrast .cloud-status {
+  background-color: #1e293b !important;
+  color: #34d399 !important;
+  border-bottom: 1px solid #334155 !important;
+}
+
 .wellness-enhanced-focus :focus-visible { outline: 4px solid #005fcc !important; outline-offset: 4px; }
 .wellness-high-contrast.wellness-enhanced-focus :focus-visible { outline-color: #ffdf00 !important; }
 body.wellness-reduce-motion, body.wellness-reduce-motion *, body.wellness-reduce-motion *::before, body.wellness-reduce-motion *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
@@ -1501,12 +1698,12 @@ body {
 .profile-badge-card {
   text-align: center;
   background: #c3e2c9;
-  color: #000000 !important;
+  color: #000000;
   animation: anim-slide-right 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .profile-badge-card h2, .profile-badge-card h3, .profile-badge-card h4 {
-  color: #000000 !important;
+  color: inherit;
 }
 
 .avatar-circle {
@@ -1583,7 +1780,7 @@ body {
   border-radius: 10px;
   font-weight: 700;
   outline: none;
-  color: #000000 !important;
+  color: #1a251e;
   transition: all 0.25s ease;
 }
 
