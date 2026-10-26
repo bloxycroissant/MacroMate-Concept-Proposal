@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export default function ProfilePage({ profile, email, onSave, busy }) {
   const [message, setMessage] = useState('');
@@ -6,7 +6,12 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
   const [profileImage, setProfileImage] = useState(profile?.pfpUrl || null);
   const fileInputRef = useRef(null);
 
-  // Derive user initials if no profile picture is uploaded
+  useEffect(() => {
+    if (profile?.pfpUrl) {
+      setProfileImage(profile.pfpUrl);
+    }
+  }, [profile?.pfpUrl]);
+
   const getInitials = (name) => {
     if (!name) return 'MM';
     const parts = name.trim().split(' ');
@@ -19,9 +24,12 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setProfileImage(imageUrl);
-      setMessage('Profile photo updated!');
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+        setMessage('Profile photo updated! Remember to click "Save Profile".');
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -49,7 +57,7 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
 
     try {
       await onSave(data);
-      setMessage('Profile saved successfully.');
+      setMessage('Profile and picture saved successfully across the site!');
     } catch {
       setMessage('Profile was not saved. Please try again.');
     } finally {
@@ -57,7 +65,7 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
     }
   }
 
-  const currentName = profile?.fullName || 'Wellness User';
+  const currentName = profile?.fullName || 'Sabando, Christianne Denise S.';
   const currentGoal = profile?.wellnessGoal || 'Maintain a balanced lifestyle';
 
   return (
@@ -75,7 +83,7 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
 
         .mm-profile-subtext {
           font-size: 0.88rem;
-          color: #a3b8aa;
+          color: #88a392;
           font-weight: 700;
           display: block;
           margin-bottom: 4px;
@@ -89,7 +97,6 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
           letter-spacing: -0.5px;
         }
 
-        /* Main 2-Column Layout */
         .mm-profile-grid-container {
           display: grid;
           grid-template-columns: 280px 1fr;
@@ -97,7 +104,6 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
           align-items: start;
         }
 
-        /* Left Side Profile Cards */
         .mm-left-profile-stack {
           display: flex;
           flex-direction: column;
@@ -170,7 +176,7 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
         }
 
         .mm-avatar-user-name {
-          font-size: 1.35rem;
+          font-size: 1.25rem;
           font-weight: 900;
           color: #0c2115;
           margin: 6px 0 2px 0;
@@ -193,7 +199,6 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
           font-weight: 800;
         }
 
-        /* Wellness Goal Box */
         .mm-wellness-goal-box {
           background: #c3e2c9;
           border-radius: 20px;
@@ -230,7 +235,6 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
           line-height: 1.4;
         }
 
-        /* Right Form Panel */
         .mm-profile-right-card {
           background: #f7fbf8;
           border-radius: 24px;
@@ -247,7 +251,7 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
 
         .mm-section-head-sub {
           font-size: 0.82rem;
-          color: #a3b8aa;
+          color: #88a392;
           font-weight: 700;
           margin-bottom: 24px;
           display: block;
@@ -298,7 +302,6 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
           gap: 16px;
         }
 
-        /* Daily Reminders Card */
         .mm-daily-reminders-banner {
           background: #c3e2c9;
           border-radius: 18px;
@@ -340,15 +343,12 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
         }
       `}</style>
 
-      {/* Header Banner */}
       <div className="mm-profile-header-group">
         <span className="mm-profile-subtext">Manage your personal wellness details</span>
         <h1 className="mm-profile-title">My Profile</h1>
       </div>
 
-      {/* Main Grid Content */}
       <div className="mm-profile-grid-container">
-        {/* Left Column: Avatar & Goal Card */}
         <div className="mm-left-profile-stack">
           <div className="mm-avatar-card">
             <div className="mm-avatar-top-banner" />
@@ -394,7 +394,6 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
           </div>
         </div>
 
-        {/* Right Column: Personal Information Form */}
         <div className="mm-profile-right-card">
           <h3 className="mm-section-head-title">Personal Information</h3>
           <span className="mm-section-head-sub">Used to personalize your nutrition and wellness targets.</span>
@@ -415,7 +414,7 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
               <div className="mm-form-field-item">
                 <label>Email Address</label>
                 <input
-                  value={email || 'local@demo.com'}
+                  value={email || 'denise@gmail.com'}
                   readOnly
                   className="mm-profile-input-styled"
                 />
@@ -505,7 +504,6 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
             )}
           </form>
 
-          {/* Bottom Daily Reminders Banner */}
           <div className="mm-daily-reminders-banner">
             <h4>Daily Reminders</h4>
             <p>Receive gentle prompts to log meals and wellness.</p>

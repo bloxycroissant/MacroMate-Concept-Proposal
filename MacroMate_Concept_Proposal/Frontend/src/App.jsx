@@ -19,30 +19,32 @@ import { auth, cloudEnabled } from './firebase/client';
 import { signOut } from 'firebase/auth';
 
 export default function App() {
-  // Navigation Flow State: 'welcome' -> 'signup' -> 'login' -> 'dashboard'
   const [currentScreen, setCurrentScreen] = useState('welcome');
 
-  // Unified User Credentials State (Captured from Sign Up & Log In)
+  // Unified Centralized Auth & Profile State
   const [userAuth, setUserAuth] = useState({
-    fullName: 'Christianne Denise S. Sabando', // Default fallback name
+    fullName: 'Sabando, Christianne Denise S.',
     email: 'denise@gmail.com',
-    password: ''
+    password: '',
+    pfpUrl: null, // Dynamically holds base64/blob URL or fallback
   });
 
-  // Dashboard Tabs State
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'food-journal' | 'health-journal' | 'my-goals' | 'profile' | 'accessibility'
-  const [foodSubTab, setFoodSubTab] = useState('hub'); // 'hub' | 'daily' | 'overall'
+  const [activeTab, setActiveTab] = useState('overview');
+  const [foodSubTab, setFoodSubTab] = useState('hub');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [foodJournalMenuOpen, setFoodJournalMenuOpen] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(localDate);
   const wellness = useWellness(selectedDate);
   const { mood, waterGlasses, energyLevel, sleepMinutes, completedGoals } = wellness.day;
+
   const setWaterGlasses = (value) => wellness.ready && wellness.updateDay({ waterGlasses: Math.max(0, Math.min(8, value)) });
   const setEnergyLevel = (value) => wellness.ready && wellness.updateDay({ energyLevel: value });
 
-  // Display Name Priority: Sign-Up/Login Full Name -> Firebase User Email -> Default
-  const displayName = userAuth.fullName || wellness.profile.fullName || auth?.currentUser?.email || 'Wellness member';
+  // 🌟 Universal Full Name and Profile Picture Sync Across Website
+  const displayName = userAuth.fullName || wellness.profile.fullName || 'Sabando, Christianne Denise S.';
+  const displayEmail = userAuth.email || auth?.currentUser?.email || 'denise@gmail.com';
+  const displayPfp = userAuth.pfpUrl || wellness.profile.pfpUrl || 'https://i.pravatar.cc/100?img=12';
 
   useEffect(() => {
     document.body.classList.toggle('wellness-reduce-motion', wellness.preferences.reduceMotion);
@@ -56,15 +58,18 @@ export default function App() {
     carbs: sum.carbs + entry.carbs, fat: sum.fat + entry.fat,
   }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
   const goals = { calories: 2200, protein: 150, carbs: 270, fat: 65 };
+
   const meals = [
     { meal: 'Breakfast', icon: '🥐' }, { meal: 'Lunch', icon: '🍱' },
     { meal: 'Dinner', icon: '🍽️' }, { meal: 'Snacks', icon: '🍿' },
   ].map((meal) => ({ ...meal, items: entries.filter((entry) => entry.meal === meal.meal) }));
+
   const number = (value) => journal.loading ? '…' : journal.error ? '—' : Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 });
   const progress = (key) => `${Math.min(100, totals[key] / goals[key] * 100)}%`;
   const dateLabel = new Date(`${selectedDate}T12:00:00`).toLocaleDateString(undefined, {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
+
   const week = Array.from({ length: 7 }, (_, index) => {
     const date = shiftDate(selectedDate, index - 6);
     return { date, calories: journal.entries.filter((entry) => entry.entryDate === date)
@@ -83,28 +88,38 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Called when user submits Sign Up form
   const handleSignUpData = (newUserData) => {
     setUserAuth({
       fullName: newUserData.name,
       email: newUserData.email,
-      password: newUserData.password
+      password: newUserData.password,
+      pfpUrl: null,
     });
-    // Sync with Wellness Profile hook if ready
     if (wellness.ready) {
       wellness.saveProfile({ ...wellness.profile, fullName: newUserData.name });
     }
     handleNavigate('login');
   };
 
-  // Called when user submits Login form
   const handleLoginSubmit = (loginData) => {
     setUserAuth((prev) => ({
       ...prev,
       email: loginData.email,
-      password: loginData.password
+      password: loginData.password,
     }));
     handleNavigate('dashboard');
+  };
+
+  // 🌟 Handles real-time updates for Name AND Profile Picture
+  const handleSaveProfile = async (profileData) => {
+    setUserAuth((prev) => ({
+      ...prev,
+      fullName: profileData.fullName,
+      pfpUrl: profileData.pfpUrl || prev.pfpUrl,
+    }));
+    if (wellness.ready) {
+      await wellness.saveProfile(profileData);
+    }
   };
 
   const menuItems = [
@@ -116,29 +131,17 @@ export default function App() {
     { id: 'accessibility', label: 'Accessibility', icon: '♿' },
   ];
 
-  // 1. WELCOME PAGE
-  if (currentScreen === 'welcome') {
-    return <WelcomePage onNavigate={handleNavigate} />;
-  }
+  if (currentScreen === 'welcome') return <WelcomePage onNavigate={handleNavigate} />;
+  if (currentScreen === 'signup') return <SignUpPage onNavigate={handleNavigate} onSignUp={handleSignUpData} />;
+  if (currentScreen === 'login') return <LoginPage onNavigate={handleNavigate} onLogin={handleLoginSubmit} savedAuth={userAuth} />;
 
-  // 2. SIGN UP PAGE (Receives User Registration Callback)
-  if (currentScreen === 'signup') {
-    return <SignUpPage onNavigate={handleNavigate} onSignUp={handleSignUpData} />;
-  }
-
-  // 3. LOG IN PAGE (Receives Credentials and Default Saved Email)
-  if (currentScreen === 'login') {
-    return <LoginPage onNavigate={handleNavigate} onLogin={handleLoginSubmit} savedAuth={userAuth} />;
-  }
-
-  // 4. PERSONAL DASHBOARD
   return (
     <div className={`app-shell ${wellness.preferences.highContrast ? 'wellness-high-contrast' : ''} ${wellness.preferences.enhancedFocus ? 'wellness-enhanced-focus' : ''}`}>
       <div className="cloud-status" role="status" aria-live={wellness.preferences.announcements ? 'polite' : 'off'}>
         {cloudEnabled ? (wellness.error ? 'Cloud records need attention' : wellness.pending ? 'Saving to Firebase…' : wellness.ready ? 'Firebase mode · No pending changes' : 'Loading Firebase records…') : 'Local demo · Wellness changes are temporary until Firebase is enabled'}
       </div>
       
-      {/* TOP HEADER BAR */}
+      {/* TOPBAR */}
       <header className="topbar">
         <div className="topbar-left">
           <div className="brand-logo" style={{ cursor: 'pointer' }} onClick={() => setCurrentScreen('welcome')}>
@@ -166,14 +169,15 @@ export default function App() {
             <span className="bell-badge">3</span>
           </div>
 
-          <div className="user-profile">
+          <div className="user-profile" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('profile')}>
             <div className="user-info">
-              {/* Dynamically Populated User Handle from Sign Up */}
+              {/* 🌟 Live Synced Full Name Badge */}
               <div className="user-handle">{displayName}</div>
               <div className="user-role">Wellness member</div>
             </div>
             <div className="user-avatar">
-              <img src="https://i.pravatar.cc/100?img=12" alt="User avatar" />
+              {/* 🌟 Live Synced Profile Picture */}
+              <img src={displayPfp} alt={displayName} style={{ objectFit: 'cover', width: '100%', height: '100%', borderRadius: '50%' }} />
             </div>
           </div>
 
@@ -183,9 +187,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* MAIN CONTAINER */}
+      {/* BODY CONTAINER */}
       <div className="app-body">
-        {/* LEFT NAVIGATION SIDEBAR */}
         <aside className="sidebar">
           <span className="menu-header">MENU</span>
           <nav className="sidebar-nav">
@@ -206,7 +209,6 @@ export default function App() {
                   {item.hasSub && <span className="chevron">{foodJournalMenuOpen ? '˅' : '˃'}</span>}
                 </button>
 
-                {/* Submenu for Food Journal */}
                 {item.id === 'food-journal' && (foodJournalMenuOpen || activeTab === 'food-journal') && (
                   <div className="submenu">
                     <button
@@ -233,14 +235,12 @@ export default function App() {
             ))}
           </nav>
 
-          {/* INSPIRATION CARD */}
           <div className="sidebar-inspo-card">
             <strong>Small steps matter</strong>
             <p>Keep logging. Your healthy rhythm grows one day at a time.</p>
             <div className="footprints">👣 👣 👣 👣</div>
           </div>
 
-          {/* SELECTED DAY'S MACROS WIDGET */}
           <div className="sidebar-macros">
             <span className="macros-title">SELECTED DAY'S MACROS</span>
 
@@ -277,7 +277,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* LOG OUT BUTTON */}
           <button 
             className="logout-btn" 
             onClick={() => {
@@ -291,7 +290,7 @@ export default function App() {
           </button>
         </aside>
 
-        {/* MAIN VIEW CONTENT AREA */}
+        {/* MAIN PAGE VIEW */}
         <main className="main-content">
           {wellness.error && <p className="journal-notice journal-error" role="alert">{wellness.error}</p>}
           {journal.loading && <p className="journal-notice" role="status">Loading saved food entries…</p>}
@@ -307,6 +306,7 @@ export default function App() {
             />
           )}
 
+          {/* 🌟 Live Synced Name in Overview Page Heading */}
           {activeTab === 'overview' && (
             <OverviewPage
               totals={totals}
@@ -321,7 +321,9 @@ export default function App() {
               error={journal.error}
               entries={entries}
               formatNumber={number}
-              displayName={displayName} sleepMinutes={sleepMinutes} completedGoals={completedGoals}
+              displayName={displayName} 
+              sleepMinutes={sleepMinutes} 
+              completedGoals={completedGoals}
               onGoalChange={(goal) => wellness.updateDay({ completedGoals: completedGoals.includes(goal) ? completedGoals.filter((item) => item !== goal) : [...completedGoals, goal] })}
               wellnessDisabled={!wellness.ready}
               onViewJournal={() => { setActiveTab('food-journal'); setFoodSubTab('daily'); }}
@@ -373,12 +375,12 @@ export default function App() {
 
           {activeTab === 'my-goals' && <GoalsPage />}
           
-          {/* PROFILE PAGE (Synced with Registered Full Name and Email) */}
+          {/* 🌟 Live Synced Name & Profile Picture in Profile Page */}
           {activeTab === 'profile' && (
             <ProfilePage 
-              profile={{ ...wellness.profile, fullName: userAuth.fullName || wellness.profile.fullName }} 
-              email={userAuth.email || auth?.currentUser?.email} 
-              onSave={wellness.saveProfile} 
+              profile={{ ...wellness.profile, fullName: displayName, pfpUrl: displayPfp }} 
+              email={displayEmail} 
+              onSave={handleSaveProfile} 
               busy={!wellness.ready} 
             />
           )}
@@ -388,9 +390,7 @@ export default function App() {
         </main>
       </div>
 
-      {/* LOG FOOD MODAL */}
       {isModalOpen && <FoodEntryForm date={selectedDate} busy={journal.busy} onSave={saveFood} onClose={() => setIsModalOpen(false)} />}
-
     </div>
   );
 }
