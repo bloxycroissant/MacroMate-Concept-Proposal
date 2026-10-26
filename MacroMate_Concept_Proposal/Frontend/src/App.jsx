@@ -12,8 +12,6 @@ import AccessibilityPage from './pages/AccessibilityPage';
 import { localDate, shiftDate } from './utils/journalDates';
 import './App.css';
 import useWellness from './hooks/useWellness';
-import { auth, cloudEnabled } from './firebase/client';
-import { signOut } from 'firebase/auth';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('health-journal'); // 'overview' | 'food-journal' | 'health-journal' | 'my-goals' | 'profile' | 'accessibility'
@@ -24,9 +22,9 @@ export default function App() {
   const [selectedDate, setSelectedDate] = useState(localDate);
   const wellness = useWellness(selectedDate);
   const { mood, waterGlasses, energyLevel, sleepMinutes, completedGoals } = wellness.day;
-  const setWaterGlasses = (value) => wellness.ready && wellness.updateDay({ waterGlasses: Math.max(0, Math.min(8, value)) });
-  const setEnergyLevel = (value) => wellness.ready && wellness.updateDay({ energyLevel: value });
-  const displayName = wellness.profile.fullName || auth?.currentUser?.email || 'Wellness member';
+  const setWaterGlasses = (value) => wellness.updateDay({ waterGlasses: Math.max(0, Math.min(8, value)) });
+  const setEnergyLevel = (value) => wellness.updateDay({ energyLevel: value });
+  const displayName = wellness.profile.fullName || 'Wellness member';
   useEffect(() => {
     document.body.classList.toggle('wellness-reduce-motion', wellness.preferences.reduceMotion);
     return () => document.body.classList.remove('wellness-reduce-motion');
@@ -71,8 +69,8 @@ export default function App() {
 
   return (
     <div className={`app-shell ${wellness.preferences.highContrast ? 'wellness-high-contrast' : ''} ${wellness.preferences.enhancedFocus ? 'wellness-enhanced-focus' : ''}`}>
-      <div className="cloud-status" role="status" aria-live={wellness.preferences.announcements ? 'polite' : 'off'}>
-        {cloudEnabled ? (wellness.error ? 'Cloud records need attention' : wellness.pending ? 'Saving to Firebase…' : wellness.ready ? 'Firebase mode · No pending changes' : 'Loading Firebase records…') : 'Local demo · Wellness changes are temporary until Firebase is enabled'}
+      <div className="session-status" role="status" aria-live={wellness.preferences.announcements ? 'polite' : 'off'}>
+        Local demo · Food and workouts save to H2. Health, goals, profile and accessibility changes reset on refresh.
       </div>
       {/* TOP HEADER BAR */}
       <header className="topbar">
@@ -212,15 +210,10 @@ export default function App() {
             </div>
           </div>
 
-          {/* LOG OUT BUTTON */}
-          <button className="logout-btn" disabled={!cloudEnabled || wellness.pending > 0} onClick={() => signOut(auth).catch(() => window.alert('Could not log out. Please try again.'))}>
-            🚪 Log out
-          </button>
         </aside>
 
         {/* MAIN VIEW CONTENT AREA */}
         <main className="main-content">
-          {wellness.error && <p className="journal-notice journal-error" role="alert">{wellness.error}</p>}
           {journal.loading && <p className="journal-notice" role="status">Loading saved food entries…</p>}
           {journal.error && <div className="journal-notice journal-error" role="alert">
             <p>{journal.error}</p><button type="button" disabled={journal.loading || journal.busy} onClick={journal.reload}>Retry</button>
@@ -230,7 +223,7 @@ export default function App() {
           {activeTab === 'health-journal' && (
             <HealthJournalPage
               date={selectedDate} onDateChange={setSelectedDate} day={wellness.day} days={wellness.days}
-              onChange={wellness.updateDay} disabled={!wellness.ready}
+              onChange={wellness.updateDay}
             />
           )}
 
@@ -250,7 +243,6 @@ export default function App() {
               formatNumber={number}
               displayName={displayName} sleepMinutes={sleepMinutes} completedGoals={completedGoals}
               onGoalChange={(goal) => wellness.updateDay({ completedGoals: completedGoals.includes(goal) ? completedGoals.filter((item) => item !== goal) : [...completedGoals, goal] })}
-              wellnessDisabled={!wellness.ready}
               onViewJournal={() => { setActiveTab('food-journal'); setFoodSubTab('daily'); }}
             />
           )}
@@ -300,8 +292,8 @@ export default function App() {
           )}
 
           {activeTab === 'my-goals' && <GoalsPage />}
-          {activeTab === 'profile' && (wellness.ready ? <ProfilePage profile={wellness.profile} email={auth?.currentUser?.email} onSave={wellness.saveProfile} busy={!wellness.ready} /> : <p>Loading profile…</p>)}
-          {activeTab === 'accessibility' && <AccessibilityPage preferences={wellness.preferences} onChange={wellness.updatePreference} busy={!wellness.ready} />}
+          {activeTab === 'profile' && <ProfilePage profile={wellness.profile} onSave={wellness.saveProfile} />}
+          {activeTab === 'accessibility' && <AccessibilityPage preferences={wellness.preferences} onChange={wellness.updatePreference} />}
 
         </main>
       </div>

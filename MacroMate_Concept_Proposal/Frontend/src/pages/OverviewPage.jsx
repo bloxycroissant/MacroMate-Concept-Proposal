@@ -11,7 +11,7 @@ export default function OverviewPage({
   error,
   entries,
   formatNumber,
-  onViewJournal, displayName, sleepMinutes, completedGoals, onGoalChange, wellnessDisabled,
+  onViewJournal, displayName, sleepMinutes, completedGoals, onGoalChange,
 }) {
   return (
     <div className="page-view">
@@ -70,7 +70,7 @@ export default function OverviewPage({
             ['breakfast', 'Log breakfast'], ['water', 'Drink 8 glasses of water'],
             ['activity', '30 min activity'], ['reflection', 'Evening reflection'],
           ].map(([id, label]) => <label key={id} className={`goal-item ${completedGoals.includes(id) ? 'done' : ''}`}>
-            <input type="checkbox" checked={completedGoals.includes(id)} disabled={wellnessDisabled} onChange={() => onGoalChange(id)} />
+            <input type="checkbox" checked={completedGoals.includes(id)} onChange={() => onGoalChange(id)} />
             <span>{label}</span>
           </label>)}
         </div>

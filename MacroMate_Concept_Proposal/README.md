@@ -2,7 +2,7 @@
 
 The food journal and workout tracker connect React to Spring Boot and a file-based H2 database. Meals, dates, calories, macros, and walking, jogging, or running workouts (distance and date) are saved on disk. The food views, sidebar totals, recent food activity, weekly calorie chart, workout list, weekly distance chart, and best workout day use saved entries.
 
-Firebase mode saves daily mood, sleep, water, energy, checklist completion, profile details, and accessibility preferences in Cloud Firestore. Firebase Authentication supplies signup/login. Food and workouts remain in H2, with records scoped to the verified Firebase user. See [Firebase setup](../FIREBASE_SETUP.md). Nutrition targets remain fixed demonstration values.
+Daily mood, sleep, water, energy, checklist completion, profile details, and accessibility preferences use temporary React state and reset on refresh. The app opens directly without signup or login. Nutrition targets remain fixed demonstration values.
 
 ## Run in VS Code
 
@@ -39,7 +39,7 @@ Started from `Backend`, H2 creates `Backend/data/macromate.mv.db`. Food and work
 
 Choose **Food Journal → Daily Food Journal**, select a date, and use **Log Food**. Enter calories and all three macros (use zero where appropriate). Entries appear in both journal views. Delete removes an entry from the database. A failed save keeps the form open and displays an error.
 
-Without Firebase mode, this remains a local single-user food/workout demo. The backend binds to `127.0.0.1`. Firebase mode requires the backend `firebase` profile, verifies Firebase ID tokens, and separates accounts. Shared hosting still requires an explicit deployment and CORS configuration.
+This is a local single-user demo with no account authentication. The backend binds to `127.0.0.1`; use it on your own computer. The food/workout API reads all records in the configured local database. Existing H2 files are retained; older extra account-owner columns are no longer used. Cloud records are not imported into H2. Shared hosting requires adding authentication and an explicit deployment and CORS configuration.
 
 | Environment variable | Purpose |
 | --- | --- |

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function ProfilePage({ profile, email, onSave, busy }) {
+export default function ProfilePage({ profile, onSave, busy }) {
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
   async function submit(event) {
@@ -9,7 +9,7 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
     const data = { fullName: form.get('fullName').trim(), age: Number(form.get('age')), heightCm: Number(form.get('heightCm')),
       weightKg: Number(form.get('weightKg')), activityLevel: form.get('activityLevel'), wellnessGoal: form.get('wellnessGoal').trim() };
     if (!data.fullName || !data.wellnessGoal) { setMessage('Enter your name and wellness goal.'); setSaving(false); return; }
-    try { await onSave(data); setMessage('Profile saved.'); }
+    try { await onSave(data); setMessage('Profile updated for this session. Changes reset on refresh.'); }
     catch { setMessage('Profile was not saved. Please try again.'); }
     finally { setSaving(false); }
   }
@@ -17,7 +17,6 @@ export default function ProfilePage({ profile, email, onSave, busy }) {
     <form className="card profile-form-card" onSubmit={submit}><h2>Personal information</h2>
       <fieldset disabled={busy || saving} className="food-form-fields">
         <label>Full name<input name="fullName" defaultValue={profile.fullName || ''} required maxLength="120" className="grey-input" /></label>
-        <label>Email<input value={email || 'Local demo'} readOnly className="grey-input" /></label>
         <div className="form-row-2">
           <label>Age<input name="age" type="number" required min="1" max="120" step="1" defaultValue={profile.age || ''} className="grey-input" /></label>
           <label>Height (cm)<input name="heightCm" type="number" required min="30" max="300" step="0.1" defaultValue={profile.heightCm || ''} className="grey-input" /></label>
