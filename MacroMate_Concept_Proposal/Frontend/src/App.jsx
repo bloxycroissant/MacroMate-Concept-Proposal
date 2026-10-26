@@ -9,6 +9,9 @@ import OverallFoodJournalPage from './pages/OverallFoodJournalPage';
 import GoalsPage from './pages/GoalsPage';
 import ProfilePage from './pages/ProfilePage';
 import AccessibilityPage from './pages/AccessibilityPage';
+import WelcomePage from './pages/WelcomePage';
+import SignUpPage from './pages/SignUpPage';
+import LoginPage from './pages/LoginPage';
 import { localDate, shiftDate } from './utils/journalDates';
 import './App.css';
 import useWellness from './hooks/useWellness';
@@ -16,7 +19,11 @@ import { auth, cloudEnabled } from './firebase/client';
 import { signOut } from 'firebase/auth';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('health-journal'); // 'overview' | 'food-journal' | 'health-journal' | 'my-goals' | 'profile' | 'accessibility'
+  // Navigation Flow State: 'welcome' -> 'signup' -> 'login' -> 'dashboard'
+  const [currentScreen, setCurrentScreen] = useState('welcome');
+
+  // Dashboard Tabs State
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'food-journal' | 'health-journal' | 'my-goals' | 'profile' | 'accessibility'
   const [foodSubTab, setFoodSubTab] = useState('hub'); // 'hub' | 'daily' | 'overall'
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [foodJournalMenuOpen, setFoodJournalMenuOpen] = useState(false);
@@ -27,10 +34,12 @@ export default function App() {
   const setWaterGlasses = (value) => wellness.ready && wellness.updateDay({ waterGlasses: Math.max(0, Math.min(8, value)) });
   const setEnergyLevel = (value) => wellness.ready && wellness.updateDay({ energyLevel: value });
   const displayName = wellness.profile.fullName || auth?.currentUser?.email || 'Wellness member';
+
   useEffect(() => {
     document.body.classList.toggle('wellness-reduce-motion', wellness.preferences.reduceMotion);
     return () => document.body.classList.remove('wellness-reduce-motion');
   }, [wellness.preferences.reduceMotion]);
+
   const journal = useFoodEntries();
   const entries = journal.entries.filter((entry) => entry.entryDate === selectedDate);
   const totals = entries.reduce((sum, entry) => ({
@@ -60,6 +69,11 @@ export default function App() {
     setSelectedDate(saved.entryDate);
   }
 
+  const handleNavigate = (targetScreen) => {
+    setCurrentScreen(targetScreen);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: '⊞' },
     { id: 'food-journal', label: 'Food Journal', icon: '🍴', hasSub: true },
@@ -69,15 +83,32 @@ export default function App() {
     { id: 'accessibility', label: 'Accessibility', icon: '♿' },
   ];
 
+  // 1. WELCOME PAGE SCREEN
+  if (currentScreen === 'welcome') {
+    return <WelcomePage onNavigate={handleNavigate} />;
+  }
+
+  // 2. SIGN UP PAGE SCREEN
+  if (currentScreen === 'signup') {
+    return <SignUpPage onNavigate={handleNavigate} />;
+  }
+
+  // 3. LOG IN PAGE SCREEN
+  if (currentScreen === 'login') {
+    return <LoginPage onNavigate={handleNavigate} />;
+  }
+
+  // 4. PERSONAL DASHBOARD APP SHELL
   return (
     <div className={`app-shell ${wellness.preferences.highContrast ? 'wellness-high-contrast' : ''} ${wellness.preferences.enhancedFocus ? 'wellness-enhanced-focus' : ''}`}>
       <div className="cloud-status" role="status" aria-live={wellness.preferences.announcements ? 'polite' : 'off'}>
         {cloudEnabled ? (wellness.error ? 'Cloud records need attention' : wellness.pending ? 'Saving to Firebase…' : wellness.ready ? 'Firebase mode · No pending changes' : 'Loading Firebase records…') : 'Local demo · Wellness changes are temporary until Firebase is enabled'}
       </div>
+      
       {/* TOP HEADER BAR */}
       <header className="topbar">
         <div className="topbar-left">
-          <div className="brand-logo">
+          <div className="brand-logo" style={{ cursor: 'pointer' }} onClick={() => setCurrentScreen('welcome')}>
             <img 
               src={new URL('./assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href} 
               alt="MacroMate Logo" 
@@ -213,7 +244,15 @@ export default function App() {
           </div>
 
           {/* LOG OUT BUTTON */}
-          <button className="logout-btn" disabled={!cloudEnabled || wellness.pending > 0} onClick={() => signOut(auth).catch(() => window.alert('Could not log out. Please try again.'))}>
+          <button 
+            className="logout-btn" 
+            onClick={() => {
+              if (cloudEnabled) {
+                signOut(auth).catch(() => window.alert('Could not log out. Please try again.'));
+              }
+              setCurrentScreen('welcome');
+            }}
+          >
             🚪 Log out
           </button>
         </aside>
