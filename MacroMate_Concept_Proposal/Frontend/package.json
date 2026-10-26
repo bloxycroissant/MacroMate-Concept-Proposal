@@ -10,10 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "preview": "vite preview",
+    "test:database": "node --test test/supabase-database.test.js",
+    "test": "node --test test/supabase-*.test.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.12",
     "@eslint/js": "^10.0.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",

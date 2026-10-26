@@ -6,5 +6,10 @@ import App from './App.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
+import SessionProvider from './components/SessionProvider.jsx'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <SessionProvider>{(account) => <App key={account} />}</SessionProvider>
   </StrictMode>,
 )

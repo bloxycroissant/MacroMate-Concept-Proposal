@@ -3,8 +3,9 @@
 The food journal and workout tracker connect React to Spring Boot and a file-based H2 database. Meals, dates, calories, macros, and walking, jogging, or running workouts (distance and date) are saved on disk. The food views, sidebar totals, recent food activity, weekly calorie chart, workout list, weekly distance chart, and best workout day use saved entries.
 
 Daily mood, sleep, water, energy, checklist completion, profile details, and accessibility preferences use temporary React state and reset on refresh. Choose **Open local demo** on the welcome screen to enter without signup or login. The welcome, login and sign-up designs remain as prototypes; they do not create accounts, verify passwords or separate user data. Nutrition targets remain fixed demonstration values.
+Supabase mode is the default. It saves food, workouts, daily mood, sleep, water, energy, checklist completion, profile details/photos and accessibility preferences in private PostgreSQL tables. Supabase Auth provides real signup/login, confirmation, logout and password recovery. See [Supabase setup](../SUPABASE_SETUP.md) for the primary startup and verification steps. Nutrition targets remain fixed demonstration values.
 
-## Run in VS Code
+## Optional local H2 demo in VS Code
 
 Install Node.js 22.12+ (or a supported newer release) and a JDK 17 or newer. Set `JAVA_HOME` to your JDK folder if Java is not configured. The included Maven wrapper downloads Maven on its first run.
 
@@ -40,6 +41,7 @@ Started from `Backend`, H2 creates `Backend/data/macromate.mv.db`. Food and work
 Choose **Food Journal → Daily Food Journal**, select a date, and use **Log Food**. Enter calories and all three macros (use zero where appropriate). Entries appear in both journal views. Delete removes an entry from the database. A failed save keeps the form open and displays an error.
 
 This is a local single-user demo with no account authentication. The backend binds to `127.0.0.1`; use it on your own computer. The food/workout API reads all records in the configured local database. Existing H2 files are retained; older extra account-owner columns are no longer used. Cloud records are not imported into H2. Shared hosting requires adding authentication and an explicit deployment and CORS configuration.
+With `VITE_STORAGE_MODE=local`, this is a single-user food/workout demo without account authentication. The backend binds to `127.0.0.1`. Other module values reset on refresh. Existing H2 files remain on the local computer and are not automatically uploaded to Supabase. The Java endpoints below apply only to this local mode; Supabase mode uses its protected Data API directly.
 
 | Environment variable | Purpose |
 | --- | --- |

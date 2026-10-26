@@ -1,23 +1,29 @@
 import { useState } from 'react';
 
-export default function SignUpPage({ onNavigate }) {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', agreed: true });
+export default function SignUpPage({ onNavigate, onSignUp }) {
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', agreed: false });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const logoUrl = new URL('../assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     if (!formData.agreed) {
-      alert('Please agree to our Terms and Privacy Policy to continue.');
+      setError('Please review and agree to the terms before creating an account.');
       return;
     }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      if (onNavigate) onNavigate('login');
-    }, 600);
+    if (!formData.name.trim()) { setError('Enter your name.'); return; }
+    setLoading(true); setError(''); setMessage('');
+    try {
+      const result = await onSignUp({ name: formData.name.trim(), email: formData.email.trim(), password: formData.password });
+      setMessage(result || 'Account created.');
+      setFormData((current) => ({ ...current, password: '' }));
+    } catch (err) { setError(err.message || 'Could not create your account. Please try again.'); }
+    finally { setLoading(false); }
   };
 
   return (
@@ -40,7 +46,6 @@ export default function SignUpPage({ onNavigate }) {
           to { opacity: 1; transform: translateX(0); }
         }
 
-        /* 100% Full Screen Container */
         .mm-fullscreen-auth {
           width: 100vw;
           height: 100vh;
@@ -54,7 +59,6 @@ export default function SignUpPage({ onNavigate }) {
           box-sizing: border-box;
         }
 
-        /* Left Form Panel */
         .mm-auth-left-panel {
           padding: 40px 48px;
           display: flex;
@@ -211,7 +215,6 @@ export default function SignUpPage({ onNavigate }) {
           transform: translateY(-1px);
         }
 
-        /* Option 1: Right Glassmorphic Showcase Canvas */
         .mm-auth-right-showcase {
           background: linear-gradient(145deg, #0d3821, #1e7e48);
           position: relative;
@@ -336,6 +339,7 @@ export default function SignUpPage({ onNavigate }) {
         .mm-sticker-text span { font-size: 0.78rem; color: #557361; font-weight: 700; }
       `}</style>
 
+      {/* Left Form Panel */}
       <div className="mm-auth-left-panel">
         <button className="mm-btn-back" onClick={() => onNavigate && onNavigate('welcome')} title="Back to Welcome">
           ←
@@ -349,10 +353,13 @@ export default function SignUpPage({ onNavigate }) {
           </div>
 
           <form onSubmit={handleSubmit}>
+            {error && <p className="auth-error" role="alert">{error}</p>}
+            {message && <p role="status">{message}</p>}
             <div className="mm-field-group">
               <label className="mm-field-label">Name</label>
               <input
                 type="text"
+                aria-label="Name" maxLength="120" autoComplete="name" disabled={loading}
                 className="mm-form-input"
                 placeholder="Full Name"
                 required
@@ -365,6 +372,7 @@ export default function SignUpPage({ onNavigate }) {
               <label className="mm-field-label">Email</label>
               <input
                 type="email"
+                aria-label="Email" autoComplete="email" disabled={loading}
                 className="mm-form-input"
                 placeholder="you@gmail.com"
                 required
@@ -378,6 +386,7 @@ export default function SignUpPage({ onNavigate }) {
               <div className="mm-input-box">
                 <input
                   type={showPassword ? 'text' : 'password'}
+                  aria-label="Password" minLength="8" maxLength="128" autoComplete="new-password" disabled={loading}
                   className="mm-form-input"
                   placeholder="••••••••••"
                   required
