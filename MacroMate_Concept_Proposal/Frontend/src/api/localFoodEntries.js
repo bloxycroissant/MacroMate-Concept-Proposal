@@ -1,3 +1,7 @@
+import { cloudEnabled, supabase } from '../supabase/client';
+import { allRows, foodColumns, requireUserId, unwrap } from '../supabase/database';
+import * as local from './localFoodEntries';
+
 const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 
 async function request(path, options = {}) {
