@@ -2,3 +2,8 @@
 *-debug.log
 **/service-account*.json
 **/.env.local
+
+oracleJdk-27/
+**/oracleJdk-27/**
+node_modules/
+dist/
