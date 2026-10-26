@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function SignUpPage({ onNavigate }) {
+export default function SignUpPage({ onNavigate, onSignUp }) {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', agreed: true });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,16 @@ export default function SignUpPage({ onNavigate }) {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      if (onNavigate) onNavigate('login');
+      // Pass registered user data (Full Name, Email, Password) to App.jsx
+      if (onSignUp) {
+        onSignUp({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+        });
+      } else if (onNavigate) {
+        onNavigate('login');
+      }
     }, 600);
   };
 
@@ -40,7 +49,6 @@ export default function SignUpPage({ onNavigate }) {
           to { opacity: 1; transform: translateX(0); }
         }
 
-        /* 100% Full Screen Container */
         .mm-fullscreen-auth {
           width: 100vw;
           height: 100vh;
@@ -54,7 +62,6 @@ export default function SignUpPage({ onNavigate }) {
           box-sizing: border-box;
         }
 
-        /* Left Form Panel */
         .mm-auth-left-panel {
           padding: 40px 48px;
           display: flex;
@@ -211,7 +218,6 @@ export default function SignUpPage({ onNavigate }) {
           transform: translateY(-1px);
         }
 
-        /* Option 1: Right Glassmorphic Showcase Canvas */
         .mm-auth-right-showcase {
           background: linear-gradient(145deg, #0d3821, #1e7e48);
           position: relative;
@@ -336,6 +342,7 @@ export default function SignUpPage({ onNavigate }) {
         .mm-sticker-text span { font-size: 0.78rem; color: #557361; font-weight: 700; }
       `}</style>
 
+      {/* Left Form Panel */}
       <div className="mm-auth-left-panel">
         <button className="mm-btn-back" onClick={() => onNavigate && onNavigate('welcome')} title="Back to Welcome">
           ←

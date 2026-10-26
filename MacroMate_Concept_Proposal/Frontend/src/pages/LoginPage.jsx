@@ -1,9 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function LoginPage({ onNavigate }) {
-  const [formData, setFormData] = useState({ email: '', password: '', agreed: true });
+export default function LoginPage({ onNavigate, onLogin, savedAuth }) {
+  // Pre-fill email dynamically from savedAuth state if available
+  const [formData, setFormData] = useState({
+    email: savedAuth?.email || '',
+    password: savedAuth?.password || '',
+    agreed: true,
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Sync state if savedAuth updates dynamically
+  useEffect(() => {
+    if (savedAuth?.email) {
+      setFormData((prev) => ({
+        ...prev,
+        email: savedAuth.email,
+        password: savedAuth.password || prev.password,
+      }));
+    }
+  }, [savedAuth]);
 
   const logoUrl = new URL('../assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
 
@@ -12,7 +28,14 @@ export default function LoginPage({ onNavigate }) {
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      if (onNavigate) onNavigate('dashboard');
+      if (onLogin) {
+        onLogin({
+          email: formData.email.trim(),
+          password: formData.password,
+        });
+      } else if (onNavigate) {
+        onNavigate('dashboard');
+      }
     }, 600);
   };
 
@@ -32,7 +55,6 @@ export default function LoginPage({ onNavigate }) {
           to { opacity: 1; transform: translateX(0); }
         }
 
-        /* 100% Full Screen Container */
         .mm-fullscreen-auth {
           width: 100vw;
           height: 100vh;
@@ -46,7 +68,6 @@ export default function LoginPage({ onNavigate }) {
           box-sizing: border-box;
         }
 
-        /* Left Form Panel */
         .mm-auth-left-panel {
           padding: 40px 48px;
           display: flex;
@@ -214,7 +235,6 @@ export default function LoginPage({ onNavigate }) {
           transform: translateY(-1px);
         }
 
-        /* Option 2 Right Waves & Floating Icons Panel */
         .mm-auth-right-waves {
           background: linear-gradient(135deg, #104229, #1e7e48);
           position: relative;
@@ -264,6 +284,7 @@ export default function LoginPage({ onNavigate }) {
         }
       `}</style>
 
+      {/* Left Form Panel */}
       <div className="mm-auth-left-panel">
         <button className="mm-btn-back" onClick={() => onNavigate && onNavigate('welcome')} title="Back to Welcome">
           ←

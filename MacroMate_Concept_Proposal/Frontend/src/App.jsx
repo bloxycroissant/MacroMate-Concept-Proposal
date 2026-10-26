@@ -22,6 +22,13 @@ export default function App() {
   // Navigation Flow State: 'welcome' -> 'signup' -> 'login' -> 'dashboard'
   const [currentScreen, setCurrentScreen] = useState('welcome');
 
+  // Unified User Credentials State (Captured from Sign Up & Log In)
+  const [userAuth, setUserAuth] = useState({
+    fullName: 'Christianne Denise S. Sabando', // Default fallback name
+    email: 'denise@gmail.com',
+    password: ''
+  });
+
   // Dashboard Tabs State
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'food-journal' | 'health-journal' | 'my-goals' | 'profile' | 'accessibility'
   const [foodSubTab, setFoodSubTab] = useState('hub'); // 'hub' | 'daily' | 'overall'
@@ -33,7 +40,9 @@ export default function App() {
   const { mood, waterGlasses, energyLevel, sleepMinutes, completedGoals } = wellness.day;
   const setWaterGlasses = (value) => wellness.ready && wellness.updateDay({ waterGlasses: Math.max(0, Math.min(8, value)) });
   const setEnergyLevel = (value) => wellness.ready && wellness.updateDay({ energyLevel: value });
-  const displayName = wellness.profile.fullName || auth?.currentUser?.email || 'Wellness member';
+
+  // Display Name Priority: Sign-Up/Login Full Name -> Firebase User Email -> Default
+  const displayName = userAuth.fullName || wellness.profile.fullName || auth?.currentUser?.email || 'Wellness member';
 
   useEffect(() => {
     document.body.classList.toggle('wellness-reduce-motion', wellness.preferences.reduceMotion);
@@ -74,6 +83,30 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Called when user submits Sign Up form
+  const handleSignUpData = (newUserData) => {
+    setUserAuth({
+      fullName: newUserData.name,
+      email: newUserData.email,
+      password: newUserData.password
+    });
+    // Sync with Wellness Profile hook if ready
+    if (wellness.ready) {
+      wellness.saveProfile({ ...wellness.profile, fullName: newUserData.name });
+    }
+    handleNavigate('login');
+  };
+
+  // Called when user submits Login form
+  const handleLoginSubmit = (loginData) => {
+    setUserAuth((prev) => ({
+      ...prev,
+      email: loginData.email,
+      password: loginData.password
+    }));
+    handleNavigate('dashboard');
+  };
+
   const menuItems = [
     { id: 'overview', label: 'Overview', icon: '⊞' },
     { id: 'food-journal', label: 'Food Journal', icon: '🍴', hasSub: true },
@@ -83,22 +116,22 @@ export default function App() {
     { id: 'accessibility', label: 'Accessibility', icon: '♿' },
   ];
 
-  // 1. WELCOME PAGE SCREEN
+  // 1. WELCOME PAGE
   if (currentScreen === 'welcome') {
     return <WelcomePage onNavigate={handleNavigate} />;
   }
 
-  // 2. SIGN UP PAGE SCREEN
+  // 2. SIGN UP PAGE (Receives User Registration Callback)
   if (currentScreen === 'signup') {
-    return <SignUpPage onNavigate={handleNavigate} />;
+    return <SignUpPage onNavigate={handleNavigate} onSignUp={handleSignUpData} />;
   }
 
-  // 3. LOG IN PAGE SCREEN
+  // 3. LOG IN PAGE (Receives Credentials and Default Saved Email)
   if (currentScreen === 'login') {
-    return <LoginPage onNavigate={handleNavigate} />;
+    return <LoginPage onNavigate={handleNavigate} onLogin={handleLoginSubmit} savedAuth={userAuth} />;
   }
 
-  // 4. PERSONAL DASHBOARD APP SHELL
+  // 4. PERSONAL DASHBOARD
   return (
     <div className={`app-shell ${wellness.preferences.highContrast ? 'wellness-high-contrast' : ''} ${wellness.preferences.enhancedFocus ? 'wellness-enhanced-focus' : ''}`}>
       <div className="cloud-status" role="status" aria-live={wellness.preferences.announcements ? 'polite' : 'off'}>
@@ -135,6 +168,7 @@ export default function App() {
 
           <div className="user-profile">
             <div className="user-info">
+              {/* Dynamically Populated User Handle from Sign Up */}
               <div className="user-handle">{displayName}</div>
               <div className="user-role">Wellness member</div>
             </div>
@@ -149,7 +183,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* MAIN CONTAINER (SIDEBAR + CONTENT) */}
+      {/* MAIN CONTAINER */}
       <div className="app-body">
         {/* LEFT NAVIGATION SIDEBAR */}
         <aside className="sidebar">
@@ -301,7 +335,6 @@ export default function App() {
             />
           )}
 
-          {/* DAILY FOOD JOURNAL VIEW */}
           {activeTab === 'food-journal' && foodSubTab === 'daily' && (
             <DailyFoodJournalPage
               selectedDate={selectedDate}
@@ -339,7 +372,17 @@ export default function App() {
           )}
 
           {activeTab === 'my-goals' && <GoalsPage />}
-          {activeTab === 'profile' && (wellness.ready ? <ProfilePage profile={wellness.profile} email={auth?.currentUser?.email} onSave={wellness.saveProfile} busy={!wellness.ready} /> : <p>Loading profile…</p>)}
+          
+          {/* PROFILE PAGE (Synced with Registered Full Name and Email) */}
+          {activeTab === 'profile' && (
+            <ProfilePage 
+              profile={{ ...wellness.profile, fullName: userAuth.fullName || wellness.profile.fullName }} 
+              email={userAuth.email || auth?.currentUser?.email} 
+              onSave={wellness.saveProfile} 
+              busy={!wellness.ready} 
+            />
+          )}
+          
           {activeTab === 'accessibility' && <AccessibilityPage preferences={wellness.preferences} onChange={wellness.updatePreference} busy={!wellness.ready} />}
 
         </main>
