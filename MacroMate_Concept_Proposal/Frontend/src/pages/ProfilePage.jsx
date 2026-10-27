@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 
-export default function ProfilePage({ profile, onSave, busy }) {
+export default function ProfilePage({ profile, email, onSave, busy }) {
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const [profileImage, setProfileImage] = useState(profile?.pfpUrl || null);
@@ -18,7 +18,10 @@ export default function ProfilePage({ profile, onSave, busy }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 1048576) {
+      if (
+        !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+        file.size > 1048576
+      ) {
         setMessage('Choose a PNG, JPEG or WebP image up to 1 MB.');
         e.target.value = '';
         return;
@@ -26,7 +29,9 @@ export default function ProfilePage({ profile, onSave, busy }) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result);
-        setMessage('Profile photo updated! Remember to click "Save Profile".');
+        setMessage(
+          'Profile photo updated! Remember to click "Save Profile".'
+        );
       };
       reader.readAsDataURL(file);
     }
@@ -38,20 +43,6 @@ export default function ProfilePage({ profile, onSave, busy }) {
     setSaving(true);
 
     const form = new FormData(event.currentTarget);
-    const data = { fullName: form.get('fullName').trim(), age: Number(form.get('age')), heightCm: Number(form.get('heightCm')),
-      weightKg: Number(form.get('weightKg')), activityLevel: form.get('activityLevel'), wellnessGoal: form.get('wellnessGoal').trim() };
-    if (!data.fullName || !data.wellnessGoal) { setMessage('Enter your name and wellness goal.'); setSaving(false); return; }
-    try { await onSave(data); setMessage('Profile updated for this session. Changes reset on refresh.'); }
-    catch { setMessage('Profile was not saved. Please try again.'); }
-    finally { setSaving(false); }
-  }
-  return <div className="page-view"><h1 className="page-title">My Profile</h1>
-    <form className="card profile-form-card" onSubmit={submit}><h2>Personal information</h2>
-      <fieldset disabled={busy || saving} className="food-form-fields">
-        <label>Full name<input name="fullName" defaultValue={profile.fullName || ''} required maxLength="120" className="grey-input" /></label>
-        <div className="form-row-2">
-          <label>Age<input name="age" type="number" required min="1" max="120" step="1" defaultValue={profile.age || ''} className="grey-input" /></label>
-          <label>Height (cm)<input name="heightCm" type="number" required min="30" max="300" step="0.1" defaultValue={profile.heightCm || ''} className="grey-input" /></label>
     const data = {
       fullName: form.get('fullName').trim(),
       age: Number(form.get('age')),
@@ -70,7 +61,9 @@ export default function ProfilePage({ profile, onSave, busy }) {
 
     try {
       await onSave(data);
-      setMessage('Profile and picture saved successfully across the site!');
+      setMessage(
+        'Profile and picture saved successfully across the site!'
+      );
     } catch {
       setMessage('Profile was not saved. Please try again.');
     } finally {
@@ -79,7 +72,8 @@ export default function ProfilePage({ profile, onSave, busy }) {
   }
 
   const currentName = profile?.fullName || 'Wellness member';
-  const currentGoal = profile?.wellnessGoal || 'Maintain a balanced lifestyle';
+  const currentGoal =
+    profile?.wellnessGoal || 'Maintain a balanced lifestyle';
 
   return (
     <div className="mm-profile-page-view">
@@ -87,7 +81,13 @@ export default function ProfilePage({ profile, onSave, busy }) {
         .mm-profile-page-view {
           padding: 24px;
           color: #122b1c;
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          font-family:
+            'Inter',
+            -apple-system,
+            BlinkMacSystemFont,
+            'Segoe UI',
+            Roboto,
+            sans-serif;
         }
 
         .mm-profile-header-group {
@@ -179,6 +179,7 @@ export default function ProfilePage({ profile, onSave, busy }) {
           box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
           transition: transform 0.2s ease;
         }
+
         .mm-btn-camera-upload:hover {
           transform: scale(1.1);
           background: #0d3b1f;
@@ -357,7 +358,9 @@ export default function ProfilePage({ profile, onSave, busy }) {
       `}</style>
 
       <div className="mm-profile-header-group">
-        <span className="mm-profile-subtext">Manage your personal wellness details</span>
+        <span className="mm-profile-subtext">
+          Manage your personal wellness details
+        </span>
         <h1 className="mm-profile-title">My Profile</h1>
       </div>
 
@@ -365,16 +368,20 @@ export default function ProfilePage({ profile, onSave, busy }) {
         <div className="mm-left-profile-stack">
           <div className="mm-avatar-card">
             <div className="mm-avatar-top-banner" />
-            
+
             <div className="mm-avatar-circle-wrapper">
               {profileImage ? (
-                <img src={profileImage} alt={currentName} className="mm-avatar-circle" />
+                <img
+                  src={profileImage}
+                  alt={currentName}
+                  className="mm-avatar-circle"
+                />
               ) : (
                 <div className="mm-avatar-circle">
                   {getInitials(currentName)}
                 </div>
               )}
-              
+
               <button
                 type="button"
                 className="mm-btn-camera-upload"
@@ -383,7 +390,7 @@ export default function ProfilePage({ profile, onSave, busy }) {
               >
                 📷
               </button>
-              
+
               <input
                 type="file"
                 ref={fileInputRef}
@@ -395,8 +402,12 @@ export default function ProfilePage({ profile, onSave, busy }) {
 
             <div className="mm-avatar-details-body">
               <h2 className="mm-avatar-user-name">{currentName}</h2>
-              <div className="mm-avatar-user-role">Wellness Member</div>
-              <span className="mm-status-pill">Profile Complete</span>
+              <div className="mm-avatar-user-role">
+                Wellness Member
+              </div>
+              <span className="mm-status-pill">
+                Profile Complete
+              </span>
             </div>
           </div>
 
@@ -408,11 +419,18 @@ export default function ProfilePage({ profile, onSave, busy }) {
         </div>
 
         <div className="mm-profile-right-card">
-          <h3 className="mm-section-head-title">Personal Information</h3>
-          <span className="mm-section-head-sub">Used to personalize your nutrition and wellness targets.</span>
+          <h3 className="mm-section-head-title">
+            Personal Information
+          </h3>
+          <span className="mm-section-head-sub">
+            Used to personalize your nutrition and wellness targets.
+          </span>
 
           <form onSubmit={submit}>
-            <fieldset disabled={busy || saving} style={{ border: 'none', padding: 0, margin: 0 }}>
+            <fieldset
+              disabled={busy || saving}
+              style={{ border: 'none', padding: 0, margin: 0 }}
+            >
               <div className="mm-form-field-item">
                 <label>Full Name</label>
                 <input
@@ -483,7 +501,9 @@ export default function ProfilePage({ profile, onSave, busy }) {
                   <select
                     name="activityLevel"
                     aria-label="Activity level"
-                    defaultValue={profile?.activityLevel || 'Moderately Active'}
+                    defaultValue={
+                      profile?.activityLevel || 'Moderately Active'
+                    }
                     className="mm-profile-input-styled"
                   >
                     <option>Sedentary</option>
@@ -498,20 +518,33 @@ export default function ProfilePage({ profile, onSave, busy }) {
                 <label>Primary Wellness Goal</label>
                 <input
                   name="wellnessGoal"
-                  defaultValue={profile?.wellnessGoal || 'Maintain a balanced lifestyle'}
+                  defaultValue={
+                    profile?.wellnessGoal ||
+                    'Maintain a balanced lifestyle'
+                  }
                   required
                   maxLength="300"
                   className="mm-profile-input-styled"
                 />
               </div>
 
-              <button type="submit" className="mm-btn-save-profile">
+              <button
+                type="submit"
+                className="mm-btn-save-profile"
+              >
                 {saving ? 'Saving...' : 'Save Profile'}
               </button>
             </fieldset>
 
             {message && (
-              <p style={{ marginTop: '14px', fontSize: '0.85rem', color: '#145a32', fontWeight: 800 }}>
+              <p
+                style={{
+                  marginTop: '14px',
+                  fontSize: '0.85rem',
+                  color: '#145a32',
+                  fontWeight: 800,
+                }}
+              >
                 {message}
               </p>
             )}
