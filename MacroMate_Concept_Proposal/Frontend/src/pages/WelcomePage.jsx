@@ -1,4 +1,3 @@
-export default function WelcomePage({ onNavigate }) {
 export default function WelcomePage({ onNavigate, allowDemo = false }) {
   // Vite-compatible asset URL resolvers
   const getAsset = (fileName) => 
@@ -459,7 +458,6 @@ export default function WelcomePage({ onNavigate, allowDemo = false }) {
           <a href="#team" className="mm-nav-link">Team 👥</a>
         </nav>
         <div className="mm-header-actions">
-          <button className="mm-btn-header-login" onClick={() => onNavigate && onNavigate('dashboard')}>Open local demo</button>
           {allowDemo && <button className="mm-btn-header-login" onClick={() => onNavigate && onNavigate('dashboard')}>Open local demo</button>}
           <button className="mm-btn-header-signup" onClick={() => onNavigate && onNavigate('signup')}>Sign Up</button>
           <button className="mm-btn-header-login" onClick={() => onNavigate && onNavigate('login')}>Log In</button>

@@ -219,8 +219,10 @@ body.wellness-reduce-motion, body.wellness-reduce-motion *, body.wellness-reduce
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-body {
-  background-color: #d1ead5;
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f6fbf7;
   color: #1a251e;
   overflow-x: hidden;
   animation: anim-bg-glow 10s ease-in-out infinite alternate;
@@ -230,6 +232,7 @@ body {
 .app-shell {
   display: flex;
   flex-direction: column;
+  width: 100%;
   min-height: 100vh;
   animation: anim-fade-in 0.5s ease-out;
 }
@@ -240,7 +243,8 @@ body {
   align-items: center;
   justify-content: space-between;
   background-color: #f6fbf7;
-  padding: 10px 24px;
+  padding: 12px 48px;
+  width: 100%;
   border-bottom: 1px solid #dce8dd;
   animation: anim-slide-down 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
@@ -433,18 +437,20 @@ body {
 .app-body {
   display: flex;
   flex: 1;
+  width: 100%;
 }
 
 /* LEFT SIDEBAR */
 .sidebar {
-  width: 220px;
+  width: 240px;
   background-color: #edf5ee;
-  padding: 16px 12px;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   border-right: 1px solid #dce8dd;
   animation: anim-slide-right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
 }
 
 .menu-header {
@@ -638,15 +644,38 @@ body {
 /* MAIN CONTENT PAGE VIEWS */
 .main-content {
   flex: 1;
-  background-color: #d1ead5;
-  padding: 24px 32px;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  background-color: transparent;
+  padding: 32px 48px;
   animation: anim-fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.landing-page,
+.landing-wrapper,
+.landing-container {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: #f6fbf7;
+}
+
+.hero-section,
+.features-section,
+.core-modules-section {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 40px 48px;
 }
 
 .page-view {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
 }
 
 .sub-heading {
@@ -676,6 +705,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 }
 
 .date-badge {
@@ -699,6 +729,7 @@ body {
   color: #1a251e;
   border-radius: 16px;
   padding: 20px;
+  width: 100%;
   box-shadow: 0 2px 8px rgba(0,0,0,0.02);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -713,6 +744,7 @@ body {
   display: grid;
   grid-template-columns: 1.6fr 1.2fr;
   gap: 20px;
+  width: 100%;
 }
 
 .checkin-card {
@@ -926,6 +958,7 @@ body {
   display: grid;
   grid-template-columns: 1.4fr 1.4fr;
   gap: 20px;
+  width: 100%;
 }
 
 .mood-history-card, .avg-mood-card {
@@ -1031,6 +1064,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
+  width: 100%;
 }
 
 .overview-stat-card {
@@ -1080,6 +1114,7 @@ body {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 20px;
+  width: 100%;
 }
 
 .chart-header {
@@ -1249,6 +1284,7 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 24px;
   margin-top: 20px;
+  width: 100%;
 }
 
 .hub-card {
@@ -1308,6 +1344,7 @@ body {
   align-items: center;
   justify-content: space-between;
   animation: anim-slide-down 0.4s ease-out;
+  width: 100%;
 }
 
 .arrow-btn {
@@ -1363,6 +1400,7 @@ body {
   display: grid;
   grid-template-columns: 2.2fr 1fr;
   gap: 20px;
+  width: 100%;
 }
 
 .meal-tables-column {
@@ -1534,6 +1572,7 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
+  width: 100%;
 }
 
 .macro-stat-box {
@@ -1550,6 +1589,7 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
+  width: 100%;
 }
 
 .column-card {
@@ -1596,6 +1636,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+  width: 100%;
 }
 
 .section-green-title {
@@ -1693,6 +1734,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 20px;
+  width: 100%;
 }
 
 .profile-badge-card {
@@ -1814,6 +1856,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 3fr;
   gap: 20px;
+  width: 100%;
 }
 
 .settings-sidebar-card {
@@ -1951,7 +1994,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 @keyframes anim-fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes anim-fade-in-down { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes anim-fade-in-left { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes anim-fade-in-right { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes anim-fade-in-right { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes anim-fade-out-up { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-20px); } }
 @keyframes anim-fade-out-down { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
 @keyframes anim-fade-out-left { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(-20px); } }
@@ -2093,6 +2136,14 @@ button:disabled { opacity: 0.6; cursor: wait; }
 .workout-row-details { justify-content: flex-end; flex-wrap: wrap; }
 .workout-chart-header { margin-bottom: 12px; color: #1a251e; }
 .bar-val { text-align: center; }
+
+@media (max-width: 992px) {
+  .topbar { padding: 12px 20px; }
+  .main-content { padding: 20px; }
+  .health-grid-top, .health-grid-bottom, .overview-middle-grid, .daily-journal-grid, .goals-grid, .profile-grid, .settings-grid, .hub-categories-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 @media (max-width: 700px) {
   .goals-page-header { align-items: flex-start; flex-direction: column; }
