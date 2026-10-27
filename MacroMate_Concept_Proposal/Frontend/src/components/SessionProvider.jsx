@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AuthContext } from '../supabase/authContext';
+import { useAuth } from '../supabase/authContext';
 import { cloudEnabled, configurationError, supabase } from '../supabase/client';
 
 export default function SessionProvider({ children }) {
