@@ -1,5 +1,4 @@
 export default function WelcomePage({ onNavigate, allowDemo = false }) {
-  // Vite-compatible asset URL resolvers
   const getAsset = (fileName) => 
     new URL(`../assets/MacroMate Assets/MacroMate Icon and Assets/${fileName}`, import.meta.url).href;
   
@@ -19,12 +18,17 @@ export default function WelcomePage({ onNavigate, allowDemo = false }) {
         }
 
         .mm-welcome-page {
+          width: 100%;
           min-height: 100vh;
+          margin: 0;
+          padding: 0;
           background-color: #f2faf4;
           color: #122b1c;
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           display: flex;
           flex-direction: column;
+          align-items: center;
+          box-sizing: border-box;
           animation: fadeInWelcome 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -34,6 +38,8 @@ export default function WelcomePage({ onNavigate, allowDemo = false }) {
           justify-content: space-between;
           align-items: center;
           padding: 18px 64px;
+          width: 100%;
+          box-sizing: border-box;
           background: #ffffff;
           position: sticky;
           top: 0;
@@ -119,9 +125,11 @@ export default function WelcomePage({ onNavigate, allowDemo = false }) {
 
         /* Hero Container */
         .mm-hero-section {
-          max-width: 1140px;
+          width: 100%;
+          max-width: 1200px;
           margin: 0 auto;
           padding: 48px 24px 32px 24px;
+          box-sizing: border-box;
           display: grid;
           grid-template-columns: 1.15fr 0.85fr;
           gap: 40px;
@@ -274,9 +282,11 @@ export default function WelcomePage({ onNavigate, allowDemo = false }) {
 
         /* Core Modules Section */
         .mm-section {
-          max-width: 1140px;
+          width: 100%;
+          max-width: 1200px;
           margin: 32px auto;
           padding: 0 24px;
+          box-sizing: border-box;
         }
 
         .mm-section-label {
@@ -395,11 +405,14 @@ export default function WelcomePage({ onNavigate, allowDemo = false }) {
         /* Callout Bottom Banner */
         .mm-bottom-banner {
           background: #145a32;
-          margin: 48px 24px 24px 24px;
+          width: calc(100% - 48px);
+          max-width: 1152px;
+          margin: 48px auto 24px auto;
           border-radius: 24px;
           padding: 40px 24px;
           text-align: center;
           color: #ffffff;
+          box-sizing: border-box;
         }
 
         .mm-banner-tag {
@@ -443,6 +456,17 @@ export default function WelcomePage({ onNavigate, allowDemo = false }) {
           font-size: 0.78rem;
           color: #617d70;
           background: #e5f2e8;
+          width: 100%;
+          box-sizing: border-box;
+        }
+
+        @media (max-width: 992px) {
+          .mm-welcome-header { padding: 18px 24px; }
+          .mm-hero-section, .mm-section { padding-left: 24px; padding-right: 24px; }
+          .mm-bottom-banner { width: calc(100% - 48px); }
+          .mm-hero-section { grid-template-columns: 1fr; }
+          .mm-grid-modules { grid-template-columns: 1fr; }
+          .mm-grid-team { grid-template-columns: 1fr; }
         }
       `}</style>
 

@@ -51,8 +51,8 @@ export default function LoginPage({ onNavigate, onLogin }) {
         }
 
         .mm-fullscreen-auth {
-          width: 100vw;
-          height: 100vh;
+          width: 100%;
+          min-height: 100vh;
           margin: 0;
           padding: 0;
           overflow: hidden;
@@ -176,22 +176,6 @@ export default function LoginPage({ onNavigate, onLogin }) {
           margin-top: 6px;
         }
         .mm-forgot-link:hover { text-decoration: underline; }
-
-        .mm-terms-line {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.78rem;
-          color: #0a1f13;
-          font-weight: 800;
-          margin: 18px 0;
-        }
-
-        .mm-terms-line a {
-          color: #e53935;
-          text-decoration: none;
-          font-weight: 900;
-        }
 
         .mm-btn-green-submit {
           width: 100%;

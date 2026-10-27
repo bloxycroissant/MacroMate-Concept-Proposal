@@ -27,6 +27,13 @@ export default function App() {
 
   const [currentScreen, setCurrentScreen] = useState('welcome');
   const [accountError, setAccountError] = useState('');
+
+  const [activeTab, setActiveTab] = useState('overview');
+  const [foodSubTab, setFoodSubTab] = useState('hub');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [foodJournalMenuOpen, setFoodJournalMenuOpen] = useState(false);
+
+  const [selectedDate, setSelectedDate] = useState(localDate);
   const wellness = useWellness(selectedDate) || {};
   const dayData = wellness.day || {};
   const preferences = wellness.preferences || {};
