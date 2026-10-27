@@ -44,6 +44,13 @@ export default function App() {
   const setWaterGlasses = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ waterGlasses: Math.max(0, Math.min(8, value)) });
   const setEnergyLevel = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ energyLevel: value });
 
+  // Auto-sync screen on cloud auth changes
+  useEffect(() => {
+    if (cloudEnabled && user && ['welcome', 'login', 'signup'].includes(currentScreen)) {
+      setCurrentScreen('dashboard');
+    }
+  }, [user, cloudEnabled, currentScreen]);
+
   // 🌟 Universal Full Name and Profile Picture Sync Across Website
   const displayName = profileData.fullName || user?.user_metadata?.full_name || 'Wellness member';
   const displayEmail = user?.email || 'Local demo';
@@ -96,17 +103,31 @@ export default function App() {
   };
 
   const handleSignUpData = async (newUserData) => {
-    if (!cloudEnabled) throw new Error('Use Open local demo. Accounts require Supabase mode.');
-    const { data, error } = await supabase.auth.signUp({ email: newUserData.email, password: newUserData.password,
-      options: { data: { full_name: newUserData.name }, emailRedirectTo: window.location.origin } });
+    if (!cloudEnabled) {
+      setCurrentScreen('dashboard');
+      return '';
+    }
+    const { data, error } = await supabase.auth.signUp({ 
+      email: newUserData.email, 
+      password: newUserData.password,
+      options: { data: { full_name: newUserData.name }, emailRedirectTo: window.location.origin } 
+    });
     if (error) throw error;
-    return data.session ? '' : 'Check your email to confirm your account, then log in.';
+    if (data.session) {
+      setCurrentScreen('dashboard');
+      return '';
+    }
+    return 'Check your email to confirm your account, then log in.';
   };
 
   const handleLoginSubmit = async (loginData) => {
-    if (!cloudEnabled) throw new Error('Use Open local demo. Accounts require Supabase mode.');
+    if (!cloudEnabled) {
+      setCurrentScreen('dashboard');
+      return;
+    }
     const { error } = await supabase.auth.signInWithPassword(loginData);
     if (error) throw error;
+    setCurrentScreen('dashboard');
   };
 
   // 🌟 Handles real-time updates for Name AND Profile Picture
@@ -118,7 +139,11 @@ export default function App() {
     if (!cloudEnabled) { handleNavigate('welcome'); return; }
     setAccountError('');
     const { error } = await supabase.auth.signOut();
-    if (error) setAccountError('Could not log out. Check your connection and try again.');
+    if (error) {
+      setAccountError('Could not log out. Check your connection and try again.');
+    } else {
+      handleNavigate('welcome');
+    }
   }
 
   const menuItems = [
