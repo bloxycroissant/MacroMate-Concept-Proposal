@@ -20,7 +20,8 @@ import { useAuth } from './supabase/authContext';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 
 export default function App() {
-  const { user, recovery, finishRecovery } = useAuth();
+  const auth = useAuth() || {};
+  const { user, recovery, finishRecovery } = auth;
   const [currentScreen, setCurrentScreen] = useState(user ? 'dashboard' : 'welcome');
   const [accountError, setAccountError] = useState('');
 
@@ -30,24 +31,28 @@ export default function App() {
   const [foodJournalMenuOpen, setFoodJournalMenuOpen] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(localDate);
-  const wellness = useWellness(selectedDate);
-  const { mood, waterGlasses, energyLevel, sleepMinutes, completedGoals } = wellness.day;
+  const wellness = useWellness(selectedDate) || {};
+  const dayData = wellness.day || {};
+  const preferences = wellness.preferences || {};
+  const profileData = wellness.profile || {};
 
-  const setWaterGlasses = (value) => wellness.ready && !wellness.pending && wellness.updateDay({ waterGlasses: Math.max(0, Math.min(8, value)) });
-  const setEnergyLevel = (value) => wellness.ready && !wellness.pending && wellness.updateDay({ energyLevel: value });
+  const { mood, waterGlasses, energyLevel, sleepMinutes, completedGoals = [] } = dayData;
+
+  const setWaterGlasses = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ waterGlasses: Math.max(0, Math.min(8, value)) });
+  const setEnergyLevel = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ energyLevel: value });
 
   // 🌟 Universal Full Name and Profile Picture Sync Across Website
-  const displayName = wellness.profile.fullName || user?.user_metadata?.full_name || 'Wellness member';
+  const displayName = profileData.fullName || user?.user_metadata?.full_name || 'Wellness member';
   const displayEmail = user?.email || 'Local demo';
-  const displayPfp = wellness.profile.pfpUrl || new URL('./assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
+  const displayPfp = profileData.pfpUrl || new URL('./assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
 
   useEffect(() => {
-    document.body.classList.toggle('wellness-reduce-motion', wellness.preferences.reduceMotion);
+    document.body.classList.toggle('wellness-reduce-motion', !!preferences.reduceMotion);
     return () => document.body.classList.remove('wellness-reduce-motion');
-  }, [wellness.preferences.reduceMotion]);
+  }, [preferences.reduceMotion]);
 
-  const journal = useFoodEntries();
-  const entries = journal.entries.filter((entry) => entry.entryDate === selectedDate);
+  const journal = useFoodEntries() || { entries: [] };
+  const entries = (journal.entries || []).filter((entry) => entry.entryDate === selectedDate);
   const totals = entries.reduce((sum, entry) => ({
     calories: sum.calories + entry.calories, protein: sum.protein + entry.protein,
     carbs: sum.carbs + entry.carbs, fat: sum.fat + entry.fat,
@@ -67,15 +72,17 @@ export default function App() {
 
   const week = Array.from({ length: 7 }, (_, index) => {
     const date = shiftDate(selectedDate, index - 6);
-    return { date, calories: journal.entries.filter((entry) => entry.entryDate === date)
+    return { date, calories: (journal.entries || []).filter((entry) => entry.entryDate === date)
       .reduce((sum, entry) => sum + entry.calories, 0) };
   });
   const chartMax = Math.max(goals.calories, ...week.map((day) => day.calories));
   const chartPoints = week.map((day, index) => `${20 + index * 70},${100 - day.calories / chartMax * 90}`).join(' ');
 
   async function saveFood(entry) {
-    const saved = await journal.save(entry);
-    setSelectedDate(saved.entryDate);
+    if (journal.save) {
+      const saved = await journal.save(entry);
+      if (saved?.entryDate) setSelectedDate(saved.entryDate);
+    }
   }
 
   const handleNavigate = (targetScreen) => {
@@ -100,8 +107,8 @@ export default function App() {
   };
 
   // 🌟 Handles real-time updates for Name AND Profile Picture
-  const handleSaveProfile = async (profileData) => {
-    await wellness.saveProfile(profileData);
+  const handleSaveProfile = async (profileDataInput) => {
+    if (wellness.saveProfile) await wellness.saveProfile(profileDataInput);
   };
 
   async function logOut() {
@@ -126,8 +133,8 @@ export default function App() {
   if (currentScreen === 'login') return <LoginPage onNavigate={handleNavigate} onLogin={handleLoginSubmit} />;
 
   return (
-    <div className={`app-shell ${wellness.preferences.highContrast ? 'wellness-high-contrast' : ''} ${wellness.preferences.enhancedFocus ? 'wellness-enhanced-focus' : ''}`}>
-      <div className="session-status" role="status" aria-live={wellness.preferences.announcements ? 'polite' : 'off'}>
+    <div className={`app-shell ${preferences.highContrast ? 'wellness-high-contrast' : ''} ${preferences.enhancedFocus ? 'wellness-enhanced-focus' : ''}`}>
+      <div className="session-status" role="status" aria-live={preferences.announcements ? 'polite' : 'off'}>
         Local demo · Food and workouts save to H2. Health, goals, profile and accessibility changes reset on refresh.
         {cloudEnabled ? (wellness.error ? 'Saved records need attention' : wellness.pending ? 'Saving your changes…' : wellness.ready ? 'Supabase connected · No pending changes' : 'Loading your records…') : 'Local demo · Food and workouts use H2. Other changes reset on refresh.'}
       </div>
@@ -289,7 +296,7 @@ export default function App() {
           
           {activeTab === 'health-journal' && (
             <HealthJournalPage
-              date={selectedDate} onDateChange={setSelectedDate} day={wellness.day} days={wellness.days}
+              date={selectedDate} onDateChange={setSelectedDate} day={dayData} days={wellness.days || {}}
               onChange={wellness.updateDay} disabled={!wellness.ready || wellness.pending > 0}
             />
           )}
@@ -312,7 +319,7 @@ export default function App() {
               displayName={displayName} 
               sleepMinutes={sleepMinutes} 
               completedGoals={completedGoals}
-              onGoalChange={(goal) => wellness.updateDay({ completedGoals: completedGoals.includes(goal) ? completedGoals.filter((item) => item !== goal) : [...completedGoals, goal] })}
+              onGoalChange={(goal) => wellness.updateDay?.({ completedGoals: completedGoals.includes(goal) ? completedGoals.filter((item) => item !== goal) : [...completedGoals, goal] })}
               wellnessDisabled={!wellness.ready || wellness.pending > 0}
               onViewJournal={() => { setActiveTab('food-journal'); setFoodSubTab('daily'); }}
             />
@@ -364,10 +371,9 @@ export default function App() {
           {activeTab === 'my-goals' && <GoalsPage />}
           
           {/* 🌟 Live Synced Name & Profile Picture in Profile Page */}
-          {activeTab === 'profile' && !wellness.ready && <p>Loading your profile…</p>}
-          {activeTab === 'profile' && wellness.ready && (
+          {activeTab === 'profile' && (
             <ProfilePage 
-              profile={{ ...wellness.profile, fullName: displayName }}
+              profile={{ ...profileData, fullName: displayName }}
               email={displayEmail} 
               onSave={handleSaveProfile} 
               busy={!wellness.ready || wellness.pending > 0}
@@ -376,7 +382,7 @@ export default function App() {
           
           {activeTab === 'accessibility' && (
             <AccessibilityPage 
-              preferences={wellness.preferences} 
+              preferences={preferences} 
               onChange={wellness.updatePreference} 
               busy={!wellness.ready || wellness.pending > 0} 
             />
