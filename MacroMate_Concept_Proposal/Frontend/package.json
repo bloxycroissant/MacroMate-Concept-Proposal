@@ -12,7 +12,9 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-toastify": "^11.2.0",
+    "react-web-notification": "^0.8.0"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.12",
