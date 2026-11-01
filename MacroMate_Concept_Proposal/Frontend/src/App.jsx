@@ -51,7 +51,6 @@ export default function App() {
   const setEnergyLevel = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ energyLevel: value });
 
   // 🌟 Universal Full Name and Profile Picture Sync Across Website
-  const displayName = profileData.fullName || user?.user_metadata?.full_name || 'Wellness member';
   useEffect(() => {
     if (cloudEnabled && user && ['welcome', 'login', 'signup'].includes(currentScreen)) {
       setCurrentScreen('dashboard');

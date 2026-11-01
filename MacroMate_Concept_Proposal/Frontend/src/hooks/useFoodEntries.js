@@ -26,13 +26,6 @@ export default function useFoodEntries() {
         if (err.name !== 'AbortError') {
           setErrorState({ uid, message: `Could not load your journal. ${err.message}` });
           setLoadedUid(uid);
-      .then((data) => {
-        setEntries(data || []);
-        setError('');
-      })
-      .catch((err) => {
-        if (err.name !== 'AbortError') {
-          setEntries([]);
         }
       })
       .finally(() => {
@@ -51,12 +44,10 @@ export default function useFoodEntries() {
         setEntries(loadedEntries);
         setLoadedUid(requestedUid);
       }
-      const data = await listFoodEntries();
-      setEntries(data || []);
     } catch (err) {
       if (requestedUid === uidRef.current) setErrorState({ uid: requestedUid, message: `Could not load your journal. ${err.message}` });
     } finally {
-      setLoading(false);
+      if (requestedUid === uidRef.current) setLoading(false);
     }
   }
 
@@ -89,6 +80,4 @@ export default function useFoodEntries() {
     error: errorState.uid === uid ? errorState.message : '',
     busy, reload, save, remove,
   };
-}
-  return { entries, loading, error, busy, reload, save, remove };
 }

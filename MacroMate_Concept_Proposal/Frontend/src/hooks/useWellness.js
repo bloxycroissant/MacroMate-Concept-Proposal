@@ -11,7 +11,6 @@ export default function useWellness(date) {
   const [days, setDays] = useState({});
   const [profile, setProfile] = useState({ fullName: user?.user_metadata?.full_name || '' });
   const [preferences, setPreferences] = useState(defaultPreferences);
-  const [ready, setReady] = useState(!cloudEnabled);
   const [loadedUid, setLoadedUid] = useState(null);
   const [error, setError] = useState('');
   const [pending, setPending] = useState(0);
