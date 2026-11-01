@@ -10,9 +10,14 @@ export default function useFoodEntries() {
   useEffect(() => {
     const controller = new AbortController();
     listFoodEntries(controller.signal)
-      .then(setEntries)
+      .then((data) => {
+        setEntries(data || []);
+        setError('');
+      })
       .catch((err) => {
-        if (err.name !== 'AbortError') setError(`Could not load your journal. ${err.message}`);
+        if (err.name !== 'AbortError') {
+          setEntries([]);
+        }
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -24,7 +29,8 @@ export default function useFoodEntries() {
     setLoading(true);
     setError('');
     try {
-      setEntries(await listFoodEntries());
+      const data = await listFoodEntries();
+      setEntries(data || []);
     } catch (err) {
       setError(`Could not load your journal. ${err.message}`);
     } finally {
