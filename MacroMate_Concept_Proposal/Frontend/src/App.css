@@ -920,6 +920,28 @@ html, body {
   animation: anim-slide-left 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.snapshot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.snapshot-header h2,
+.snapshot-header p {
+  margin: 0 0 8px;
+}
+
+.snapshot-heart {
+  flex: 0 0 auto;
+  color: #ff6b81;
+  font-size: clamp(56px, 7vw, 82px);
+  line-height: 0.9;
+  text-shadow: 0 0 18px rgba(255, 107, 129, 0.42);
+  transform-origin: center;
+  animation: anim-heartbeat 1.35s infinite ease-in-out;
+}
+
 .snapshot-tag {
   font-size: 11px;
   letter-spacing: 1px;
@@ -2190,6 +2212,23 @@ button:disabled { opacity: 0.6; cursor: wait; }
 .mood-calendar-face { position: absolute; inset: auto -3px -4px auto; font-size: 12px; line-height: 1; }
 .average-mood-day { background: #d3d5d4; color: #172a1e; font-size: clamp(15px, 2vw, 24px); }
 .average-mood-day.has-mood { background: #a8dcae; }
+.mood-year-picker { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0 16px; font-weight: 800; }
+.mood-year-picker select { width: auto; min-width: 110px; padding: 8px 12px; border: 1px solid #9bb9a2; border-radius: 10px; background: #fff; color: #1a251e; font: inherit; }
+.mood-month-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.mood-month-summary { display: grid; justify-items: center; gap: 4px; padding: 10px 6px; border: 1px solid transparent; border-radius: 14px; background: rgba(255,255,255,0.42); color: #244b34; font: inherit; font-weight: 800; cursor: pointer; transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease; }
+.mood-month-summary:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
+.mood-month-summary.selected { border-color: #073f27; box-shadow: inset 0 0 0 1px #073f27; }
+.mood-month-summary.has-mood { background: #a8dcae; }
+.mood-month-summary-face { font-size: 24px; }
+.average-mood-selection { min-height: 1.4em; margin: 8px 0; font-weight: 800; text-align: center; }
+.average-mood-period-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: clamp(4px, 1vw, 10px); align-items: center; }
+.average-mood-period-grid .average-mood-day { display: grid; justify-items: center; align-content: center; gap: 2px; min-width: 0; padding: 5px 2px; font-size: clamp(16px, 2vw, 24px); }
+.average-mood-label { color: #526357; font-size: 10px; font-weight: 800; }
+.average-mood-period-grid .average-mood-day:focus-visible,
+.mood-month-summary:focus-visible,
+.mood-year-picker select:focus-visible { outline: 3px solid #005fcc; outline-offset: 3px; }
+.average-mood-period-grid:not(.year-average-grid) .average-mood-day:only-child { grid-column: 4; }
+.year-average-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .mood-calendar-blank { aspect-ratio: 1; }
 .mood-calendar-empty { margin-top: 10px; color: #526357; font-size: 13px; text-align: center; }
 .average-mood-calendar { margin-top: 8px; background: transparent; }
@@ -2222,6 +2261,7 @@ button:disabled { opacity: 0.6; cursor: wait; }
   .wellness-weekdays { grid-template-columns: repeat(7, minmax(72px, 1fr)); }
   .mood-calendar { gap: 5px; padding: 8px; }
   .mood-calendar-weekday { font-size: 10px; }
+  .mood-month-grid, .year-average-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .overall-macros-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .overall-columns-grid { grid-template-columns: 1fr; }
   .meal-sidebar-tab { min-width: 62px; }
