@@ -39,6 +39,10 @@ export default function App() {
   const preferences = wellness.preferences || {};
   const profileData = wellness.profile || {};
 
+  // Local overlay state to force instant topbar profile updates
+  const [customProfile, setCustomProfile] = useState(null);
+  const activeProfile = customProfile || profileData;
+
   const { mood, waterGlasses, energyLevel, sleepMinutes, completedGoals = [] } = dayData;
 
   const setWaterGlasses = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ waterGlasses: Math.max(0, Math.min(8, value)) });
@@ -50,9 +54,9 @@ export default function App() {
     }
   }, [user, cloudEnabled, currentScreen]);
 
-  const displayName = profileData.fullName || user?.user_metadata?.full_name || 'Christianne Denise Sabando';
+  const displayName = activeProfile.fullName || user?.user_metadata?.full_name || 'Christianne Denise Sabando';
   const displayEmail = user?.email || 'Local demo';
-  const displayPfp = profileData.pfpUrl || new URL('./assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
+  const displayPfp = activeProfile.pfpUrl || new URL('./assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
 
   useEffect(() => {
     document.body.classList.toggle('wellness-reduce-motion', !!preferences.reduceMotion);
@@ -128,7 +132,9 @@ export default function App() {
     setCurrentScreen('dashboard');
   };
 
+  // Immediate Topbar Profile Synchronizer
   const handleSaveProfile = async (profileDataInput) => {
+    setCustomProfile((prev) => ({ ...prev, ...profileDataInput }));
     if (wellness.saveProfile) {
       await wellness.saveProfile(profileDataInput);
     }
@@ -141,10 +147,11 @@ export default function App() {
         await supabase.auth.signOut();
       }
     } catch (e) {
-      // Catch token errors during sign out
+      // Ignore token revocation error on sign out
     } finally {
       localStorage.clear();
       sessionStorage.clear();
+      setCustomProfile(null);
       handleNavigate('welcome');
     }
   }
@@ -165,6 +172,60 @@ export default function App() {
 
   return (
     <div className={`app-shell ${preferences.highContrast ? 'wellness-high-contrast' : ''} ${preferences.enhancedFocus ? 'wellness-enhanced-focus' : ''}`}>
+      <style>{`
+        /* Bidirectional Submenu Animations */
+        @keyframes subMenuExpand {
+          0% {
+            opacity: 0;
+            transform: translateY(-8px);
+            max-height: 0px;
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 100px;
+          }
+        }
+
+        @keyframes subMenuCollapse {
+          0% {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 100px;
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-8px);
+            max-height: 0px;
+          }
+        }
+
+        .submenu-container {
+          overflow: hidden;
+        }
+
+        .submenu-container.open {
+          animation: subMenuExpand 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .submenu-container.closed {
+          animation: subMenuCollapse 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .chevron {
+          display: inline-block;
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .chevron.open {
+          transform: rotate(180deg);
+        }
+
+        .chevron.closed {
+          transform: rotate(0deg);
+        }
+      `}</style>
+
       <div className="session-status" role="status" aria-live={preferences.announcements ? 'polite' : 'off'}>
         Local demo · Food and workouts save to H2. Health, goals, profile and accessibility changes reset on refresh.
         {cloudEnabled ? (wellness.error ? 'Saved records need attention' : wellness.pending ? 'Saving your changes…' : wellness.ready ? 'Supabase connected · No pending changes' : 'Loading your records…') : 'Local demo · Food and workouts use H2. Other changes reset on refresh.'}
@@ -233,29 +294,37 @@ export default function App() {
                 >
                   <span className="nav-icon">{item.icon}</span>
                   <span className="nav-label">{item.label}</span>
-                  {item.hasSub && <span className="chevron">{foodJournalMenuOpen ? '˅' : '˃'}</span>}
+                  {item.hasSub && (
+                    <span className={`chevron ${foodJournalMenuOpen ? 'open' : 'closed'}`}>
+                      ▾
+                    </span>
+                  )}
                 </button>
 
-                {item.id === 'food-journal' && (foodJournalMenuOpen || activeTab === 'food-journal') && (
-                  <div className="submenu">
-                    <button
-                      className={`submenu-item ${foodSubTab === 'daily' ? 'active' : ''}`}
-                      onClick={() => {
-                        setActiveTab('food-journal');
-                        setFoodSubTab('daily');
-                      }}
-                    >
-                      📓 Daily Food Journal
-                    </button>
-                    <button
-                      className={`submenu-item ${foodSubTab === 'overall' ? 'active' : ''}`}
-                      onClick={() => {
-                        setActiveTab('food-journal');
-                        setFoodSubTab('overall');
-                      }}
-                    >
-                      📖 Overall Food Journal
-                    </button>
+                {item.id === 'food-journal' && (
+                  <div className={`submenu-container ${foodJournalMenuOpen ? 'open' : 'closed'}`}>
+                    <div className="submenu">
+                      <button
+                        className={`submenu-item ${foodSubTab === 'daily' ? 'active' : ''}`}
+                        onClick={() => {
+                          setActiveTab('food-journal');
+                          setFoodSubTab('daily');
+                          setFoodJournalMenuOpen(true);
+                        }}
+                      >
+                        📓 Daily Food Journal
+                      </button>
+                      <button
+                        className={`submenu-item ${foodSubTab === 'overall' ? 'active' : ''}`}
+                        onClick={() => {
+                          setActiveTab('food-journal');
+                          setFoodSubTab('overall');
+                          setFoodJournalMenuOpen(true);
+                        }}
+                      >
+                        📖 Overall Food Journal
+                      </button>
+                    </div>
                   </div>
                 )}
               </React.Fragment>
@@ -341,7 +410,7 @@ export default function App() {
                 if (targetDate && targetDate !== selectedDate) {
                   setSelectedDate(targetDate);
                 }
-                wellness.updateDay?.(patch);
+                wellness.updateDay?.(patch, targetDate || selectedDate);
               }} 
               disabled={!wellness.ready || wellness.pending > 0}
             />
@@ -417,7 +486,7 @@ export default function App() {
           
           {activeTab === 'profile' && (
             <ProfilePage 
-              profile={{ ...profileData, fullName: displayName }}
+              profile={{ ...activeProfile, fullName: displayName }}
               email={displayEmail} 
               onSave={handleSaveProfile} 
               busy={!wellness.ready || wellness.pending > 0}

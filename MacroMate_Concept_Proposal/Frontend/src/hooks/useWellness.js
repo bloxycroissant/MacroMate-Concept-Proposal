@@ -11,16 +11,6 @@ export default function useWellness(date) {
   const [days, setDays] = useState({});
   const [profile, setProfile] = useState({ fullName: user?.user_metadata?.full_name || '' });
   const [preferences, setPreferences] = useState(defaultPreferences);
-  function updateDay(patch) {
-    setDays((current) => ({ ...current, [date]: { ...current[date], ...patch } }));
-  }
-  async function saveProfile(data) {
-    setProfile(data);
-  }
-  function updatePreference(key, value) {
-    setPreferences((current) => ({ ...current, [key]: value }));
-  }
-  return { days, day: { ...defaultDay, ...days[date] }, profile, preferences, updateDay, saveProfile, updatePreference };
   const [ready, setReady] = useState(!cloudEnabled);
   const [error, setError] = useState('');
   const [pending, setPending] = useState(0);
@@ -59,11 +49,11 @@ export default function useWellness(date) {
     queue.current = task.catch(() => {});
     return task;
   }
-  function updateDay(patch) {
-    if (!cloudEnabled) { setDays((current) => ({ ...current, [date]: { ...current[date], ...patch } })); return; }
+  function updateDay(patch, targetDate = date) {
+    if (!cloudEnabled) { setDays((current) => ({ ...current, [targetDate]: { ...current[targetDate], ...patch } })); return; }
     void enqueue(async () => {
-      const row = unwrap(await supabase.rpc('save_checkin', { p_date: date, p_patch: patch }));
-      setDays((current) => ({ ...current, [date]: dayFromRow(row) }));
+      const row = unwrap(await supabase.rpc('save_checkin', { p_date: targetDate, p_patch: patch }));
+      setDays((current) => ({ ...current, [targetDate]: dayFromRow(row) }));
     }).catch(() => {});
   }
   async function saveProfile(data) {
