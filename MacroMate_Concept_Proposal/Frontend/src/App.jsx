@@ -44,15 +44,13 @@ export default function App() {
   const setWaterGlasses = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ waterGlasses: Math.max(0, Math.min(8, value)) });
   const setEnergyLevel = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ energyLevel: value });
 
-  // Auto-sync screen on cloud auth changes
   useEffect(() => {
     if (cloudEnabled && user && ['welcome', 'login', 'signup'].includes(currentScreen)) {
       setCurrentScreen('dashboard');
     }
   }, [user, cloudEnabled, currentScreen]);
 
-  // 🌟 Universal Full Name and Profile Picture Sync Across Website
-  const displayName = profileData.fullName || user?.user_metadata?.full_name || 'Wellness member';
+  const displayName = profileData.fullName || user?.user_metadata?.full_name || 'Christianne Denise Sabando';
   const displayEmail = user?.email || 'Local demo';
   const displayPfp = profileData.pfpUrl || new URL('./assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
 
@@ -130,7 +128,6 @@ export default function App() {
     setCurrentScreen('dashboard');
   };
 
-  // 🌟 Handles real-time updates for Name AND Profile Picture
   const handleSaveProfile = async (profileDataInput) => {
     if (wellness.saveProfile) await wellness.saveProfile(profileDataInput);
   };
@@ -197,17 +194,15 @@ export default function App() {
 
           <div className="user-profile" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('profile')}>
             <div className="user-info">
-              {/* 🌟 Live Synced Full Name Badge */}
               <div className="user-handle">{displayName}</div>
               <div className="user-role">Wellness member</div>
             </div>
             <div className="user-avatar">
-              {/* 🌟 Live Synced Profile Picture */}
               <img src={displayPfp} alt={displayName} style={{ objectFit: 'cover', width: '100%', height: '100%', borderRadius: '50%' }} />
             </div>
           </div>
 
-          <button className="log-food-btn" disabled={journal.loading || !!journal.error || journal.busy} onClick={() => setIsModalOpen(true)}>
+          <button className="log-food-btn" disabled={journal.loading || journal.busy} onClick={() => setIsModalOpen(true)}>
             + Log Food
           </button>
         </div>
@@ -312,24 +307,40 @@ export default function App() {
           </button>
         </aside>
 
-        {/* MAIN PAGE VIEW */}
+        {/* FULL WIDTH MAIN CONTENT */}
         <main className="main-content">
           {accountError && <p className="journal-notice journal-error" role="alert">{accountError}</p>}
-          {wellness.error && <div className="journal-notice journal-error" role="alert"><p>{wellness.error}</p><button onClick={wellness.reload} disabled={wellness.pending > 0}>Reload saved records</button></div>}
+          {wellness.error && cloudEnabled && user && (
+            <div className="journal-notice journal-error" role="alert">
+              <p>{wellness.error}</p>
+              <button onClick={wellness.reload} disabled={wellness.pending > 0}>Reload saved records</button>
+            </div>
+          )}
           {journal.loading && <p className="journal-notice" role="status">Loading saved food entries…</p>}
-          {journal.error && <div className="journal-notice journal-error" role="alert">
-            <p>{journal.error}</p><button type="button" disabled={journal.loading || journal.busy} onClick={journal.reload}>Retry</button>
-          </div>}
+          {journal.error && cloudEnabled && user && (
+            <div className="journal-notice journal-error" role="alert">
+              <p>{journal.error}</p>
+              <button type="button" disabled={journal.loading || journal.busy} onClick={journal.reload}>Retry</button>
+            </div>
+          )}
           <p className="journal-selected-date">Food journal: {dateLabel}</p>
           
           {activeTab === 'health-journal' && (
-            <HealthJournalPage
-              date={selectedDate} onDateChange={setSelectedDate} day={dayData} days={wellness.days || {}}
-              onChange={wellness.updateDay} disabled={!wellness.ready || wellness.pending > 0}
-            />
-          )}
+  <HealthJournalPage
+    date={selectedDate} 
+    onDateChange={setSelectedDate} 
+    day={dayData} 
+    days={wellness.days || {}}
+    onChange={(patch, targetDate) => {
+      if (targetDate && targetDate !== selectedDate) {
+        setSelectedDate(targetDate);
+      }
+      wellness.updateDay?.(patch);
+    }} 
+    disabled={!wellness.ready || wellness.pending > 0}
+  />
+)}
 
-          {/* 🌟 Live Synced Name in Overview Page Heading */}
           {activeTab === 'overview' && (
             <OverviewPage
               totals={totals}
@@ -398,7 +409,6 @@ export default function App() {
 
           {activeTab === 'my-goals' && <GoalsPage />}
           
-          {/* 🌟 Live Synced Name & Profile Picture in Profile Page */}
           {activeTab === 'profile' && (
             <ProfilePage 
               profile={{ ...profileData, fullName: displayName }}
