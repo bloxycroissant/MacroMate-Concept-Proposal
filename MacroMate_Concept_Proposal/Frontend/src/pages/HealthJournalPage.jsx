@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import React, { useState } from 'react';
 import JournalDateSelector from '../components/JournalDateSelector';
 import { shiftDate } from '../utils/journalDates';
 
@@ -14,7 +13,7 @@ function averageMood(entries) {
   return moods[Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)];
 }
 
-export default function HealthJournalPage({ date, onDateChange, day, days, onChange, disabled }) {
+export function HealthJournalCalendar({ date, onDateChange, day, days, onChange, disabled }) {
   const [period, setPeriod] = useState('month');
   const [selectedAverageKey, setSelectedAverageKey] = useState(null);
   const monthPickerRef = useRef(null);

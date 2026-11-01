@@ -54,7 +54,6 @@ export default function App() {
     }
   }, [user, cloudEnabled, currentScreen]);
 
-  const displayName = profileData.fullName || user?.user_metadata?.full_name || 'Christianne Denise Sabando';
   const displayEmail = user?.email || 'Local demo';
   const displayPfp = profileData.pfpUrl || new URL('./assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
 
