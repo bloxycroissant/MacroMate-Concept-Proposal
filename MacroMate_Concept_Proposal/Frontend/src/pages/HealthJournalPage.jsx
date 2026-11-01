@@ -494,6 +494,13 @@ export default function HealthJournalPage({ date = localDate(), onDateChange, da
                           </button>
                         ))}
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectDateAndMood(item.date, null)}
+                        style={{ border: 'none', background: 'transparent', color: '#557361', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer', padding: '4px 8px' }}
+                      >
+                        Remove mood
+                      </button>
                     </div>
                   )}
                 </div>
