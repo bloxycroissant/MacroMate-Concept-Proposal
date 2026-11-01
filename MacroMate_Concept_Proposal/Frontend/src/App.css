@@ -18,9 +18,12 @@
 
 /* REFINED DARK / HIGH CONTRAST MODE THEME */
 .wellness-high-contrast,
-.wellness-high-contrast body,
+body.wellness-high-contrast,
+body.wellness-high-contrast #root,
 .wellness-high-contrast .app-shell,
-.wellness-high-contrast .main-content {
+.wellness-high-contrast .app-body,
+.wellness-high-contrast .main-content,
+.wellness-high-contrast .session-status {
   background-color: #0f172a !important;
   color: #f8fafc !important;
 }
@@ -48,11 +51,46 @@
 .wellness-high-contrast .date-strip-card,
 .wellness-high-contrast .profile-badge-card,
 .wellness-high-contrast .goal-highlight-card,
-.wellness-high-contrast .reminders-banner {
+.wellness-high-contrast .reminders-banner,
+.wellness-high-contrast .mm-avatar-card,
+.wellness-high-contrast .mm-profile-right-card {
   background-color: #1e293b !important;
   border: 1px solid #334155 !important;
   color: #f8fafc !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.wellness-high-contrast .mm-wellness-goal-box {
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+
+.wellness-high-contrast .mm-avatar-top-banner {
+  background-color: #334155 !important;
+}
+
+.wellness-high-contrast .mm-profile-input-styled,
+.wellness-high-contrast .mm-profile-input-styled:focus {
+  background-color: #334155 !important;
+  border-color: #64748b !important;
+  color: #f8fafc !important;
+}
+
+.wellness-high-contrast .mm-profile-input-styled[readonly] {
+  color: #cbd5e1 !important;
+}
+
+.wellness-high-contrast .mm-avatar-circle:not(img),
+.wellness-high-contrast .mm-heart-icon-circle {
+  background-color: #475569 !important;
+  border-color: #64748b !important;
+  color: #f8fafc !important;
+}
+
+.wellness-high-contrast .mm-status-pill {
+  background-color: #059669 !important;
+  color: #ffffff !important;
 }
 
 .wellness-high-contrast h1,

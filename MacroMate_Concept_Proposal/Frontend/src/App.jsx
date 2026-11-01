@@ -63,9 +63,12 @@ export default function App() {
   const displayPfp = activeProfile.pfpUrl || new URL('./assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
 
   useEffect(() => {
+    document.body.classList.toggle('wellness-high-contrast', !!preferences.highContrast);
     document.body.classList.toggle('wellness-reduce-motion', !!preferences.reduceMotion);
-    return () => document.body.classList.remove('wellness-reduce-motion');
-  }, [preferences.reduceMotion]);
+    return () => {
+      document.body.classList.remove('wellness-high-contrast', 'wellness-reduce-motion');
+    };
+  }, [preferences.highContrast, preferences.reduceMotion]);
 
   const journal = useFoodEntries() || { entries: [] };
   const entries = (journal.entries || []).filter((entry) => entry.entryDate === selectedDate);
