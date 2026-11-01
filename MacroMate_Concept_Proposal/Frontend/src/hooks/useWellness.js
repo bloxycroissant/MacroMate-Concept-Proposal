@@ -11,16 +11,6 @@ export default function useWellness(date) {
   const [days, setDays] = useState({});
   const [profile, setProfile] = useState({ fullName: user?.user_metadata?.full_name || '' });
   const [preferences, setPreferences] = useState(defaultPreferences);
-  function updateDay(patch) {
-    setDays((current) => ({ ...current, [date]: { ...current[date], ...patch } }));
-  }
-  async function saveProfile(data) {
-    setProfile(data);
-  }
-  function updatePreference(key, value) {
-    setPreferences((current) => ({ ...current, [key]: value }));
-  }
-  return { days, day: { ...defaultDay, ...days[date] }, profile, preferences, updateDay, saveProfile, updatePreference };
   const [ready, setReady] = useState(!cloudEnabled);
   const [error, setError] = useState('');
   const [pending, setPending] = useState(0);
