@@ -129,16 +129,22 @@ export default function App() {
   };
 
   const handleSaveProfile = async (profileDataInput) => {
-    if (wellness.saveProfile) await wellness.saveProfile(profileDataInput);
+    if (wellness.saveProfile) {
+      await wellness.saveProfile(profileDataInput);
+    }
   };
 
   async function logOut() {
-    if (!cloudEnabled) { handleNavigate('welcome'); return; }
     setAccountError('');
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      setAccountError('Could not log out. Check your connection and try again.');
-    } else {
+    try {
+      if (cloudEnabled && supabase) {
+        await supabase.auth.signOut();
+      }
+    } catch (e) {
+      // Catch token errors during sign out
+    } finally {
+      localStorage.clear();
+      sessionStorage.clear();
       handleNavigate('welcome');
     }
   }
@@ -326,20 +332,20 @@ export default function App() {
           <p className="journal-selected-date">Food journal: {dateLabel}</p>
           
           {activeTab === 'health-journal' && (
-  <HealthJournalPage
-    date={selectedDate} 
-    onDateChange={setSelectedDate} 
-    day={dayData} 
-    days={wellness.days || {}}
-    onChange={(patch, targetDate) => {
-      if (targetDate && targetDate !== selectedDate) {
-        setSelectedDate(targetDate);
-      }
-      wellness.updateDay?.(patch);
-    }} 
-    disabled={!wellness.ready || wellness.pending > 0}
-  />
-)}
+            <HealthJournalPage
+              date={selectedDate} 
+              onDateChange={setSelectedDate} 
+              day={dayData} 
+              days={wellness.days || {}}
+              onChange={(patch, targetDate) => {
+                if (targetDate && targetDate !== selectedDate) {
+                  setSelectedDate(targetDate);
+                }
+                wellness.updateDay?.(patch);
+              }} 
+              disabled={!wellness.ready || wellness.pending > 0}
+            />
+          )}
 
           {activeTab === 'overview' && (
             <OverviewPage
