@@ -32,6 +32,8 @@ export default function App() {
   const [foodSubTab, setFoodSubTab] = useState('hub');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [foodJournalMenuOpen, setFoodJournalMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(localDate);
   const wellness = useWellness(selectedDate) || {};
@@ -39,22 +41,26 @@ export default function App() {
   const preferences = wellness.preferences || {};
   const profileData = wellness.profile || {};
 
+  // Local overlay state to force instant topbar profile updates
+  const [customProfile, setCustomProfile] = useState(null);
+  const activeProfile = customProfile || profileData;
+
   const { mood, waterGlasses, energyLevel, sleepMinutes, completedGoals = [] } = dayData;
 
   const setWaterGlasses = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ waterGlasses: Math.max(0, Math.min(8, value)) });
   const setEnergyLevel = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ energyLevel: value });
 
-  // Auto-sync screen on cloud auth changes
+  // 🌟 Universal Full Name and Profile Picture Sync Across Website
+  const displayName = profileData.fullName || user?.user_metadata?.full_name || 'Wellness member';
   useEffect(() => {
     if (cloudEnabled && user && ['welcome', 'login', 'signup'].includes(currentScreen)) {
       setCurrentScreen('dashboard');
     }
   }, [user, cloudEnabled, currentScreen]);
 
-  // 🌟 Universal Full Name and Profile Picture Sync Across Website
-  const displayName = profileData.fullName || user?.user_metadata?.full_name || 'Wellness member';
+  const displayName = activeProfile.fullName || user?.user_metadata?.full_name || 'Christianne Denise Sabando';
   const displayEmail = user?.email || 'Local demo';
-  const displayPfp = profileData.pfpUrl || new URL('./assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
+  const displayPfp = activeProfile.pfpUrl || new URL('./assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href;
 
   useEffect(() => {
     document.body.classList.toggle('wellness-high-contrast', !!preferences.highContrast);
@@ -133,18 +139,26 @@ export default function App() {
     setCurrentScreen('dashboard');
   };
 
-  // 🌟 Handles real-time updates for Name AND Profile Picture
+  // Immediate Topbar Profile Synchronizer
   const handleSaveProfile = async (profileDataInput) => {
-    if (wellness.saveProfile) await wellness.saveProfile(profileDataInput);
+    setCustomProfile((prev) => ({ ...prev, ...profileDataInput }));
+    if (wellness.saveProfile) {
+      await wellness.saveProfile(profileDataInput);
+    }
   };
 
   async function logOut() {
-    if (!cloudEnabled) { handleNavigate('welcome'); return; }
     setAccountError('');
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      setAccountError('Could not log out. Check your connection and try again.');
-    } else {
+    try {
+      if (cloudEnabled && supabase) {
+        await supabase.auth.signOut();
+      }
+    } catch (e) {
+      // Ignore token revocation error on sign out
+    } finally {
+      localStorage.clear();
+      sessionStorage.clear();
+      setCustomProfile(null);
       handleNavigate('welcome');
     }
   }
@@ -157,14 +171,91 @@ export default function App() {
     { id: 'profile', label: 'Profile', icon: '👤' },
     { id: 'accessibility', label: 'Accessibility', icon: '♿' },
   ];
+  const searchPages = [
+    ...menuItems.filter((item) => item.id !== 'food-journal'),
+    { id: 'daily-food-journal', label: 'Daily Food Journal' },
+    { id: 'overall-food-journal', label: 'Overall Food Journal' },
+  ];
+  const searchTerm = searchQuery.trim().toLowerCase();
+  const searchResults = searchTerm ? [
+    ...searchPages.filter((item) => item.label.toLowerCase().includes(searchTerm)),
+    ...(journal.entries || []).filter((entry) => entry.foodName.toLowerCase().includes(searchTerm))
+      .slice(0, 5).map((entry) => ({ ...entry, id: 'food-entry', label: `${entry.foodName} · ${entry.meal} · ${entry.entryDate}` })),
+  ] : [];
+  function openSearchResult(result) {
+    if (result.id === 'daily-food-journal' || result.id === 'overall-food-journal' || result.id === 'food-entry') {
+      setActiveTab('food-journal');
+      setFoodJournalMenuOpen(true);
+      setFoodSubTab(result.id === 'overall-food-journal' ? 'overall' : 'daily');
+    } else {
+      setActiveTab(result.id);
+    }
+    if (result.entryDate) setSelectedDate(result.entryDate);
+    setSearchQuery('');
+  }
 
   if (recovery) return <ResetPasswordPage onDone={finishRecovery} />;
-  if (currentScreen === 'welcome') return <WelcomePage onNavigate={handleNavigate} allowDemo={!cloudEnabled} />;
-  if (currentScreen === 'signup') return <SignUpPage onNavigate={handleNavigate} onSignUp={handleSignUpData} />;
-  if (currentScreen === 'login') return <LoginPage onNavigate={handleNavigate} onLogin={handleLoginSubmit} />;
+  const canShowDashboard = cloudEnabled && !!user;
+  if (currentScreen === 'welcome' && !canShowDashboard) return <WelcomePage onNavigate={handleNavigate} allowDemo={!cloudEnabled} />;
+  if (currentScreen === 'signup' && !canShowDashboard) return <SignUpPage onNavigate={handleNavigate} onSignUp={handleSignUpData} />;
+  if (currentScreen === 'login' && !canShowDashboard) return <LoginPage onNavigate={handleNavigate} onLogin={handleLoginSubmit} />;
 
   return (
     <div className={`app-shell ${preferences.highContrast ? 'wellness-high-contrast' : ''} ${preferences.enhancedFocus ? 'wellness-enhanced-focus' : ''}`}>
+      <style>{`
+        /* Bidirectional Submenu Animations */
+        @keyframes subMenuExpand {
+          0% {
+            opacity: 0;
+            transform: translateY(-8px);
+            max-height: 0px;
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 100px;
+          }
+        }
+
+        @keyframes subMenuCollapse {
+          0% {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 100px;
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(-8px);
+            max-height: 0px;
+          }
+        }
+
+        .submenu-container {
+          overflow: hidden;
+        }
+
+        .submenu-container.open {
+          animation: subMenuExpand 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .submenu-container.closed {
+          animation: subMenuCollapse 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .chevron {
+          display: inline-block;
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .chevron.open {
+          transform: rotate(180deg);
+        }
+
+        .chevron.closed {
+          transform: rotate(0deg);
+        }
+      `}</style>
+
       <div className="session-status" role="status" aria-live={preferences.announcements ? 'polite' : 'off'}>
         Local demo · Food and workouts save to H2. Health, goals, profile and accessibility changes reset on refresh.
         {cloudEnabled ? (wellness.error ? 'Saved records need attention' : wellness.pending ? 'Saving your changes…' : wellness.ready ? 'Supabase connected · No pending changes' : 'Loading your records…') : 'Local demo · Food and workouts use H2. Other changes reset on refresh.'}
@@ -173,14 +264,14 @@ export default function App() {
       {/* TOPBAR */}
       <header className="topbar">
         <div className="topbar-left">
-          <div className="brand-logo" style={{ cursor: 'pointer' }} onClick={() => setCurrentScreen('welcome')}>
+          <button type="button" className="brand-logo" onClick={() => handleNavigate(user ? 'dashboard' : 'welcome')} aria-label="Go to MacroMate home">
             <img 
               src={new URL('./assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href} 
               alt="MacroMate Logo" 
               className="brand-icon-img" 
             />
             <span className="brand-text">MacroMate</span>
-          </div>
+          </button>
           <div className="dashboard-title">
             <span className="title-icon">📊</span>
             <span>Personal Dashboard</span>
@@ -189,28 +280,39 @@ export default function App() {
 
         <div className="search-box">
           <span className="search-icon">🔍</span>
-          <input type="text" placeholder="Search activities..." />
+          <input
+            type="search"
+            aria-label="Search pages and food entries"
+            aria-controls="topbar-search-results"
+            aria-expanded={!!searchTerm}
+            placeholder="Search activities..."
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            onKeyDown={(event) => { if (event.key === 'Escape') setSearchQuery(''); }}
+          />
+          {searchTerm && <div className="topbar-search-results" id="topbar-search-results" role="listbox" aria-label="Search results">
+            {searchResults.length ? searchResults.map((result) => <button key={`${result.id}-${result.label}`} type="button" role="option" onClick={() => openSearchResult(result)}>{result.label}</button>)
+              : <span className="empty-search-results">No matching pages or food entries.</span>}
+          </div>}
         </div>
 
         <div className="topbar-right">
-          <div className="notification-bell">
-            🔔
-            <span className="bell-badge">3</span>
+          <div className="notification-bell notification-control">
+            <button type="button" className="notification-trigger" aria-label="Notifications" aria-expanded={showNotifications} onClick={() => setShowNotifications((visible) => !visible)}>🔔</button>
+            {showNotifications && <div className="notification-popover" role="status"><strong>Notifications</strong><p>You’re all caught up. New food and wellness updates will appear here.</p></div>}
           </div>
 
-          <div className="user-profile" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('profile')}>
+          <button type="button" className="user-profile" onClick={() => setActiveTab('profile')} aria-label="Open profile">
             <div className="user-info">
-              {/* 🌟 Live Synced Full Name Badge */}
               <div className="user-handle">{displayName}</div>
               <div className="user-role">Wellness member</div>
             </div>
             <div className="user-avatar">
-              {/* 🌟 Live Synced Profile Picture */}
               <img src={displayPfp} alt={displayName} style={{ objectFit: 'cover', width: '100%', height: '100%', borderRadius: '50%' }} />
             </div>
-          </div>
+          </button>
 
-          <button className="log-food-btn" disabled={journal.loading || !!journal.error || journal.busy} onClick={() => setIsModalOpen(true)}>
+          <button className="log-food-btn" disabled={journal.loading || journal.busy} onClick={() => setIsModalOpen(true)}>
             + Log Food
           </button>
         </div>
@@ -235,29 +337,37 @@ export default function App() {
                 >
                   <span className="nav-icon">{item.icon}</span>
                   <span className="nav-label">{item.label}</span>
-                  {item.hasSub && <span className="chevron">{foodJournalMenuOpen ? '˅' : '˃'}</span>}
+                  {item.hasSub && (
+                    <span className={`chevron ${foodJournalMenuOpen ? 'open' : 'closed'}`}>
+                      ▾
+                    </span>
+                  )}
                 </button>
 
-                {item.id === 'food-journal' && (foodJournalMenuOpen || activeTab === 'food-journal') && (
-                  <div className="submenu">
-                    <button
-                      className={`submenu-item ${foodSubTab === 'daily' ? 'active' : ''}`}
-                      onClick={() => {
-                        setActiveTab('food-journal');
-                        setFoodSubTab('daily');
-                      }}
-                    >
-                      📓 Daily Food Journal
-                    </button>
-                    <button
-                      className={`submenu-item ${foodSubTab === 'overall' ? 'active' : ''}`}
-                      onClick={() => {
-                        setActiveTab('food-journal');
-                        setFoodSubTab('overall');
-                      }}
-                    >
-                      📖 Overall Food Journal
-                    </button>
+                {item.id === 'food-journal' && (
+                  <div className={`submenu-container ${foodJournalMenuOpen ? 'open' : 'closed'}`}>
+                    <div className="submenu">
+                      <button
+                        className={`submenu-item ${foodSubTab === 'daily' ? 'active' : ''}`}
+                        onClick={() => {
+                          setActiveTab('food-journal');
+                          setFoodSubTab('daily');
+                          setFoodJournalMenuOpen(true);
+                        }}
+                      >
+                        📓 Daily Food Journal
+                      </button>
+                      <button
+                        className={`submenu-item ${foodSubTab === 'overall' ? 'active' : ''}`}
+                        onClick={() => {
+                          setActiveTab('food-journal');
+                          setFoodSubTab('overall');
+                          setFoodJournalMenuOpen(true);
+                        }}
+                      >
+                        📖 Overall Food Journal
+                      </button>
+                    </div>
                   </div>
                 )}
               </React.Fragment>
@@ -315,24 +425,40 @@ export default function App() {
           </button>
         </aside>
 
-        {/* MAIN PAGE VIEW */}
+        {/* FULL WIDTH MAIN CONTENT */}
         <main className="main-content">
           {accountError && <p className="journal-notice journal-error" role="alert">{accountError}</p>}
-          {wellness.error && <div className="journal-notice journal-error" role="alert"><p>{wellness.error}</p><button onClick={wellness.reload} disabled={wellness.pending > 0}>Reload saved records</button></div>}
+          {wellness.error && cloudEnabled && user && (
+            <div className="journal-notice journal-error" role="alert">
+              <p>{wellness.error}</p>
+              <button onClick={wellness.reload} disabled={wellness.pending > 0}>Reload saved records</button>
+            </div>
+          )}
           {journal.loading && <p className="journal-notice" role="status">Loading saved food entries…</p>}
-          {journal.error && <div className="journal-notice journal-error" role="alert">
-            <p>{journal.error}</p><button type="button" disabled={journal.loading || journal.busy} onClick={journal.reload}>Retry</button>
-          </div>}
+          {journal.error && cloudEnabled && user && (
+            <div className="journal-notice journal-error" role="alert">
+              <p>{journal.error}</p>
+              <button type="button" disabled={journal.loading || journal.busy} onClick={journal.reload}>Retry</button>
+            </div>
+          )}
           <p className="journal-selected-date">Food journal: {dateLabel}</p>
           
           {activeTab === 'health-journal' && (
             <HealthJournalPage
-              date={selectedDate} onDateChange={setSelectedDate} day={dayData} days={wellness.days || {}}
-              onChange={wellness.updateDay} disabled={!wellness.ready || wellness.pending > 0}
+              date={selectedDate} 
+              onDateChange={setSelectedDate} 
+              day={dayData} 
+              days={wellness.days || {}}
+              onChange={(patch, targetDate) => {
+                if (targetDate && targetDate !== selectedDate) {
+                  setSelectedDate(targetDate);
+                }
+                wellness.updateDay?.(patch, targetDate || selectedDate);
+              }} 
+              disabled={!wellness.ready || wellness.pending > 0}
             />
           )}
 
-          {/* 🌟 Live Synced Name in Overview Page Heading */}
           {activeTab === 'overview' && (
             <OverviewPage
               totals={totals}
@@ -379,6 +505,7 @@ export default function App() {
               energyLevel={energyLevel}
               onEnergyLevelChange={setEnergyLevel}
               formatNumber={number}
+              controlsDisabled={!wellness.ready || wellness.pending > 0}
             />
           )}
 
@@ -401,10 +528,9 @@ export default function App() {
 
           {activeTab === 'my-goals' && <GoalsPage />}
           
-          {/* 🌟 Live Synced Name & Profile Picture in Profile Page */}
           {activeTab === 'profile' && (
             <ProfilePage 
-              profile={{ ...profileData, fullName: displayName }}
+              profile={{ ...activeProfile, fullName: displayName }}
               email={displayEmail} 
               onSave={handleSaveProfile} 
               busy={!wellness.ready || wellness.pending > 0}

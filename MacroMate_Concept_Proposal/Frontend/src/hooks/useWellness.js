@@ -7,16 +7,19 @@ export const defaultDay = { mood: 'Okay', energyLevel: 3, sleepMinutes: 0, water
 export const defaultPreferences = { highContrast: false, reduceMotion: false, enhancedFocus: false, announcements: true };
 
 export default function useWellness(date) {
-  const { user } = useAuth();
+  const { user } = useAuth() || {};
   const [days, setDays] = useState({});
   const [profile, setProfile] = useState({ fullName: user?.user_metadata?.full_name || '' });
   const [preferences, setPreferences] = useState(defaultPreferences);
   const [ready, setReady] = useState(!cloudEnabled);
+  const [loadedUid, setLoadedUid] = useState(null);
   const [error, setError] = useState('');
   const [pending, setPending] = useState(0);
   const [reloadToken, setReloadToken] = useState(0);
   const queue = useRef(Promise.resolve());
   const uid = user?.id;
+  const fullName = user?.user_metadata?.full_name || '';
+  const ready = !cloudEnabled || (!!uid && loadedUid === uid);
   useEffect(() => {
     if (!cloudEnabled || !uid) return;
     let alive = true;
@@ -30,12 +33,17 @@ export default function useWellness(date) {
       const profileRow = unwrap(profileResult);
       const preferenceRow = unwrap(preferenceResult);
       setDays(Object.fromEntries(dailyRows.map((row) => [row.entry_date, dayFromRow(row)])));
-      if (profileRow) setProfile(profileFromRow(profileRow));
+      setProfile(profileRow ? profileFromRow(profileRow) : { fullName });
       setPreferences({ ...defaultPreferences, ...preferencesFromRow(preferenceRow) });
-      setError(''); setReady(true);
-    }).catch(() => { if (alive) setError('Could not load your saved records. Check the connection and try again.'); });
+      setError('');
+      setLoadedUid(uid);
+    }).catch(() => {
+      if (alive) {
+        setError('Could not load your saved records. Check the connection and try again.');
+      }
+    });
     return () => { alive = false; };
-  }, [uid, reloadToken]);
+  }, [uid, reloadToken, fullName]);
 
   function enqueue(action) {
     if (!uid || !ready) return Promise.reject(new Error('Wait for your records to finish loading.'));
@@ -49,11 +57,22 @@ export default function useWellness(date) {
     queue.current = task.catch(() => {});
     return task;
   }
-  function updateDay(patch) {
-    if (!cloudEnabled) { setDays((current) => ({ ...current, [date]: { ...current[date], ...patch } })); return; }
+  function updateDay(patch, targetDate = date) {
+    if (!cloudEnabled) { setDays((current) => ({ ...current, [targetDate]: { ...current[targetDate], ...patch } })); return; }
     void enqueue(async () => {
-      const row = unwrap(await supabase.rpc('save_checkin', { p_date: date, p_patch: patch }));
-      setDays((current) => ({ ...current, [date]: dayFromRow(row) }));
+      if (patch.mood === null) {
+        const row = unwrap(await supabase.from('daily_checkins').update({ mood: null })
+          .eq('user_id', uid).eq('entry_date', targetDate).select('*').maybeSingle());
+        setDays((current) => {
+          if (row) return { ...current, [targetDate]: dayFromRow(row) };
+          const next = { ...current };
+          delete next[targetDate];
+          return next;
+        });
+        return;
+      }
+      const row = unwrap(await supabase.rpc('save_checkin', { p_date: targetDate, p_patch: patch }));
+      setDays((current) => ({ ...current, [targetDate]: dayFromRow(row) }));
     }).catch(() => {});
   }
   async function saveProfile(data) {
@@ -72,6 +91,10 @@ export default function useWellness(date) {
       setPreferences(preferencesFromRow(row));
     }).catch(() => {});
   }
-  return { days, day: { ...defaultDay, ...days[date], mood: days[date]?.mood || defaultDay.mood }, profile, preferences, ready, pending, error,
-    updateDay, updatePreference, saveProfile, reload: () => setReloadToken((value) => value + 1) };
+  const activeDays = cloudEnabled && loadedUid !== uid ? {} : days;
+  const activeProfile = cloudEnabled && loadedUid !== uid ? { fullName } : profile;
+  const activePreferences = cloudEnabled && loadedUid !== uid ? defaultPreferences : preferences;
+  return { days: activeDays, day: { ...defaultDay, ...activeDays[date], mood: activeDays[date]?.mood || defaultDay.mood },
+    profile: activeProfile, preferences: activePreferences, ready, pending, error,
+    updateDay, updatePreference, saveProfile, reload: () => { setLoadedUid(null); setReloadToken((value) => value + 1); } };
 }
