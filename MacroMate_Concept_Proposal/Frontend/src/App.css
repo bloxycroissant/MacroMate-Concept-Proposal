@@ -5,9 +5,16 @@
 .auth-error { color: #9c2020; padding: 10px; background: #fff2f2; border-radius: 8px; }
 .session-status { padding: 10px 20px; background: #e4f3e6; color: #1a251e; text-align: left; font-size: 13px; }
 .wellness-history { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-.wellness-history button { display: grid; gap: 6px; padding: 10px; border: 1px solid #abc4b2; border-radius: 8px; background: #fff; cursor: pointer; }
+.wellness-history button { display: grid; gap: 6px; padding: 10px; border: 1px solid #abc4b2; border-radius: 8px; background: #fff; cursor: pointer; animation: anim-fade-in-up 0.4s ease both; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.wellness-history button:hover, .wellness-history button.selected { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.12); }
+.wellness-history button.selected { border-color: #0b7544; background: #e4f3e6; }
 .wellness-weekdays { display: grid; grid-template-columns: repeat(7, minmax(65px, 1fr)); gap: 10px; margin-top: 20px; overflow-x: auto; }
-.wellness-weekdays > div { display: grid; gap: 8px; text-align: center; }
+.wellness-weekdays > button { display: grid; gap: 8px; align-content: start; padding: 12px 8px; border: 1px solid transparent; border-radius: 12px; background: rgba(255,255,255,0.42); color: inherit; text-align: center; cursor: pointer; animation: anim-fade-in-up 0.45s ease both; transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease; }
+.wellness-weekdays > button:hover:not(:disabled) { transform: translateY(-3px); background: rgba(255,255,255,0.8); box-shadow: 0 5px 12px rgba(0,0,0,0.12); }
+.wellness-weekdays > button:disabled { cursor: default; opacity: 0.7; }
+.wellness-weekdays > button:focus-visible, .wellness-history button:focus-visible { outline: 3px solid #005fcc; outline-offset: 3px; }
+.wellness-average-face { display: inline-block; font-size: 1.7rem; }
+.wellness-period-label { text-align: center; font-weight: 700; }
 
 /* REFINED DARK / HIGH CONTRAST MODE THEME */
 .wellness-high-contrast,
@@ -785,6 +792,8 @@ html, body {
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+.mood-btn span { font-size: 1.1em; }
 
 .mood-btn:hover {
   transform: translateY(-2px) scale(1.05);
