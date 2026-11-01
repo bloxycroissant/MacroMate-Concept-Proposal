@@ -5,9 +5,16 @@
 .auth-error { color: #9c2020; padding: 10px; background: #fff2f2; border-radius: 8px; }
 .session-status { padding: 10px 20px; background: #e4f3e6; color: #1a251e; text-align: left; font-size: 13px; }
 .wellness-history { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-.wellness-history button { display: grid; gap: 6px; padding: 10px; border: 1px solid #abc4b2; border-radius: 8px; background: #fff; cursor: pointer; }
+.wellness-history button { display: grid; gap: 6px; padding: 10px; border: 1px solid #abc4b2; border-radius: 8px; background: #fff; cursor: pointer; animation: anim-fade-in-up 0.4s ease both; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.wellness-history button:hover, .wellness-history button.selected { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.12); }
+.wellness-history button.selected { border-color: #0b7544; background: #e4f3e6; }
 .wellness-weekdays { display: grid; grid-template-columns: repeat(7, minmax(65px, 1fr)); gap: 10px; margin-top: 20px; overflow-x: auto; }
-.wellness-weekdays > div { display: grid; gap: 8px; text-align: center; }
+.wellness-weekdays > button { display: grid; gap: 8px; align-content: start; padding: 12px 8px; border: 1px solid transparent; border-radius: 12px; background: rgba(255,255,255,0.42); color: inherit; text-align: center; cursor: pointer; animation: anim-fade-in-up 0.45s ease both; transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease; }
+.wellness-weekdays > button:hover:not(:disabled) { transform: translateY(-3px); background: rgba(255,255,255,0.8); box-shadow: 0 5px 12px rgba(0,0,0,0.12); }
+.wellness-weekdays > button:disabled { cursor: default; opacity: 0.7; }
+.wellness-weekdays > button:focus-visible, .wellness-history button:focus-visible { outline: 3px solid #005fcc; outline-offset: 3px; }
+.wellness-average-face { display: inline-block; font-size: 1.7rem; }
+.wellness-period-label { text-align: center; font-weight: 700; }
 
 /* REFINED DARK / HIGH CONTRAST MODE THEME */
 .wellness-high-contrast,
@@ -270,6 +277,9 @@ html, body {
   font-size: 22px;
   color: #1a251e;
   cursor: pointer;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .brand-icon-img {
@@ -296,6 +306,7 @@ html, body {
 }
 
 .search-box {
+  position: relative;
   display: flex;
   align-items: center;
   background-color: #e4f3e6;
@@ -362,6 +373,11 @@ html, body {
   gap: 10px;
   color: #000000 !important;
   cursor: pointer;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: right;
+  font: inherit;
   transition: transform 0.2s ease;
 }
 
@@ -442,6 +458,7 @@ html, body {
   display: flex;
   flex: 1;
   width: 100%;
+  background: linear-gradient(180deg, #fbfffb 0%, #dcffdf 72%, #19ad57 100%);
 }
 
 /* LEFT SIDEBAR */
@@ -693,6 +710,7 @@ html, body {
 .giant-title {
   color: #000000 !important;
   font-weight: 900;
+  font-family: Georgia, "Times New Roman", serif;
 }
 
 .page-title {
@@ -785,6 +803,8 @@ html, body {
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+.mood-btn span { font-size: 1.1em; }
 
 .mood-btn:hover {
   transform: translateY(-2px) scale(1.05);
@@ -898,6 +918,28 @@ html, body {
   flex-direction: column;
   justify-content: space-between;
   animation: anim-slide-left 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.snapshot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.snapshot-header h2,
+.snapshot-header p {
+  margin: 0 0 8px;
+}
+
+.snapshot-heart {
+  flex: 0 0 auto;
+  color: #ff6b81;
+  font-size: clamp(56px, 7vw, 82px);
+  line-height: 0.9;
+  text-shadow: 0 0 18px rgba(255, 107, 129, 0.42);
+  transform-origin: center;
+  animation: anim-heartbeat 1.35s infinite ease-in-out;
 }
 
 .snapshot-tag {
@@ -1295,6 +1337,9 @@ html, body {
   border-radius: 24px;
   padding: 40px;
   color: white;
+  border: 0;
+  font: inherit;
+  text-align: left;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -1520,6 +1565,7 @@ html, body {
 }
 
 .droplet {
+  display: inline-block;
   opacity: 0.3;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -1551,6 +1597,7 @@ html, body {
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   text-align: center;
+  cursor: pointer;
 }
 
 .energy-num:hover {
@@ -2057,7 +2104,7 @@ button:disabled { opacity: 0.6; cursor: wait; }
 @media (max-width: 992px) {
   .topbar { padding: 12px 20px; }
   .main-content { padding: 20px; }
-  .health-grid-top, .health-grid-bottom, .overview-middle-grid, .daily-journal-grid, .goals-grid, .profile-grid, .settings-grid, .hub-categories-grid {
+  .health-grid-top, .health-grid-bottom, .mood-calendar-grid, .overview-middle-grid, .daily-journal-grid, .goals-grid, .profile-grid, .settings-grid, .hub-categories-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -2068,3 +2115,157 @@ button:disabled { opacity: 0.6; cursor: wait; }
 }
 .food-form-fields label { display: grid; gap: 4px; font-size: 13px; }
 .modal-content { max-height: 90vh; overflow-y: auto; width: min(400px, 95vw); }
+
+/* Shared layout refinements for the supplied desktop and mobile references. */
+#root { text-align: left; }
+.topbar { min-height: 72px; padding: 12px 28px; gap: 18px; }
+.sidebar { width: 200px; padding: 20px 12px; }
+.main-content { padding: 28px 32px; }
+.page-view { gap: 16px; text-align: left; }
+.page-title, .giant-title { margin: 0; line-height: 1.12; }
+.card { border: 1px solid #b8d5bd; box-shadow: 0 2px 10px rgba(27, 73, 43, 0.045); }
+.nav-item:focus-visible, .submenu-item:focus-visible, .log-food-btn:focus-visible,
+.primary-green-btn:focus-visible, .entry-delete-btn:focus-visible,
+.timeframe-tabs button:focus-visible, .energy-num:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 3px;
+}
+.topbar-search-results {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid #b8d5bd;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(26, 37, 30, 0.14);
+}
+.topbar-search-results button {
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #1a251e;
+  text-align: left;
+  cursor: pointer;
+}
+.topbar-search-results button:hover,
+.topbar-search-results button:focus-visible { background: #e4f3e6; }
+.brand-logo:focus-visible, .user-profile:focus-visible, .notification-trigger:focus-visible,
+.mm-eye-icon:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 3px;
+}
+.mm-eye-icon {
+  border: 0 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  line-height: 1;
+}
+.notification-control { position: relative; }
+.notification-popover {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 12px);
+  right: 0;
+  width: min(280px, 80vw);
+  padding: 16px;
+  border: 1px solid #b8d5bd;
+  border-radius: 12px;
+  background: #fff;
+  color: #1a251e;
+  box-shadow: 0 12px 30px rgba(26, 37, 30, 0.14);
+}
+.notification-popover p { margin-top: 6px; font-size: 13px; }
+.notification-trigger {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.empty-search-results { padding: 8px; color: #526357; font-size: 13px; }
+.droplets-row button { border: 0; background: transparent; padding: 2px; cursor: pointer; }
+.droplets-row button:focus-visible { outline: 3px solid #005fcc; border-radius: 8px; }
+.hub-card { cursor: pointer; }
+.hub-card:focus-visible { outline: 4px solid #005fcc; outline-offset: 3px; }
+.mood-calendar-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
+.mood-calendar-grid > .card { min-width: 0; }
+.mood-calendar-grid h2 { margin: 0; text-align: center; text-transform: capitalize; }
+.mood-month-picker { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 10px; scrollbar-width: none; -ms-overflow-style: none; }
+.mood-month-picker::-webkit-scrollbar { display: none; }
+.mood-month-picker button { flex: 0 0 auto; padding: 7px 14px; border: 0; border-radius: 18px; background: #fff; color: #1a251e; font-weight: 800; cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease; }
+.mood-month-picker button:hover { transform: translateY(-2px); }
+.mood-month-picker button.active { background: #073f27; color: #fff; }
+.mood-calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: clamp(4px, 1vw, 10px); align-items: center; padding: 12px; border-radius: 18px; background: rgba(255,255,255,0.38); }
+.mood-calendar-weekday { color: #526357; font-size: 12px; font-weight: 900; text-align: center; text-transform: uppercase; }
+.mood-calendar-day, .average-mood-day { position: relative; display: grid; place-items: center; min-width: 0; aspect-ratio: 1; padding: 2px; border: 1px solid transparent; border-radius: 50%; background: #c4e1ce; color: #244b34; font: inherit; cursor: pointer; transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease; }
+.mood-calendar-day { font-size: 12px; font-weight: 800; }
+.mood-calendar-day:hover, .average-mood-day:hover { transform: scale(1.08); box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
+.mood-calendar-day.has-mood { background: #a7d8b7; }
+.mood-calendar-day.selected, .average-mood-day.selected { border-color: #073f27; box-shadow: inset 0 0 0 1px #073f27; }
+.mood-calendar-face { position: absolute; inset: auto -3px -4px auto; font-size: 12px; line-height: 1; }
+.average-mood-day { background: #d3d5d4; color: #172a1e; font-size: clamp(15px, 2vw, 24px); }
+.average-mood-day.has-mood { background: #a8dcae; }
+.mood-year-picker { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0 16px; font-weight: 800; }
+.mood-year-picker select { width: auto; min-width: 110px; padding: 8px 12px; border: 1px solid #9bb9a2; border-radius: 10px; background: #fff; color: #1a251e; font: inherit; }
+.mood-month-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.mood-month-summary { display: grid; justify-items: center; gap: 4px; padding: 10px 6px; border: 1px solid transparent; border-radius: 14px; background: rgba(255,255,255,0.42); color: #244b34; font: inherit; font-weight: 800; cursor: pointer; transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease; }
+.mood-month-summary:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
+.mood-month-summary.selected { border-color: #073f27; box-shadow: inset 0 0 0 1px #073f27; }
+.mood-month-summary.has-mood { background: #a8dcae; }
+.mood-month-summary-face { font-size: 24px; }
+.average-mood-selection { min-height: 1.4em; margin: 8px 0; font-weight: 800; text-align: center; }
+.average-mood-period-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: clamp(4px, 1vw, 10px); align-items: center; }
+.average-mood-period-grid .average-mood-day { display: grid; justify-items: center; align-content: center; gap: 2px; min-width: 0; padding: 5px 2px; font-size: clamp(16px, 2vw, 24px); }
+.average-mood-label { color: #526357; font-size: 10px; font-weight: 800; }
+.average-mood-period-grid .average-mood-day:focus-visible,
+.mood-month-summary:focus-visible,
+.mood-year-picker select:focus-visible { outline: 3px solid #005fcc; outline-offset: 3px; }
+.average-mood-period-grid:not(.year-average-grid) .average-mood-day:only-child { grid-column: 4; }
+.year-average-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.mood-calendar-blank { aspect-ratio: 1; }
+.mood-calendar-empty { margin-top: 10px; color: #526357; font-size: 13px; text-align: center; }
+.average-mood-calendar { margin-top: 8px; background: transparent; }
+
+@media (max-width: 992px) {
+  .topbar { flex-wrap: wrap; padding: 12px 20px; }
+  .topbar-left { flex: 1; }
+  .search-box { order: 3; width: 100%; }
+  .app-body { flex-direction: column; }
+  .sidebar { width: 100%; padding: 12px 16px; border-right: 0; border-bottom: 1px solid #dce8dd; }
+  .sidebar-nav { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .sidebar-inspo-card, .sidebar-macros, .sidebar > .logout-btn { display: none; }
+  .main-content { padding: 24px; }
+}
+
+@media (max-width: 700px) {
+  .topbar { padding: 10px 14px; }
+  .topbar-left { gap: 10px; }
+  .dashboard-title { font-size: 12px; }
+  .brand-text { font-size: 18px; }
+  .brand-icon-img { height: 30px; }
+  .topbar-right { width: 100%; justify-content: space-between; gap: 8px; }
+  .user-profile { margin-left: auto; }
+  .main-content { padding: 16px; }
+  .page-view { gap: 14px; }
+  .page-title { font-size: 28px; }
+  .giant-title { font-size: 32px; }
+  .mood-selector { flex-wrap: wrap; }
+  .mood-btn { min-width: 42%; }
+  .wellness-weekdays { grid-template-columns: repeat(7, minmax(72px, 1fr)); }
+  .mood-calendar { gap: 5px; padding: 8px; }
+  .mood-calendar-weekday { font-size: 10px; }
+  .mood-month-grid, .year-average-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .overall-macros-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .overall-columns-grid { grid-template-columns: 1fr; }
+  .meal-sidebar-tab { min-width: 62px; }
+  .daily-table { min-width: 560px; }
+  .meal-table-wrap { overflow-x: auto; }
+  .mm-profile-page-view { padding: 16px !important; }
+}
