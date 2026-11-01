@@ -32,6 +32,8 @@ export default function App() {
   const [foodSubTab, setFoodSubTab] = useState('hub');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [foodJournalMenuOpen, setFoodJournalMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(localDate);
   const wellness = useWellness(selectedDate) || {};
@@ -43,13 +45,6 @@ export default function App() {
 
   const setWaterGlasses = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ waterGlasses: Math.max(0, Math.min(8, value)) });
   const setEnergyLevel = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ energyLevel: value });
-
-  // Auto-sync screen on cloud auth changes
-  useEffect(() => {
-    if (cloudEnabled && user && ['welcome', 'login', 'signup'].includes(currentScreen)) {
-      setCurrentScreen('dashboard');
-    }
-  }, [user, cloudEnabled, currentScreen]);
 
   // 🌟 Universal Full Name and Profile Picture Sync Across Website
   const displayName = profileData.fullName || user?.user_metadata?.full_name || 'Wellness member';
@@ -154,11 +149,34 @@ export default function App() {
     { id: 'profile', label: 'Profile', icon: '👤' },
     { id: 'accessibility', label: 'Accessibility', icon: '♿' },
   ];
+  const searchPages = [
+    ...menuItems.filter((item) => item.id !== 'food-journal'),
+    { id: 'daily-food-journal', label: 'Daily Food Journal' },
+    { id: 'overall-food-journal', label: 'Overall Food Journal' },
+  ];
+  const searchTerm = searchQuery.trim().toLowerCase();
+  const searchResults = searchTerm ? [
+    ...searchPages.filter((item) => item.label.toLowerCase().includes(searchTerm)),
+    ...(journal.entries || []).filter((entry) => entry.foodName.toLowerCase().includes(searchTerm))
+      .slice(0, 5).map((entry) => ({ ...entry, id: 'food-entry', label: `${entry.foodName} · ${entry.meal} · ${entry.entryDate}` })),
+  ] : [];
+  function openSearchResult(result) {
+    if (result.id === 'daily-food-journal' || result.id === 'overall-food-journal' || result.id === 'food-entry') {
+      setActiveTab('food-journal');
+      setFoodJournalMenuOpen(true);
+      setFoodSubTab(result.id === 'overall-food-journal' ? 'overall' : 'daily');
+    } else {
+      setActiveTab(result.id);
+    }
+    if (result.entryDate) setSelectedDate(result.entryDate);
+    setSearchQuery('');
+  }
 
   if (recovery) return <ResetPasswordPage onDone={finishRecovery} />;
-  if (currentScreen === 'welcome') return <WelcomePage onNavigate={handleNavigate} allowDemo={!cloudEnabled} />;
-  if (currentScreen === 'signup') return <SignUpPage onNavigate={handleNavigate} onSignUp={handleSignUpData} />;
-  if (currentScreen === 'login') return <LoginPage onNavigate={handleNavigate} onLogin={handleLoginSubmit} />;
+  const canShowDashboard = cloudEnabled && !!user;
+  if (currentScreen === 'welcome' && !canShowDashboard) return <WelcomePage onNavigate={handleNavigate} allowDemo={!cloudEnabled} />;
+  if (currentScreen === 'signup' && !canShowDashboard) return <SignUpPage onNavigate={handleNavigate} onSignUp={handleSignUpData} />;
+  if (currentScreen === 'login' && !canShowDashboard) return <LoginPage onNavigate={handleNavigate} onLogin={handleLoginSubmit} />;
 
   return (
     <div className={`app-shell ${preferences.highContrast ? 'wellness-high-contrast' : ''} ${preferences.enhancedFocus ? 'wellness-enhanced-focus' : ''}`}>
@@ -170,14 +188,14 @@ export default function App() {
       {/* TOPBAR */}
       <header className="topbar">
         <div className="topbar-left">
-          <div className="brand-logo" style={{ cursor: 'pointer' }} onClick={() => setCurrentScreen('welcome')}>
+          <button type="button" className="brand-logo" onClick={() => handleNavigate(user ? 'dashboard' : 'welcome')} aria-label="Go to MacroMate home">
             <img 
               src={new URL('./assets/MacroMate Assets/MacroMate Icon and Assets/MacroMate Logo.png', import.meta.url).href} 
               alt="MacroMate Logo" 
               className="brand-icon-img" 
             />
             <span className="brand-text">MacroMate</span>
-          </div>
+          </button>
           <div className="dashboard-title">
             <span className="title-icon">📊</span>
             <span>Personal Dashboard</span>
@@ -186,16 +204,29 @@ export default function App() {
 
         <div className="search-box">
           <span className="search-icon">🔍</span>
-          <input type="text" placeholder="Search activities..." />
+          <input
+            type="search"
+            aria-label="Search pages and food entries"
+            aria-controls="topbar-search-results"
+            aria-expanded={!!searchTerm}
+            placeholder="Search activities..."
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            onKeyDown={(event) => { if (event.key === 'Escape') setSearchQuery(''); }}
+          />
+          {searchTerm && <div className="topbar-search-results" id="topbar-search-results" role="listbox" aria-label="Search results">
+            {searchResults.length ? searchResults.map((result) => <button key={`${result.id}-${result.label}`} type="button" role="option" onClick={() => openSearchResult(result)}>{result.label}</button>)
+              : <span className="empty-search-results">No matching pages or food entries.</span>}
+          </div>}
         </div>
 
         <div className="topbar-right">
-          <div className="notification-bell">
-            🔔
-            <span className="bell-badge">3</span>
+          <div className="notification-bell notification-control">
+            <button type="button" className="notification-trigger" aria-label="Notifications" aria-expanded={showNotifications} onClick={() => setShowNotifications((visible) => !visible)}>🔔</button>
+            {showNotifications && <div className="notification-popover" role="status"><strong>Notifications</strong><p>You’re all caught up. New food and wellness updates will appear here.</p></div>}
           </div>
 
-          <div className="user-profile" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('profile')}>
+          <button type="button" className="user-profile" onClick={() => setActiveTab('profile')} aria-label="Open profile">
             <div className="user-info">
               {/* 🌟 Live Synced Full Name Badge */}
               <div className="user-handle">{displayName}</div>
@@ -205,7 +236,7 @@ export default function App() {
               {/* 🌟 Live Synced Profile Picture */}
               <img src={displayPfp} alt={displayName} style={{ objectFit: 'cover', width: '100%', height: '100%', borderRadius: '50%' }} />
             </div>
-          </div>
+          </button>
 
           <button className="log-food-btn" disabled={journal.loading || !!journal.error || journal.busy} onClick={() => setIsModalOpen(true)}>
             + Log Food
@@ -376,6 +407,7 @@ export default function App() {
               energyLevel={energyLevel}
               onEnergyLevelChange={setEnergyLevel}
               formatNumber={number}
+              controlsDisabled={!wellness.ready || wellness.pending > 0}
             />
           )}
 
