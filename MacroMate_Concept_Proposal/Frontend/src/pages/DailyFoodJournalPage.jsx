@@ -15,6 +15,7 @@ export default function DailyFoodJournalPage({
   energyLevel,
   onEnergyLevelChange,
   formatNumber,
+  controlsDisabled = false,
 }) {
   return (
     <div className="page-view">
@@ -49,6 +50,7 @@ export default function DailyFoodJournalPage({
                           <td>{formatNumber(entry.carbs)} g</td>
                           <td>
                             <button
+                              type="button"
                               className="entry-delete-btn"
                               disabled={busy}
                               onClick={() => onDelete(entry.id)}
@@ -93,13 +95,17 @@ export default function DailyFoodJournalPage({
             <div className="widget-title">WATER INTAKE 💧</div>
             <div className="droplets-row">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((glass) => (
-                <span
+                <button
+                  type="button"
                   key={glass}
                   className={`droplet ${glass <= waterGlasses ? 'filled' : ''}`}
+                  aria-label={`Set water intake to ${glass} glass${glass === 1 ? '' : 'es'}`}
+                  aria-pressed={waterGlasses === glass}
+                  disabled={controlsDisabled}
                   onClick={() => onWaterGlassesChange(glass)}
                 >
                   💧
-                </span>
+                </button>
               ))}
             </div>
           </div>
@@ -110,7 +116,11 @@ export default function DailyFoodJournalPage({
               {[1, 2, 3, 4, 5].map((level) => (
                 <button
                   key={level}
+                  type="button"
                   className={`energy-num ${energyLevel === level ? 'active' : ''}`}
+                  aria-label={`Set energy level to ${level}`}
+                  aria-pressed={energyLevel === level}
+                  disabled={controlsDisabled}
                   onClick={() => onEnergyLevelChange(level)}
                 >
                   {level}
