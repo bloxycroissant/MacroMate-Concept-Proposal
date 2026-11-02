@@ -37,9 +37,25 @@ export default function LoginPage({ onNavigate, onLogin }) {
   return (
     <div className="mm-fullscreen-auth">
       <style>{`
-        @keyframes floatIcon {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-16px) rotate(8deg); }
+        @keyframes foodDriftA {
+          0%, 100% { transform: translate(0, 0) rotate(-4deg); }
+          35% { transform: translate(12px, -10px) rotate(3deg); }
+          70% { transform: translate(-7px, -15px) rotate(7deg); }
+        }
+        @keyframes foodDriftB {
+          0%, 100% { transform: translate(0, 0) rotate(5deg); }
+          30% { transform: translate(-11px, -13px) rotate(-3deg); }
+          65% { transform: translate(8px, -6px) rotate(-8deg); }
+        }
+        @keyframes foodDriftC {
+          0%, 100% { transform: translate(0, 0) rotate(2deg); }
+          40% { transform: translate(9px, 11px) rotate(-6deg); }
+          75% { transform: translate(-10px, 4px) rotate(5deg); }
+        }
+        @keyframes foodDriftD {
+          0%, 100% { transform: translate(0, 0) rotate(-5deg); }
+          32% { transform: translate(-8px, 10px) rotate(5deg); }
+          68% { transform: translate(12px, 3px) rotate(9deg); }
         }
         @keyframes foodDriftA {
           0%, 100% { transform: translate(0, 0) rotate(-4deg); }
@@ -275,7 +291,11 @@ export default function LoginPage({ onNavigate, onLogin }) {
           align-items: center;
           justify-content: center;
           flex-direction: column;
+<<<<<<< HEAD
           gap: 26px;
+=======
+          gap: 22px;
+>>>>>>> f7309a2 (Fix some errors)
           padding: 48px;
           box-sizing: border-box;
         }
@@ -283,6 +303,7 @@ export default function LoginPage({ onNavigate, onLogin }) {
         .mm-icon-float {
           position: absolute;
           z-index: 2;
+<<<<<<< HEAD
           display: block;
           width: auto;
           height: auto;
@@ -317,18 +338,45 @@ export default function LoginPage({ onNavigate, onLogin }) {
         .mm-icon-float-9 { top: 10%; right: 32%; font-size: clamp(2rem, 2.5vw, 3rem); animation: foodDriftD 6.1s infinite ease-in-out 0.3s; }
         .mm-icon-float-10 { bottom: 5%; right: 36%; font-size: clamp(2rem, 2.5vw, 3rem); animation: foodDriftC 7s infinite ease-in-out 1.7s; }
         .mm-icon-float-11 { top: 37%; left: 5%; font-size: clamp(2rem, 2.4vw, 2.8rem); animation: foodDriftC 6.6s infinite ease-in-out 0.9s; }
+=======
+          font-size: clamp(2rem, 3vw, 3.5rem);
+          line-height: 1;
+          pointer-events: none;
+          filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.16));
+        }
+        .mm-icon-float-1 { top: 16%; left: 14%; font-size: clamp(3rem, 3.8vw, 4.5rem); animation: foodDriftA 5.2s infinite ease-in-out; }
+        .mm-icon-float-2 { top: 24%; right: 12%; font-size: clamp(2.8rem, 3.5vw, 4rem); animation: foodDriftB 6s infinite ease-in-out 0.7s; }
+        .mm-icon-float-3 { bottom: 25%; left: 20%; font-size: clamp(2.8rem, 3.7vw, 4.2rem); animation: foodDriftC 5.7s infinite ease-in-out 0.3s; }
+        .mm-icon-float-4 { bottom: 18%; right: 16%; font-size: clamp(3rem, 3.9vw, 4.5rem); animation: foodDriftD 6.5s infinite ease-in-out 1s; }
+        .mm-icon-float-5 { top: 7%; left: 52%; animation: foodDriftC 6.4s infinite ease-in-out 0.4s; }
+        .mm-icon-float-6 { top: 60%; left: 5%; animation: foodDriftD 5.8s infinite ease-in-out 1.1s; }
+        .mm-icon-float-7 { top: 43%; right: 4%; animation: foodDriftA 6.8s infinite ease-in-out 0.7s; }
+        .mm-icon-float-8 { bottom: 5%; left: 43%; animation: foodDriftB 5.4s infinite ease-in-out 1.4s; }
+        .mm-icon-float-9 { top: 10%; right: 32%; animation: foodDriftD 6.1s infinite ease-in-out 0.3s; }
+        .mm-icon-float-10 { bottom: 5%; right: 34%; animation: foodDriftC 7s infinite ease-in-out 1.7s; }
+        .mm-icon-float-11 { top: 37%; left: 5%; animation: foodDriftC 6.6s infinite ease-in-out 0.9s; }
+>>>>>>> f7309a2 (Fix some errors)
 
         .mm-center-brand-card {
           background: rgba(255, 255, 255, 0.95);
           backdrop-filter: blur(12px);
+<<<<<<< HEAD
           padding: 42px 54px;
           border: 1px solid rgba(255,255,255,0.75);
+=======
+          padding: 32px 48px;
+          border: 1px solid rgba(255, 255, 255, 0.75);
+>>>>>>> f7309a2 (Fix some errors)
           border-radius: 32px;
           text-align: center;
           color: #102a1c;
           animation: pulseLogoGlow 6s ease-in-out infinite;
           z-index: 3;
+<<<<<<< HEAD
           box-shadow: 0 24px 70px rgba(0,0,0,0.2);
+=======
+          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
+>>>>>>> f7309a2 (Fix some errors)
         }
 
         .mm-center-logo-img {
@@ -351,6 +399,7 @@ export default function LoginPage({ onNavigate, onLogin }) {
           color: #1e7e48;
           font-weight: 800;
         }
+<<<<<<< HEAD
 
         .mm-auth-promo-caption {
           z-index: 4;
@@ -363,10 +412,25 @@ export default function LoginPage({ onNavigate, onLogin }) {
 
         .mm-auth-promo-points {
           z-index: 4;
+=======
+        .mm-auth-promo-caption {
+          max-width: 520px;
+          margin: 0;
+          color: rgba(255, 255, 255, 0.94);
+          font-size: 1rem;
+          font-weight: 700;
+          line-height: 1.5;
+          text-align: center;
+          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          z-index: 3;
+        }
+        .mm-auth-promo-points {
+>>>>>>> f7309a2 (Fix some errors)
           display: flex;
           flex-wrap: wrap;
           justify-content: center;
           gap: 10px;
+<<<<<<< HEAD
         }
         .mm-auth-promo-points span {
           padding: 9px 13px;
@@ -445,17 +509,57 @@ export default function LoginPage({ onNavigate, onLogin }) {
             border-radius: 24px;
             padding: 28px 18px;
           }
+=======
+          z-index: 3;
+        }
+        .mm-auth-promo-points span {
+          padding: 9px 13px;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.13);
+          color: #fff;
+          font-size: 0.78rem;
+          font-weight: 800;
+          backdrop-filter: blur(8px);
+        }
+        @media (max-width: 900px) {
+          .mm-fullscreen-auth { grid-template-columns: minmax(340px, 42%) minmax(0, 1fr); }
+          .mm-auth-left-panel { padding: 32px 28px; }
+          .mm-auth-right-waves { padding: 32px 20px; }
+        }
+        @media (max-width: 700px) {
+          .mm-fullscreen-auth { display: flex; flex-direction: column; min-height: 100svh; height: auto; }
+          .mm-auth-left-panel { min-height: 100svh; padding: 24px; }
+          .mm-auth-right-waves { min-height: 480px; padding: 28px 18px; }
+>>>>>>> f7309a2 (Fix some errors)
           .mm-center-brand-card { padding: 24px 32px; border-radius: 24px; }
           .mm-center-logo-img { height: 48px; }
           .mm-center-brand-title { font-size: 1.8rem; }
           .mm-auth-promo-caption { font-size: 0.9rem; }
+<<<<<<< HEAD
           .mm-icon-float-1, .mm-icon-float-2, .mm-icon-float-3, .mm-icon-float-4 { font-size: 2.4rem; }
         }
 
+=======
+          .mm-icon-float { font-size: 2rem; }
+          .mm-icon-float-1 { top: 14%; left: 7%; }
+          .mm-icon-float-2 { top: 25%; right: 5%; }
+          .mm-icon-float-3 { bottom: 22%; left: 8%; }
+          .mm-icon-float-4 { bottom: 17%; right: 8%; }
+          .mm-icon-float-5 { top: 5%; left: 52%; }
+          .mm-icon-float-6 { top: 60%; left: 2%; }
+          .mm-icon-float-7 { top: 44%; right: 2%; }
+          .mm-icon-float-8 { bottom: 4%; left: 43%; }
+          .mm-icon-float-9 { top: 8%; right: 29%; }
+          .mm-icon-float-10 { bottom: 4%; right: 32%; }
+          .mm-icon-float-11 { top: 37%; left: 2%; }
+        }
+>>>>>>> f7309a2 (Fix some errors)
         @media (prefers-reduced-motion: reduce) {
           .mm-fullscreen-auth *, .mm-fullscreen-auth *::before, .mm-fullscreen-auth *::after {
             animation-duration: 0.01ms !important;
             animation-iteration-count: 1 !important;
+<<<<<<< HEAD
             scroll-behavior: auto !important;
             transition-duration: 0.01ms !important;
           }
@@ -568,6 +672,11 @@ export default function LoginPage({ onNavigate, onLogin }) {
           .mm-icon-float-10 { bottom: 4%; right: 34%; }
           .mm-icon-float-11 { top: 36%; left: 2%; }
         }
+=======
+            transition-duration: 0.01ms !important;
+          }
+        }
+>>>>>>> f7309a2 (Fix some errors)
       `}</style>
 
       {/* Left Form Panel */}

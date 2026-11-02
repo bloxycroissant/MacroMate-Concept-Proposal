@@ -1248,6 +1248,91 @@ html, body {
   gap: 10px;
 }
 
+.goals-checklist-header,
+.checklist-goal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.checklist-goals-form {
+  display: grid;
+  gap: 10px;
+}
+
+.checklist-goal-edit-row,
+.checklist-goal-add-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(70px, 90px) auto;
+  align-items: end;
+  gap: 7px;
+}
+
+.checklist-goal-edit-row label,
+.checklist-goal-add-row label {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  color: #40564a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.checklist-goal-edit-row input,
+.checklist-goal-add-row input,
+.checklist-goal-add-row select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #b8d2bd;
+  border-radius: 7px;
+  padding: 6px;
+  background: #fff;
+  color: #1a251e;
+  font: inherit;
+  font-size: 12px;
+}
+
+.checklist-goal-edit-row .checklist-target-field,
+.checklist-goal-add-row .checklist-target-field {
+  grid-column: 2;
+}
+
+.checklist-goal-remove {
+  border: 0;
+  padding: 5px;
+  background: transparent;
+  color: #8c2525;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.checklist-goal-add-row {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  padding-top: 8px;
+  border-top: 1px solid #e1ece3;
+}
+
+.checklist-goal-add-row > label:first-child {
+  grid-column: 1 / -1;
+}
+
+.checklist-goal-add-row > .checklist-target-field {
+  grid-column: auto;
+}
+
+.checklist-goal-actions {
+  justify-content: flex-end;
+}
+
+.checklist-goal-actions .goals-edit-btn:last-child {
+  border-color: #168a50;
+  background: #168a50;
+  color: #fff;
+}
+
 .goal-item {
   display: flex;
   align-items: center;
@@ -1594,6 +1679,70 @@ html, body {
   font-weight: 900;
   color: #1a251e;
   margin-bottom: 8px;
+}
+
+.goals-edit-btn,
+.daily-goals-actions button {
+  border: 1px solid #9dbda4;
+  border-radius: 8px;
+  padding: 5px 9px;
+  background: #f7fbf7;
+  color: #1a251e;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.goals-edit-btn:disabled,
+.daily-goals-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.daily-goals-form {
+  display: grid;
+  gap: 8px;
+}
+
+.daily-goals-form label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(84px, 110px);
+  align-items: center;
+  gap: 10px;
+  color: #40564a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.daily-goals-form input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #b8d2bd;
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: #fff;
+  color: #1a251e;
+  font: inherit;
+}
+
+.daily-goals-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.daily-goals-actions button[type="submit"] {
+  border-color: #168a50;
+  background: #168a50;
+  color: #fff;
+}
+
+.daily-goals-error {
+  margin: 8px 0 0;
+  color: #8c2525;
+  font-size: 12px;
 }
 
 .droplets-row {

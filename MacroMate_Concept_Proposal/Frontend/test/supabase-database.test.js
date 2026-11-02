@@ -16,6 +16,8 @@ before(async () => {
     insert into auth.users values ('${alice}'),('${bob}');`);
   await database.exec(await readFile(new URL('../../../supabase/migrations/202610260001_macromate.sql', import.meta.url), 'utf8'));
   await database.exec(await readFile(new URL('../../../supabase/migrations/202611020001_allow_clearing_checkin_mood.sql', import.meta.url), 'utf8'));
+  await database.exec(await readFile(new URL('../../../supabase/migrations/202611020002_unlimited_water_intake.sql', import.meta.url), 'utf8'));
+  await database.exec(await readFile(new URL('../../../supabase/migrations/202611020003_customize_daily_checklist_goals.sql', import.meta.url), 'utf8'));
 });
 beforeEach(async () => {
   await database.exec('reset role; truncate public.food_entries, public.workouts, public.daily_checkins, public.profiles, public.preferences restart identity;');
@@ -69,11 +71,11 @@ test('guests have no table or RPC access', async () => {
   await assert.rejects(asUser(null, "select public.save_preference('highContrast',true)"), /permission denied/i);
 });
 test('atomic health and preference patches preserve unrelated fields', async () => {
-  await asUser(alice, 'select public.save_checkin($1,$2)', ['2026-10-26',{ mood:'Great', completedGoals:['breakfast'] }]);
+  await asUser(alice, 'select public.save_checkin($1,$2)', ['2026-10-26',{ mood:'Great', completedGoals:['breakfast','custom-goal_1'] }]);
   await asUser(alice, 'select public.save_checkin($1,$2)', ['2026-10-26',{ waterGlasses:6, sleepMinutes:450 }]);
   const day = (await asUser(alice, 'select * from public.daily_checkins')).rows[0];
   assert.equal(day.mood, 'Great'); assert.equal(day.water_glasses, 6); assert.equal(day.sleep_minutes,450);
-  assert.deepEqual(day.completed_goals,['breakfast']);
+  assert.deepEqual(day.completed_goals,['breakfast','custom-goal_1']);
   await asUser(alice, "select public.save_preference('highContrast',true)");
   await asUser(alice, "select public.save_preference('reduceMotion',true)");
   const preferences = (await asUser(alice, 'select * from public.preferences')).rows[0];
@@ -95,8 +97,10 @@ test('an owner can clear an existing mood directly without changing the check-in
   assert.equal(day.water_glasses, 2);
   assert.equal(day.sleep_minutes, 420);
 });
-test('check-in RPC rejects invalid numbers, unknown fields, goals and dates', async () => {
-  for (const patch of [{waterGlasses:9},{waterGlasses:1.5},{energyLevel:0},{sleepMinutes:1441},{completedGoals:['admin']},{mood:'Invalid'},{user_id:bob},{waterGlasses:'1'}]) {
+test('check-in RPC allows water intake above eight and rejects invalid values', async () => {
+  await asUser(alice, 'select public.save_checkin($1,$2)', ['2026-10-26',{waterGlasses:9}]);
+  assert.equal((await asUser(alice, 'select water_glasses from public.daily_checkins')).rows[0].water_glasses, 9);
+  for (const patch of [{waterGlasses:-1},{waterGlasses:1.5},{energyLevel:0},{sleepMinutes:1441},{completedGoals:[{}]},{mood:'Invalid'},{user_id:bob},{waterGlasses:'1'}]) {
     await assert.rejects(asUser(alice, 'select public.save_checkin($1,$2)', ['2026-10-26',patch]));
   }
   await assert.rejects(asUser(alice,'select public.save_checkin($1,$2)',['2026-99-99',{mood:'Good'}]));

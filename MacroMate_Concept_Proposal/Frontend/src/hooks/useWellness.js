@@ -50,7 +50,15 @@ export default function useWellness(date) {
     const task = queue.current.then(async () => {
       setError('');
       try { return await action(); }
-      catch (err) { setError('Your change was not saved. Check your connection and try again.'); throw err; }
+      catch (err) {
+        console.error('Could not save wellness changes.', err);
+        const backendMessage = [err?.message, err?.details, err?.hint].filter(Boolean).join(' ');
+        const message = /daily_checkins_water_glasses_check/i.test(backendMessage)
+          ? 'Water intake is still limited by the database schema. Apply the 202611020002_unlimited_water_intake.sql migration, then try again.'
+          : `Your change was not saved. ${backendMessage || 'Check your connection and try again.'}`;
+        setError(message);
+        throw err;
+      }
       finally { setPending((count) => count - 1); }
     });
     queue.current = task.catch(() => {});

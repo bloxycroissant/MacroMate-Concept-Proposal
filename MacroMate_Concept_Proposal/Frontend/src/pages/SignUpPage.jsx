@@ -83,9 +83,14 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
         }
 
         .mm-auth-left-panel {
+<<<<<<< HEAD
           position: relative;
           min-height: calc(100svh - 48px);
           padding: 68px clamp(18px, 3vw, 40px) 28px;
+=======
+          min-height: 100svh;
+          padding: 40px 48px;
+>>>>>>> f7309a2 (Fix some errors)
           display: flex;
           flex-direction: column;
           justify-content: center;
@@ -271,8 +276,12 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
             linear-gradient(145deg, #0d3821, #1e7e48);
           position: relative;
           width: 100%;
+<<<<<<< HEAD
           min-height: calc(100svh - 48px);
           border-radius: 30px;
+=======
+          min-height: 100svh;
+>>>>>>> f7309a2 (Fix some errors)
           overflow: hidden;
           display: flex;
           flex-direction: column;
@@ -285,7 +294,11 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
         .mm-signup-food {
           position: absolute;
           z-index: 1;
+<<<<<<< HEAD
           font-size: clamp(2rem, 3vw, 3.4rem);
+=======
+          font-size: clamp(2rem, 3vw, 3.2rem);
+>>>>>>> f7309a2 (Fix some errors)
           line-height: 1;
           pointer-events: none;
           filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.16));
@@ -406,6 +419,7 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
         .mm-sticker-icon { font-size: 2rem; }
         .mm-sticker-text strong { display: block; font-size: 1rem; font-weight: 900; }
         .mm-sticker-text span { font-size: 0.78rem; color: #557361; font-weight: 700; }
+<<<<<<< HEAD
 
         .mm-auth-footer {
           color: #587261;
@@ -450,10 +464,35 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
           .mm-showcase-glass-card { padding: 30px; }
         }
 
+=======
+        .mm-signup-promo-caption {
+          position: absolute;
+          z-index: 3;
+          right: 24px;
+          bottom: 28px;
+          left: 24px;
+          margin: 0;
+          color: rgba(255, 255, 255, 0.94);
+          font-size: 0.9rem;
+          font-weight: 700;
+          line-height: 1.45;
+          text-align: center;
+          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 900px) {
+          .mm-fullscreen-auth { grid-template-columns: minmax(340px, 42%) minmax(0, 1fr); }
+          .mm-auth-left-panel { padding: 32px 28px; }
+          .mm-auth-right-showcase { padding: 32px 20px; }
+          .mm-showcase-glass-card { width: min(360px, 100%); padding: 30px; }
+          .mm-floating-sticker { right: 24px; bottom: 76px; }
+        }
+>>>>>>> f7309a2 (Fix some errors)
         @media (max-width: 700px) {
           .mm-fullscreen-auth {
             display: flex;
             flex-direction: column;
+<<<<<<< HEAD
             padding: 12px;
             gap: 12px;
           }
@@ -577,6 +616,18 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
           .mm-btn-back { position: static; width: 36px; height: 36px; }
           .mm-auth-right-showcase { min-height: 500px; padding: 28px 18px 90px; }
           .mm-showcase-glass-card { width: min(360px, 100%); padding: 26px; }
+=======
+            min-height: 100svh;
+            height: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
+          }
+          .mm-auth-left-panel { min-height: 100svh; padding: 24px; }
+          .mm-auth-right-showcase { min-height: 520px; padding: 28px 18px 90px; }
+          .mm-showcase-glass-card { width: min(360px, 100%); padding: 26px; }
+          .mm-floating-sticker { right: 16px; bottom: 50px; padding: 11px 15px; }
+          .mm-sticker-icon { font-size: 1.5rem; }
+>>>>>>> f7309a2 (Fix some errors)
           .mm-signup-food { font-size: 2rem; }
           .mm-signup-food-1 { top: 7%; left: 8%; }
           .mm-signup-food-2 { top: 20%; right: 5%; }
@@ -585,6 +636,29 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
           .mm-signup-food-5 { bottom: 8%; left: 7%; }
           .mm-signup-food-6 { bottom: 5%; right: 38%; }
           .mm-signup-food-7 { top: 69%; right: 7%; }
+<<<<<<< HEAD
+=======
+          .mm-signup-promo-caption { bottom: 8px; font-size: 0.76rem; }
+        }
+        @media (min-width: 701px) and (max-height: 800px) {
+          .mm-auth-left-panel { padding-top: 18px; padding-bottom: 18px; }
+          .mm-auth-logo-header { margin-top: -4px; margin-bottom: 10px; }
+          .mm-auth-logo-img { height: 44px; }
+          .mm-auth-head-title { font-size: 2.2rem; }
+          .mm-field-group { margin-bottom: 9px; }
+          .mm-field-label { margin-bottom: 4px; }
+          .mm-form-input { padding-top: 10px; padding-bottom: 10px; }
+          .mm-terms-line { margin: 10px 0; font-size: 0.74rem; }
+          .mm-btn-green-submit { padding: 10px; }
+          .mm-btn-white-alt { padding: 10px; margin-top: 8px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .mm-fullscreen-auth *, .mm-fullscreen-auth *::before, .mm-fullscreen-auth *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
+>>>>>>> f7309a2 (Fix some errors)
         }
       `}</style>
 
@@ -720,6 +794,7 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
             <span>+250 kcal Logged</span>
           </div>
         </div>
+        <p className="mm-signup-promo-caption">Start with one simple check-in. Build a routine that feels good.</p>
       </div>
     </div>
   );

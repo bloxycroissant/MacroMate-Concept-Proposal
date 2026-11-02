@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 export default function OverviewPage({
   totals,
   goals,
@@ -12,7 +14,68 @@ export default function OverviewPage({
   entries,
   formatNumber,
   onViewJournal, displayName, sleepMinutes, completedGoals, onGoalChange, wellnessDisabled = false,
+  checklistGoals = [], checklistGoalStorageError = '', onChecklistGoalsChange,
 }) {
+  const [editingChecklistGoals, setEditingChecklistGoals] = useState(false);
+  const [draftChecklistGoals, setDraftChecklistGoals] = useState(checklistGoals);
+  const [newGoalType, setNewGoalType] = useState('checklist');
+  const [newGoalLabel, setNewGoalLabel] = useState('');
+  const [newGoalTarget, setNewGoalTarget] = useState(1);
+  const [checklistEditorError, setChecklistEditorError] = useState('');
+
+  function openChecklistEditor() {
+    setDraftChecklistGoals(checklistGoals.map((goal) => ({ ...goal })));
+    setChecklistEditorError('');
+    setEditingChecklistGoals(true);
+  }
+
+  function addChecklistGoal(event) {
+    event.preventDefault();
+    const label = newGoalLabel.trim();
+    if (draftChecklistGoals.length >= 20 || !label || label.length > 80) {
+      setChecklistEditorError('Enter a goal name (up to 80 characters). You can add up to 20 goals.');
+      return;
+    }
+    const metric = newGoalType === 'checklist' ? null : newGoalType;
+    const id = globalThis.crypto?.randomUUID?.() || `goal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setDraftChecklistGoals((current) => [...current, {
+      id,
+      label,
+      metric,
+      ...(metric ? { target: Number(newGoalTarget) } : {}),
+    }]);
+    setNewGoalLabel('');
+    setNewGoalTarget(1);
+    setChecklistEditorError('');
+  }
+
+  function saveChecklistGoals(event) {
+    event.preventDefault();
+    if (draftChecklistGoals.some((goal) => !goal.label.trim() || goal.label.trim().length > 80
+      || (goal.metric && (!Number.isInteger(goal.target) || goal.target < 1 || goal.target > 100000)))) {
+      setChecklistEditorError('Each goal needs a name, and numeric targets must be whole numbers from 1 to 100000.');
+      return;
+    }
+    if (onChecklistGoalsChange(draftChecklistGoals)) {
+      setEditingChecklistGoals(false);
+      setChecklistEditorError('');
+    }
+  }
+
+  function checklistGoalLabel(goal) {
+    if (goal.metric === 'water') {
+      return goal.label === 'Drink water'
+        ? `Drink ${goal.target} glasses of water`
+        : `${goal.label} (${goal.target} glasses)`;
+    }
+    if (goal.metric === 'activity') {
+      return goal.label === 'Activity'
+        ? `${goal.target} min activity`
+        : `${goal.label} (${goal.target} min)`;
+    }
+    return goal.label;
+  }
+
   return (
     <div className="page-view">
       <span className="sub-heading">Track your daily progress</span>
@@ -65,14 +128,104 @@ export default function OverviewPage({
         </div>
 
         <div className="card goals-checklist-card">
-          <strong className="card-heading">Goals for the selected day</strong>
-          {[
-            ['breakfast', 'Log breakfast'], ['water', 'Drink 8 glasses of water'],
-            ['activity', '30 min activity'], ['reflection', 'Evening reflection'],
-          ].map(([id, label]) => <label key={id} className={`goal-item ${completedGoals.includes(id) ? 'done' : ''}`}>
-            <input type="checkbox" checked={completedGoals.includes(id)} disabled={wellnessDisabled} onChange={() => onGoalChange(id)} />
-            <span>{label}</span>
-          </label>)}
+          <div className="goals-checklist-header">
+            <strong className="card-heading">Goals for the selected day</strong>
+            <button type="button" className="goals-edit-btn" disabled={wellnessDisabled} onClick={editingChecklistGoals ? () => setEditingChecklistGoals(false) : openChecklistEditor}>
+              {editingChecklistGoals ? 'Close' : 'Customize'}
+            </button>
+          </div>
+          {editingChecklistGoals ? (
+            <form className="checklist-goals-form" onSubmit={saveChecklistGoals}>
+              {draftChecklistGoals.map((goal) => (
+                <div className="checklist-goal-edit-row" key={goal.id}>
+                  <label>
+                    <span>Goal name</span>
+                    <input
+                      type="text"
+                      maxLength="80"
+                      required
+                      value={goal.label}
+                      aria-label={`${goal.label} goal name`}
+                      onChange={(event) => setDraftChecklistGoals((current) => current.map((item) => item.id === goal.id ? { ...item, label: event.target.value } : item))}
+                    />
+                  </label>
+                  {goal.metric && (
+                    <label className="checklist-target-field">
+                      <span>{goal.metric === 'water' ? 'Glasses' : 'Minutes'}</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max="100000"
+                        step="1"
+                        required
+                        value={goal.target}
+                        aria-label={`${goal.label} target`}
+                        onChange={(event) => setDraftChecklistGoals((current) => current.map((item) => item.id === goal.id ? { ...item, target: Number(event.target.value) } : item))}
+                      />
+                    </label>
+                  )}
+                  <button
+                    type="button"
+                    className="checklist-goal-remove"
+                    aria-label={`Remove ${goal.label}`}
+                    onClick={() => setDraftChecklistGoals((current) => current.filter((item) => item.id !== goal.id))}
+                  >Remove</button>
+                </div>
+              ))}
+              <div className="checklist-goal-add-row">
+                <label>
+                  <span>New goal type</span>
+                  <select value={newGoalType} onChange={(event) => setNewGoalType(event.target.value)}>
+                    <option value="checklist">Checklist</option>
+                    <option value="water">Water target</option>
+                    <option value="activity">Activity target</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Goal name</span>
+                  <input
+                    type="text"
+                    maxLength="80"
+                    value={newGoalLabel}
+                    aria-label="New goal name"
+                    placeholder="Enter a goal"
+                    onChange={(event) => setNewGoalLabel(event.target.value)}
+                  />
+                </label>
+                {newGoalType !== 'checklist' && (
+                  <label className="checklist-target-field">
+                    <span>{newGoalType === 'water' ? 'Glasses' : 'Minutes'}</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100000"
+                      step="1"
+                      value={newGoalTarget}
+                      aria-label="New goal target"
+                      onChange={(event) => setNewGoalTarget(event.target.value)}
+                    />
+                  </label>
+                )}
+                <button type="button" className="goals-edit-btn" disabled={draftChecklistGoals.length >= 20} onClick={addChecklistGoal}>Add goal</button>
+              </div>
+              <div className="checklist-goal-actions">
+                <button type="button" className="goals-edit-btn" onClick={() => setEditingChecklistGoals(false)}>Cancel</button>
+                <button type="submit" className="goals-edit-btn">Save goals</button>
+              </div>
+              {checklistEditorError && <p className="daily-goals-error" role="alert">{checklistEditorError}</p>}
+              {checklistGoalStorageError && <p className="daily-goals-error" role="alert">{checklistGoalStorageError}</p>}
+            </form>
+          ) : (
+            <>
+              {checklistGoals.length ? checklistGoals.map((goal) => (
+                <label key={goal.id} className={`goal-item ${completedGoals.includes(goal.id) ? 'done' : ''}`}>
+                  <input type="checkbox" checked={completedGoals.includes(goal.id)} disabled={wellnessDisabled} onChange={() => onGoalChange(goal.id)} />
+                  <span>{checklistGoalLabel(goal)}</span>
+                </label>
+              )) : <p className="stat-sub">No goals for this day yet. Customize to add one.</p>}
+              {checklistGoalStorageError && <p className="daily-goals-error" role="alert">{checklistGoalStorageError}</p>}
+            </>
+          )}
         </div>
       </div>
 

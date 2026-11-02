@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useFoodEntries from './hooks/useFoodEntries';
 import FoodEntryForm from './components/FoodEntryForm';
 import DailyFoodJournalPage from './pages/DailyFoodJournalPage';
@@ -19,9 +19,51 @@ import { cloudEnabled, supabase } from './supabase/client';
 import { useAuth } from './supabase/authContext';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 
+const defaultGoals = { calories: 2200, protein: 150, carbs: 270, fat: 65 };
+const defaultChecklistGoals = [
+  { id: 'breakfast', label: 'Log breakfast', metric: null },
+  { id: 'water', label: 'Drink water', metric: 'water', target: 8 },
+  { id: 'activity', label: 'Activity', metric: 'activity', target: 30 },
+  { id: 'reflection', label: 'Evening reflection', metric: null },
+];
+
+function validGoalValues(values) {
+  return Object.fromEntries(Object.entries(defaultGoals).map(([key, fallback]) => {
+    const value = Number(values?.[key]);
+    return [key, Number.isInteger(value) && value > 0 && value <= 100000 ? value : fallback];
+  }));
+}
+
+function validateChecklistGoals(goals) {
+  if (!Array.isArray(goals) || goals.length > 20) {
+    throw new Error('Saved checklist goals must be a list of at most 20 goals.');
+  }
+  const validatedGoals = goals.map((goal) => {
+    if (!goal || typeof goal !== 'object' || !/^[A-Za-z0-9_-]{1,64}$/.test(goal.id)
+      || typeof goal.label !== 'string' || !goal.label.trim() || goal.label.trim().length > 80
+      || ![null, 'water', 'activity'].includes(goal.metric)) {
+      throw new Error('A saved checklist goal has invalid details.');
+    }
+    if (goal.metric && (!Number.isInteger(goal.target) || goal.target < 1 || goal.target > 100000)) {
+      throw new Error('A goal target must be a whole number from 1 to 100000.');
+    }
+    return {
+      id: goal.id,
+      label: goal.label.trim(),
+      metric: goal.metric,
+      ...(goal.metric ? { target: goal.target } : {}),
+    };
+  });
+  if (new Set(validatedGoals.map((goal) => goal.id)).size !== validatedGoals.length) {
+    throw new Error('Saved checklist goal IDs must be unique.');
+  }
+  return validatedGoals;
+}
+
 export default function App() {
   const auth = useAuth() || {};
   const user = auth.user || null;
+  const goalsOwner = user?.id || 'local';
   const recovery = auth.recovery || false;
   const finishRecovery = auth.finishRecovery || (() => {});
 
@@ -36,6 +78,10 @@ export default function App() {
   const [showNotifications, setShowNotifications] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(localDate);
+  const [goalWriteError, setGoalWriteError] = useState(null);
+  const [goalOverride, setGoalOverride] = useState(null);
+  const [checklistGoalOverride, setChecklistGoalOverride] = useState(null);
+  const [checklistGoalWriteError, setChecklistGoalWriteError] = useState(null);
   const wellness = useWellness(selectedDate) || {};
   const dayData = wellness.day || {};
   const preferences = wellness.preferences || {};
@@ -47,7 +93,7 @@ export default function App() {
 
   const { mood, waterGlasses, energyLevel, sleepMinutes, completedGoals = [] } = dayData;
 
-  const setWaterGlasses = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ waterGlasses: Math.max(0, Math.min(8, value)) });
+  const setWaterGlasses = (value) => wellness.ready && !wellness.pending && Number.isInteger(value) && value >= 0 && wellness.updateDay?.({ waterGlasses: value });
   const setEnergyLevel = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ energyLevel: value });
 
   // 🌟 Universal Full Name and Profile Picture Sync Across Website
@@ -75,7 +121,109 @@ export default function App() {
     calories: sum.calories + entry.calories, protein: sum.protein + entry.protein,
     carbs: sum.carbs + entry.carbs, fat: sum.fat + entry.fat,
   }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
-  const goals = { calories: 2200, protein: 150, carbs: 270, fat: 65 };
+  const goalPreference = useMemo(() => {
+    try {
+      const dailyGoals = localStorage.getItem(`macromate.daily-goals-by-date.${goalsOwner}`);
+      if (dailyGoals) {
+        const parsed = JSON.parse(dailyGoals);
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+          throw new Error('Saved daily goals have an invalid format.');
+        }
+        if (parsed[selectedDate]) return { values: validGoalValues(parsed[selectedDate]), error: '' };
+      }
+
+      if (selectedDate === localDate()) {
+        const legacyGoals = localStorage.getItem(`macromate.daily-goals.${goalsOwner}`);
+        if (legacyGoals) return { values: validGoalValues(JSON.parse(legacyGoals)), error: '' };
+      }
+      return { values: defaultGoals, error: '' };
+    } catch (error) {
+      console.error('Could not load saved daily goals for this date.', error);
+      return { values: defaultGoals, error: 'Your goal targets for this date could not be loaded from this browser.' };
+    }
+  }, [goalsOwner, selectedDate]);
+  const isCurrentGoalOverride = goalOverride?.owner === goalsOwner && goalOverride?.date === selectedDate;
+  const goals = isCurrentGoalOverride ? goalOverride.values : goalPreference.values;
+  const currentGoalWriteError = goalWriteError?.owner === goalsOwner && goalWriteError?.date === selectedDate
+    ? goalWriteError.message
+    : '';
+  const goalStorageError = currentGoalWriteError || (isCurrentGoalOverride ? '' : goalPreference.error);
+  const checklistGoalPreference = useMemo(() => {
+    try {
+      const saved = localStorage.getItem(`macromate.checklist-goals-by-date.${goalsOwner}`);
+      if (!saved) return { values: defaultChecklistGoals, error: '' };
+      const byDate = JSON.parse(saved);
+      if (!byDate || typeof byDate !== 'object' || Array.isArray(byDate)) {
+        throw new Error('Saved daily checklist goals have an invalid format.');
+      }
+      return {
+        values: byDate[selectedDate] === undefined
+          ? defaultChecklistGoals
+          : validateChecklistGoals(byDate[selectedDate]),
+        error: '',
+      };
+    } catch (error) {
+      console.error('Could not load checklist goals for this date.', error);
+      return { values: defaultChecklistGoals, error: 'Checklist goals for this date could not be loaded from this browser.' };
+    }
+  }, [goalsOwner, selectedDate]);
+  const isCurrentChecklistGoalOverride = checklistGoalOverride?.owner === goalsOwner && checklistGoalOverride?.date === selectedDate;
+  const checklistGoals = isCurrentChecklistGoalOverride ? checklistGoalOverride.values : checklistGoalPreference.values;
+  const currentChecklistGoalWriteError = checklistGoalWriteError?.owner === goalsOwner && checklistGoalWriteError?.date === selectedDate
+    ? checklistGoalWriteError.message
+    : '';
+  const checklistGoalStorageError = currentChecklistGoalWriteError
+    || (isCurrentChecklistGoalOverride ? '' : checklistGoalPreference.error);
+
+  const updateGoals = (values) => {
+    try {
+      const storageKey = `macromate.daily-goals-by-date.${goalsOwner}`;
+      const saved = localStorage.getItem(storageKey);
+      const byDate = saved ? JSON.parse(saved) : {};
+      if (!byDate || typeof byDate !== 'object' || Array.isArray(byDate)) {
+        throw new Error('Saved daily goals have an invalid format.');
+      }
+      localStorage.setItem(storageKey, JSON.stringify({ ...byDate, [selectedDate]: values }));
+      setGoalOverride({ owner: goalsOwner, date: selectedDate, values });
+      setGoalWriteError(null);
+    } catch (error) {
+      console.error('Could not save daily goals for this date.', error);
+      setGoalWriteError({
+        owner: goalsOwner,
+        date: selectedDate,
+        message: 'Your goal targets for this date could not be saved in this browser.',
+      });
+    }
+  };
+
+  const updateChecklistGoals = (values) => {
+    try {
+      const validatedGoals = validateChecklistGoals(values);
+      const storageKey = `macromate.checklist-goals-by-date.${goalsOwner}`;
+      const saved = localStorage.getItem(storageKey);
+      const byDate = saved ? JSON.parse(saved) : {};
+      if (!byDate || typeof byDate !== 'object' || Array.isArray(byDate)) {
+        throw new Error('Saved daily checklist goals have an invalid format.');
+      }
+      localStorage.setItem(storageKey, JSON.stringify({ ...byDate, [selectedDate]: validatedGoals }));
+      setChecklistGoalOverride({ owner: goalsOwner, date: selectedDate, values: validatedGoals });
+      setChecklistGoalWriteError(null);
+      const retainedIds = new Set(validatedGoals.map((goal) => goal.id));
+      const nextCompletedGoals = completedGoals.filter((goalId) => retainedIds.has(goalId));
+      if (nextCompletedGoals.length !== completedGoals.length) {
+        wellness.updateDay?.({ completedGoals: nextCompletedGoals }, selectedDate);
+      }
+      return true;
+    } catch (error) {
+      console.error('Could not save checklist goals for this date.', error);
+      setChecklistGoalWriteError({
+        owner: goalsOwner,
+        date: selectedDate,
+        message: 'Checklist goals for this date could not be saved in this browser.',
+      });
+      return false;
+    }
+  };
 
   const meals = [
     { meal: 'Breakfast', icon: '🥐' }, { meal: 'Lunch', icon: '🍱' },
@@ -93,7 +241,7 @@ export default function App() {
     return { date, calories: (journal.entries || []).filter((entry) => entry.entryDate === date)
       .reduce((sum, entry) => sum + entry.calories, 0) };
   });
-  const chartMax = Math.max(goals.calories, ...week.map((day) => day.calories));
+  const chartMax = Math.max(1, ...week.map((day) => day.calories));
   const chartPoints = week.map((day, index) => `${20 + index * 70},${100 - day.calories / chartMax * 90}`).join(' ');
 
   async function saveFood(entry) {
@@ -148,14 +296,27 @@ export default function App() {
 
   async function logOut() {
     setAccountError('');
+    let savedGoals = null;
+    try {
+      savedGoals = localStorage.getItem(`macromate.daily-goals.${goalsOwner}`);
+    } catch (error) {
+      console.error('Could not preserve daily goals while logging out.', error);
+    }
     try {
       if (cloudEnabled && supabase) {
         await supabase.auth.signOut();
       }
-    } catch (e) {
-      // Ignore token revocation error on sign out
+    } catch (error) {
+      console.error('Could not revoke the current session during sign out.', error);
     } finally {
       localStorage.clear();
+      if (savedGoals) {
+        try {
+          localStorage.setItem(`macromate.daily-goals.${goalsOwner}`, savedGoals);
+        } catch (error) {
+          console.error('Could not preserve daily goals while logging out.', error);
+        }
+      }
       sessionStorage.clear();
       setCustomProfile(null);
       handleNavigate('welcome');
@@ -256,8 +417,9 @@ export default function App() {
       `}</style>
 
       <div className="session-status" role="status" aria-live={preferences.announcements ? 'polite' : 'off'}>
-        Local demo · Food and workouts save to H2. Health, goals, profile and accessibility changes reset on refresh.
-        {cloudEnabled ? (wellness.error ? 'Saved records need attention' : wellness.pending ? 'Saving your changes…' : wellness.ready ? 'Supabase connected · No pending changes' : 'Loading your records…') : 'Local demo · Food and workouts use H2. Other changes reset on refresh.'}
+        {cloudEnabled
+          ? (wellness.error ? 'Saved records need attention' : wellness.pending ? 'Saving your changes…' : wellness.ready ? 'Supabase connected · No pending changes' : 'Loading your records…')
+          : 'Local demo · Food and workouts save to H2. Daily macro goals save in this browser; other health and profile changes reset on refresh.'}
       </div>
       
       {/* TOPBAR */}
@@ -440,7 +602,7 @@ export default function App() {
               <button type="button" disabled={journal.loading || journal.busy} onClick={journal.reload}>Retry</button>
             </div>
           )}
-          <p className="journal-selected-date">Food journal: {dateLabel}</p>
+          {activeTab !== 'health-journal' && <p className="journal-selected-date">Food journal: {dateLabel}</p>}
           
           {activeTab === 'health-journal' && (
             <HealthJournalPage
@@ -460,6 +622,7 @@ export default function App() {
 
           {activeTab === 'overview' && (
             <OverviewPage
+              key={selectedDate}
               totals={totals}
               goals={goals}
               mood={mood}
@@ -475,6 +638,9 @@ export default function App() {
               displayName={displayName} 
               sleepMinutes={sleepMinutes} 
               completedGoals={completedGoals}
+              checklistGoals={checklistGoals}
+              checklistGoalStorageError={checklistGoalStorageError}
+              onChecklistGoalsChange={updateChecklistGoals}
               onGoalChange={(goal) => wellness.updateDay?.({ completedGoals: completedGoals.includes(goal) ? completedGoals.filter((item) => item !== goal) : [...completedGoals, goal] })}
               wellnessDisabled={!wellness.ready || wellness.pending > 0}
               onViewJournal={() => { setActiveTab('food-journal'); setFoodSubTab('daily'); }}
@@ -490,11 +656,14 @@ export default function App() {
 
           {activeTab === 'food-journal' && foodSubTab === 'daily' && (
             <DailyFoodJournalPage
+              key={selectedDate}
               selectedDate={selectedDate}
               onDateChange={setSelectedDate}
               meals={meals}
               totals={totals}
               goals={goals}
+              onGoalsChange={updateGoals}
+              goalStorageError={goalStorageError || goalPreference.error}
               loading={journal.loading}
               error={journal.error}
               busy={journal.busy}

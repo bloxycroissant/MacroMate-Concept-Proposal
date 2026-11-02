@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import JournalDateSelector from '../components/JournalDateSelector';
 
 export default function DailyFoodJournalPage({
@@ -6,6 +7,8 @@ export default function DailyFoodJournalPage({
   meals,
   totals,
   goals,
+  onGoalsChange,
+  goalStorageError = '',
   loading,
   error,
   busy,
@@ -17,6 +20,24 @@ export default function DailyFoodJournalPage({
   formatNumber,
   controlsDisabled = false,
 }) {
+  const [editingGoals, setEditingGoals] = useState(false);
+  const [goalValues, setGoalValues] = useState(goals);
+
+  function saveGoals(event) {
+    event.preventDefault();
+    const values = Object.fromEntries(Object.entries(goalValues).map(([key, value]) => [key, Number(value)]));
+    if (Object.values(values).some((value) => !Number.isInteger(value) || value < 1 || value > 100000)) {
+      return;
+    }
+    onGoalsChange(values);
+    setEditingGoals(false);
+  }
+
+  function cancelGoalEdit() {
+    setGoalValues(goals);
+    setEditingGoals(false);
+  }
+
   return (
     <div className="page-view">
       <span className="sub-heading">Track your daily journal</span>
@@ -85,28 +106,64 @@ export default function DailyFoodJournalPage({
 
         <div className="widgets-column">
           <div className="card right-widget">
-            <div className="widget-title">TODAY'S GOALS 🎯</div>
-            <div className="goals-mini-grid">
-              <div>{goals.calories} kcal</div><div>{goals.protein} g protein</div><div>{goals.fat} g fat</div><div>{goals.carbs} g carbs</div>
+            <div className="widget-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+              <span>TODAY'S GOALS 🎯</span>
+              <button type="button" className="goals-edit-btn" disabled={controlsDisabled} onClick={() => {
+                setGoalValues(goals);
+                setEditingGoals((editing) => !editing);
+              }}>{editingGoals ? 'Close' : 'Customize'}</button>
             </div>
+            {editingGoals ? (
+              <form className="daily-goals-form" onSubmit={saveGoals}>
+                {[
+                  ['calories', 'Calories', 'kcal'],
+                  ['protein', 'Protein', 'g'],
+                  ['fat', 'Fat', 'g'],
+                  ['carbs', 'Carbs', 'g'],
+                ].map(([key, label, unit]) => (
+                  <label key={key}>
+                    <span>{label} ({unit})</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100000"
+                      step="1"
+                      required
+                      value={goalValues[key]}
+                      aria-label={`${label} goal`}
+                      onChange={(event) => setGoalValues((current) => ({ ...current, [key]: event.target.value }))}
+                    />
+                  </label>
+                ))}
+                <div className="daily-goals-actions">
+                  <button type="button" disabled={controlsDisabled} onClick={cancelGoalEdit}>Cancel</button>
+                  <button type="submit" disabled={controlsDisabled}>Save goals</button>
+                </div>
+              </form>
+            ) : (
+              <div className="goals-mini-grid">
+                <div>{goals.calories} kcal</div><div>{goals.protein} g protein</div><div>{goals.fat} g fat</div><div>{goals.carbs} g carbs</div>
+              </div>
+            )}
+            {goalStorageError && <p className="daily-goals-error" role="alert">{goalStorageError}</p>}
           </div>
 
           <div className="card right-widget">
             <div className="widget-title">WATER INTAKE 💧</div>
-            <div className="droplets-row">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((glass) => (
-                <button
-                  type="button"
-                  key={glass}
-                  className={`droplet ${glass <= waterGlasses ? 'filled' : ''}`}
-                  aria-label={`Set water intake to ${glass} glass${glass === 1 ? '' : 'es'}`}
-                  aria-pressed={waterGlasses === glass}
-                  disabled={controlsDisabled}
-                  onClick={() => onWaterGlassesChange(glass)}
-                >
-                  💧
-                </button>
-              ))}
+            <div className="water-counter" style={{ width: 'auto', padding: 0, border: 0, background: 'transparent', justifyContent: 'center', gap: '10px' }}>
+              <button
+                type="button"
+                aria-label="Remove one glass of water"
+                disabled={controlsDisabled || waterGlasses <= 0}
+                onClick={() => onWaterGlassesChange(Math.max(0, waterGlasses - 1))}
+              >-</button>
+              <span aria-live="polite">{waterGlasses} {waterGlasses === 1 ? 'glass' : 'glasses'}</span>
+              <button
+                type="button"
+                aria-label="Add one glass of water"
+                disabled={controlsDisabled}
+                onClick={() => onWaterGlassesChange(waterGlasses + 1)}
+              >+</button>
             </div>
           </div>
 
