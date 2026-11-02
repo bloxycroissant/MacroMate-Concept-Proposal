@@ -11,7 +11,7 @@ export default function OverviewPage({
   error,
   entries,
   formatNumber,
-  onViewJournal, displayName, sleepMinutes, completedGoals, onGoalChange,
+  onViewJournal, displayName, sleepMinutes, completedGoals, onGoalChange, wellnessDisabled = false,
 }) {
   return (
     <div className="page-view">
@@ -70,7 +70,7 @@ export default function OverviewPage({
             ['breakfast', 'Log breakfast'], ['water', 'Drink 8 glasses of water'],
             ['activity', '30 min activity'], ['reflection', 'Evening reflection'],
           ].map(([id, label]) => <label key={id} className={`goal-item ${completedGoals.includes(id) ? 'done' : ''}`}>
-            <input type="checkbox" checked={completedGoals.includes(id)} onChange={() => onGoalChange(id)} />
+            <input type="checkbox" checked={completedGoals.includes(id)} disabled={wellnessDisabled} onChange={() => onGoalChange(id)} />
             <span>{label}</span>
           </label>)}
         </div>
@@ -79,7 +79,7 @@ export default function OverviewPage({
       <div className="card recent-activity-card">
         <div className="recent-header">
           <strong>Recent activity</strong>
-          <button className="entry-delete-btn" onClick={onViewJournal}>View journal</button>
+          <button type="button" className="entry-delete-btn" onClick={onViewJournal}>View journal</button>
         </div>
         {entries.length === 0 && (
           <p className="stat-sub">{loading ? 'Loading…' : error ? 'Journal unavailable' : 'No food logged for this date yet.'}</p>

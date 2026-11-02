@@ -614,6 +614,9 @@ export default function LoginPage({ onNavigate, onLogin }) {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
                 <button type="button" className="mm-eye-icon" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>👁️</button>
+                <button type="button" className="mm-eye-icon" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword((visible) => !visible)}>
+                  👁️
+                </button>
               </div>
               <a href="#forgot" className="mm-forgot-link" onClick={requestPasswordReset}>
                 Forgot Password

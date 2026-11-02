@@ -3,7 +3,8 @@ import { useState, useRef } from 'react';
 export default function ProfilePage({ profile = {}, email = '', onSave, busy = false }) {
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
-  const [profileImage, setProfileImage] = useState(profile?.pfpUrl || null);
+  const [selectedProfileImage, setSelectedProfileImage] = useState(null);
+  const profileImage = selectedProfileImage || profile?.pfpUrl || null;
   const fileInputRef = useRef(null);
 
   const getInitials = (name) => {
@@ -28,7 +29,7 @@ export default function ProfilePage({ profile = {}, email = '', onSave, busy = f
       }
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImage(reader.result);
+        setSelectedProfileImage(reader.result);
         setMessage('Profile photo updated! Remember to click "Save Profile".');
       };
       reader.readAsDataURL(file);

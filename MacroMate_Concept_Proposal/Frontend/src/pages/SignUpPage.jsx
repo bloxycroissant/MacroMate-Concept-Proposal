@@ -646,6 +646,9 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
                 <button type="button" className="mm-eye-icon" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>👁️</button>
+                <button type="button" className="mm-eye-icon" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword((visible) => !visible)}>
+                  👁️
+                </button>
               </div>
             </div>
 
