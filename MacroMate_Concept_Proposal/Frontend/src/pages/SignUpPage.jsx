@@ -41,6 +41,26 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
           0%, 100% { transform: scale(1); opacity: 0.35; }
           50% { transform: scale(1.18); opacity: 0.65; }
         }
+        @keyframes foodDriftA {
+          0%, 100% { transform: translate(0, 0) rotate(-4deg); }
+          35% { transform: translate(12px, -10px) rotate(3deg); }
+          70% { transform: translate(-7px, -15px) rotate(7deg); }
+        }
+        @keyframes foodDriftB {
+          0%, 100% { transform: translate(0, 0) rotate(5deg); }
+          30% { transform: translate(-11px, -13px) rotate(-3deg); }
+          65% { transform: translate(8px, -6px) rotate(-8deg); }
+        }
+        @keyframes foodDriftC {
+          0%, 100% { transform: translate(0, 0) rotate(2deg); }
+          40% { transform: translate(9px, 11px) rotate(-6deg); }
+          75% { transform: translate(-10px, 4px) rotate(5deg); }
+        }
+        @keyframes foodDriftD {
+          0%, 100% { transform: translate(0, 0) rotate(-5deg); }
+          32% { transform: translate(-8px, 10px) rotate(5deg); }
+          68% { transform: translate(12px, 3px) rotate(9deg); }
+        }
         @keyframes slideInLeft {
           from { opacity: 0; transform: translateX(-40px); }
           to { opacity: 1; transform: translateX(0); }
@@ -49,79 +69,102 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
         .mm-fullscreen-auth {
           width: 100%;
           min-height: 100vh;
+          min-height: 100svh;
           margin: 0;
-          padding: 0;
-          overflow: hidden;
-          background: #d4f3d2;
+          padding: 24px;
+          overflow-x: hidden;
+          overflow-y: auto;
+          background: radial-gradient(circle at 8% 8%, #eff9ee 0, transparent 34%), #e4f2e5;
           display: grid;
-          grid-template-columns: 480px 1fr;
+          grid-template-columns: minmax(410px, 0.9fr) minmax(0, 1.1fr);
+          gap: 20px;
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           box-sizing: border-box;
         }
 
         .mm-auth-left-panel {
-          padding: 40px 48px;
+          position: relative;
+          min-height: calc(100svh - 48px);
+          padding: 68px clamp(18px, 3vw, 40px) 28px;
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
-          background: #d4f3d2;
+          justify-content: center;
+          gap: 20px;
+          background: rgba(255, 255, 255, 0.42);
+          border: 1px solid rgba(255, 255, 255, 0.8);
+          border-radius: 30px;
           z-index: 10;
           animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .mm-btn-back {
-          background: none;
-          border: none;
-          font-size: 1.6rem;
+          position: absolute;
+          top: 24px;
+          left: 24px;
+          background: rgba(255, 255, 255, 0.85);
+          border: 1px solid #d5e8d8;
+          border-radius: 50%;
+          font-size: 1.25rem;
           cursor: pointer;
           color: #102a1c;
           padding: 0;
-          width: 36px;
-          height: 36px;
+          width: 42px;
+          height: 42px;
           display: flex;
           align-items: center;
+          justify-content: center;
           transition: transform 0.2s ease;
         }
-        .mm-btn-back:hover { transform: translateX(-4px); }
+        .mm-btn-back:hover { transform: translateX(-3px); background: #ffffff; }
+
+        .mm-auth-form-card {
+          width: min(100%, 480px);
+          margin: auto;
+          padding: clamp(24px, 3vw, 36px);
+          background: rgba(255, 255, 255, 0.94);
+          border: 1px solid rgba(190, 218, 196, 0.8);
+          border-radius: 28px;
+          box-shadow: 0 24px 70px rgba(18, 68, 40, 0.12);
+        }
 
         .mm-auth-logo-header {
           text-align: center;
-          margin-top: -10px;
-          margin-bottom: 18px;
+          margin: 0 0 22px;
         }
 
         .mm-auth-logo-img {
-          height: 52px;
+          height: 58px;
           width: auto;
           transition: transform 0.3s ease;
         }
         .mm-auth-logo-img:hover { transform: scale(1.08) rotate(-3deg); }
 
         .mm-auth-head-title {
-          font-size: 2.5rem;
+          font-size: clamp(2rem, 3.2vw, 2.5rem);
           font-weight: 900;
           color: #0a1f13;
-          margin: 6px 0 0 0;
+          margin: 10px 0 0;
           letter-spacing: -0.8px;
+          line-height: 1.1;
         }
 
         .mm-auth-sub-title {
           font-size: 0.9rem;
-          color: #2c4a38;
-          font-weight: 800;
-          margin-top: 2px;
+          color: #607767;
+          font-weight: 500;
+          margin-top: 8px;
         }
 
         .mm-field-group {
-          margin-bottom: 14px;
+          margin-bottom: 16px;
         }
 
         .mm-field-label {
           display: block;
           font-size: 0.85rem;
           font-weight: 800;
-          color: #0a1f13;
-          margin-bottom: 6px;
+          color: #294435;
+          margin-bottom: 8px;
         }
 
         .mm-input-box {
@@ -130,10 +173,10 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
 
         .mm-form-input {
           width: 100%;
-          padding: 12px 16px;
-          border-radius: 18px;
-          border: 1.5px solid #bce1c3;
-          background: #edf8ee;
+          padding: 13px 16px;
+          border-radius: 14px;
+          border: 1.5px solid #d6e6d9;
+          background: #f7fbf7;
           font-size: 0.92rem;
           color: #0a1f13;
           outline: none;
@@ -152,13 +195,16 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
           right: 14px;
           top: 50%;
           transform: translateY(-50%);
+          border: 0;
+          background: transparent;
+          color: #45634e;
           cursor: pointer;
-          opacity: 0.75;
           font-size: 1rem;
-          transition: transform 0.2s ease, opacity 0.2s ease;
+          padding: 6px;
+          transition: transform 0.2s ease, color 0.2s ease;
         }
         .mm-eye-icon:hover {
-          opacity: 1;
+          color: #108a43;
           transform: translateY(-50%) scale(1.15);
         }
 
@@ -169,26 +215,28 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
           font-size: 0.78rem;
           color: #0a1f13;
           font-weight: 800;
-          margin: 16px 0;
+          margin: 14px 0 18px;
+          line-height: 1.45;
         }
 
         .mm-terms-line a {
-          color: #e53935;
+          color: #108a43;
           text-decoration: none;
           font-weight: 900;
         }
+        .mm-terms-line a:hover { text-decoration: underline; }
 
         .mm-btn-green-submit {
           width: 100%;
-          padding: 13px;
-          border-radius: 22px;
-          background: #108a43;
+          padding: 14px;
+          border-radius: 14px;
+          background: linear-gradient(135deg, #118c4a, #08733b);
           color: #ffffff;
           font-weight: 900;
           font-size: 1.02rem;
           border: none;
           cursor: pointer;
-          box-shadow: 0 6px 18px rgba(16, 138, 67, 0.28);
+          box-shadow: 0 8px 18px rgba(16, 138, 67, 0.22);
           transition: all 0.25s ease;
         }
         .mm-btn-green-submit:hover {
@@ -200,14 +248,15 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
         .mm-btn-white-alt {
           width: 100%;
           padding: 12px;
-          border-radius: 22px;
+          border-radius: 14px;
           background: #ffffff;
           color: #0a1f13;
           font-weight: 800;
           font-size: 0.9rem;
           border: none;
           cursor: pointer;
-          margin-top: 10px;
+          margin-top: 12px;
+          border: 1px solid #e1ece3;
           transition: all 0.25s ease;
         }
         .mm-btn-white-alt:hover {
@@ -216,18 +265,38 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
         }
 
         .mm-auth-right-showcase {
-          background: linear-gradient(145deg, #0d3821, #1e7e48);
+          background:
+            radial-gradient(circle at 18% 18%, rgba(161, 218, 171, 0.24), transparent 28%),
+            radial-gradient(circle at 84% 78%, rgba(241, 207, 142, 0.2), transparent 30%),
+            linear-gradient(145deg, #0d3821, #1e7e48);
           position: relative;
           width: 100%;
-          height: 100%;
+          min-height: calc(100svh - 48px);
+          border-radius: 30px;
           overflow: hidden;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 40px;
+          padding: 48px;
           box-sizing: border-box;
         }
+
+        .mm-signup-food {
+          position: absolute;
+          z-index: 1;
+          font-size: clamp(2rem, 3vw, 3.4rem);
+          line-height: 1;
+          pointer-events: none;
+          filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.16));
+        }
+        .mm-signup-food-1 { top: 8%; left: 16%; animation: foodDriftA 5.4s infinite ease-in-out; }
+        .mm-signup-food-2 { top: 21%; right: 7%; animation: foodDriftB 6.1s infinite ease-in-out 0.6s; }
+        .mm-signup-food-3 { top: 48%; left: 6%; animation: foodDriftC 5.8s infinite ease-in-out 0.2s; }
+        .mm-signup-food-4 { top: 38%; right: 5%; animation: foodDriftD 6.5s infinite ease-in-out 1s; }
+        .mm-signup-food-5 { bottom: 8%; left: 18%; animation: foodDriftB 5.7s infinite ease-in-out 0.8s; }
+        .mm-signup-food-6 { bottom: 5%; right: 42%; animation: foodDriftC 6.8s infinite ease-in-out 1.2s; }
+        .mm-signup-food-7 { top: 68%; right: 12%; animation: foodDriftA 6.3s infinite ease-in-out 0.4s; }
 
         .mm-glow-orb-1 {
           position: absolute;
@@ -258,10 +327,10 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
           backdrop-filter: blur(20px);
           border: 1px solid rgba(255, 255, 255, 0.28);
           border-radius: 28px;
-          padding: 36px;
-          width: 360px;
+          padding: 40px;
+          width: min(440px, 100%);
           color: #ffffff;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
           animation: floatCard1 6s ease-in-out infinite;
           z-index: 2;
         }
@@ -337,6 +406,186 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
         .mm-sticker-icon { font-size: 2rem; }
         .mm-sticker-text strong { display: block; font-size: 1rem; font-weight: 900; }
         .mm-sticker-text span { font-size: 0.78rem; color: #557361; font-weight: 700; }
+
+        .mm-auth-footer {
+          color: #587261;
+          font-size: 0.78rem;
+          text-align: center;
+        }
+        .mm-auth-error {
+          margin: 0 0 14px;
+          padding: 11px 13px;
+          border: 1px solid #f1c7c7;
+          border-radius: 12px;
+          color: #8d2424;
+          background: #fff3f3;
+          font-size: 0.84rem;
+        }
+        .mm-auth-message {
+          margin: 0 0 14px;
+          padding: 11px 13px;
+          border: 1px solid #c5e3cc;
+          border-radius: 12px;
+          color: #1d6035;
+          background: #eff9f1;
+          font-size: 0.84rem;
+        }
+        .mm-btn-green-submit:focus-visible,
+        .mm-btn-white-alt:focus-visible,
+        .mm-btn-back:focus-visible,
+        .mm-eye-icon:focus-visible {
+          outline: 3px solid #0b7840;
+          outline-offset: 3px;
+        }
+
+        @media (max-width: 900px) {
+          .mm-fullscreen-auth {
+            grid-template-columns: minmax(370px, 0.95fr) minmax(0, 1.05fr);
+            padding: 16px;
+            gap: 14px;
+          }
+          .mm-auth-left-panel, .mm-auth-right-showcase {
+            min-height: calc(100svh - 32px);
+          }
+          .mm-showcase-glass-card { padding: 30px; }
+        }
+
+        @media (max-width: 700px) {
+          .mm-fullscreen-auth {
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            gap: 12px;
+          }
+          .mm-auth-left-panel {
+            min-height: auto;
+            padding: 68px 12px 16px;
+            border-radius: 24px;
+          }
+          .mm-btn-back { top: 16px; left: 16px; }
+          .mm-auth-form-card { padding: 24px 20px; border-radius: 22px; }
+          .mm-auth-right-showcase {
+            min-height: 420px;
+            border-radius: 24px;
+            padding: 26px 18px 90px;
+          }
+          .mm-showcase-glass-card { padding: 26px; border-radius: 22px; }
+          .mm-floating-sticker { right: 16px; bottom: 16px; padding: 11px 15px; }
+          .mm-sticker-icon { font-size: 1.5rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .mm-fullscreen-auth *, .mm-fullscreen-auth *::before, .mm-fullscreen-auth *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            scroll-behavior: auto !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
+
+        /* Keep the original split-screen form; reserve added decoration for the showcase. */
+        .mm-fullscreen-auth {
+          min-height: 100vh;
+          min-height: 100svh;
+          padding: 0;
+          overflow: hidden;
+          background: #d4f3d2;
+          grid-template-columns: 480px minmax(0, 1fr);
+          gap: 0;
+        }
+        .mm-auth-left-panel {
+          position: static;
+          min-height: 0;
+          padding: 40px 48px;
+          justify-content: space-between;
+          gap: 0;
+          background: #d4f3d2;
+          border: 0;
+          border-radius: 0;
+        }
+        .mm-btn-back {
+          position: static;
+          background: none;
+          border: 0;
+          border-radius: 0;
+          font-size: 1.6rem;
+          width: 36px;
+          height: 36px;
+          justify-content: flex-start;
+        }
+        .mm-btn-back:hover { background: none; }
+        .mm-auth-form-card {
+          width: 100%;
+          max-width: none;
+          margin: 0;
+          padding: 0;
+          background: transparent;
+          border: 0;
+          border-radius: 0;
+          box-shadow: none;
+        }
+        .mm-auth-logo-header { margin: -10px 0 18px; }
+        .mm-auth-logo-img { height: 52px; }
+        .mm-auth-head-title {
+          font-size: 2.5rem;
+          margin: 6px 0 0;
+          line-height: normal;
+        }
+        .mm-auth-sub-title {
+          color: #2c4a38;
+          font-weight: 800;
+          margin-top: 2px;
+        }
+        .mm-field-group { margin-bottom: 14px; }
+        .mm-field-label { color: #0a1f13; margin-bottom: 6px; }
+        .mm-form-input {
+          padding: 12px 16px;
+          border-radius: 18px;
+          border-color: #bce1c3;
+          background: #edf8ee;
+        }
+        .mm-eye-icon { color: inherit; opacity: 0.75; }
+        .mm-eye-icon:hover { color: inherit; opacity: 1; }
+        .mm-terms-line { margin: 16px 0; line-height: normal; }
+        .mm-terms-line a { color: #e53935; }
+        .mm-btn-green-submit {
+          padding: 13px;
+          border-radius: 22px;
+          background: #108a43;
+          box-shadow: 0 6px 18px rgba(16, 138, 67, 0.28);
+        }
+        .mm-btn-white-alt {
+          padding: 12px;
+          border-radius: 22px;
+          border: 0;
+          margin-top: 10px;
+        }
+        .mm-auth-right-showcase {
+          min-height: 0;
+          border-radius: 0;
+          padding: 40px;
+        }
+        .mm-showcase-glass-card { padding: 36px; width: 360px; }
+        @media (max-width: 900px) {
+          .mm-fullscreen-auth { grid-template-columns: minmax(370px, 44%) minmax(0, 1fr); padding: 0; gap: 0; }
+          .mm-auth-left-panel, .mm-auth-right-showcase { min-height: 100svh; }
+          .mm-auth-left-panel { padding: 32px 28px; }
+        }
+        @media (max-width: 700px) {
+          .mm-fullscreen-auth { display: flex; flex-direction: column; padding: 0; gap: 0; }
+          .mm-auth-left-panel { min-height: 100svh; padding: 24px; }
+          .mm-btn-back { position: static; width: 36px; height: 36px; }
+          .mm-auth-right-showcase { min-height: 500px; padding: 28px 18px 90px; }
+          .mm-showcase-glass-card { width: min(360px, 100%); padding: 26px; }
+          .mm-signup-food { font-size: 2rem; }
+          .mm-signup-food-1 { top: 7%; left: 8%; }
+          .mm-signup-food-2 { top: 20%; right: 5%; }
+          .mm-signup-food-3 { top: 48%; left: 3%; }
+          .mm-signup-food-4 { top: 42%; right: 3%; }
+          .mm-signup-food-5 { bottom: 8%; left: 7%; }
+          .mm-signup-food-6 { bottom: 5%; right: 38%; }
+          .mm-signup-food-7 { top: 69%; right: 7%; }
+        }
       `}</style>
 
       {/* Left Form Panel */}
@@ -345,7 +594,7 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
           ←
         </button>
 
-        <div>
+        <div className="mm-auth-form-card">
           <div className="mm-auth-logo-header">
             <img src={logoUrl} alt="MacroMate Logo" className="mm-auth-logo-img" />
             <h2 className="mm-auth-head-title">Sign Up</h2>
@@ -353,11 +602,12 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
           </div>
 
           <form onSubmit={handleSubmit}>
-            {error && <p className="auth-error" role="alert">{error}</p>}
-            {message && <p role="status">{message}</p>}
+            {error && <p className="mm-auth-error" role="alert">{error}</p>}
+            {message && <p className="mm-auth-message" role="status">{message}</p>}
             <div className="mm-field-group">
-              <label className="mm-field-label">Name</label>
+              <label className="mm-field-label" htmlFor="signup-name">Full name</label>
               <input
+                id="signup-name"
                 type="text"
                 aria-label="Name" maxLength="120" autoComplete="name" disabled={loading}
                 className="mm-form-input"
@@ -369,8 +619,9 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
             </div>
 
             <div className="mm-field-group">
-              <label className="mm-field-label">Email</label>
+              <label className="mm-field-label" htmlFor="signup-email">Email address</label>
               <input
+                id="signup-email"
                 type="email"
                 aria-label="Email" autoComplete="email" disabled={loading}
                 className="mm-form-input"
@@ -382,9 +633,10 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
             </div>
 
             <div className="mm-field-group">
-              <label className="mm-field-label">Password</label>
+              <label className="mm-field-label" htmlFor="signup-password">Password</label>
               <div className="mm-input-box">
                 <input
+                  id="signup-password"
                   type={showPassword ? 'text' : 'password'}
                   aria-label="Password" minLength="8" maxLength="128" autoComplete="new-password" disabled={loading}
                   className="mm-form-input"
@@ -393,6 +645,7 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
+                <button type="button" className="mm-eye-icon" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>👁️</button>
                 <button type="button" className="mm-eye-icon" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword((visible) => !visible)}>
                   👁️
                 </button>
@@ -421,7 +674,7 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
           </button>
         </div>
 
-        <div style={{ fontSize: '0.78rem', color: '#385c46', textAlign: 'center' }}>
+        <div className="mm-auth-footer">
           MacroMate © 2026 • Group 8
         </div>
       </div>
@@ -429,6 +682,13 @@ export default function SignUpPage({ onNavigate, onSignUp }) {
       <div className="mm-auth-right-showcase">
         <div className="mm-glow-orb-1" />
         <div className="mm-glow-orb-2" />
+        <span className="mm-signup-food mm-signup-food-1" aria-hidden="true">🍓</span>
+        <span className="mm-signup-food mm-signup-food-2" aria-hidden="true">🥑</span>
+        <span className="mm-signup-food mm-signup-food-3" aria-hidden="true">🍊</span>
+        <span className="mm-signup-food mm-signup-food-4" aria-hidden="true">🥕</span>
+        <span className="mm-signup-food mm-signup-food-5" aria-hidden="true">🫐</span>
+        <span className="mm-signup-food mm-signup-food-6" aria-hidden="true">🍌</span>
+        <span className="mm-signup-food mm-signup-food-7" aria-hidden="true">🥦</span>
 
         <div className="mm-showcase-glass-card">
           <span className="mm-showcase-badge">✨ REAL-TIME TRACKING</span>

@@ -37,6 +37,11 @@ body {
 }
 
 #root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  text-align: left;
+  border: 0;
   width: min(100%, 1440px);
   max-width: 100%;
   margin: 0 auto;
