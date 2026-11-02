@@ -45,12 +45,10 @@ export default function useFoodEntries() {
         setEntries(loadedEntries);
         setLoadedUid(requestedUid);
       }
-      const data = await listFoodEntries();
-      setEntries(data || []);
     } catch (err) {
       if (requestedUid === uidRef.current) setErrorState({ uid: requestedUid, message: `Could not load your journal. ${err.message}` });
     } finally {
-      setLoading(false);
+      if (requestedUid === uidRef.current) setLoading(false);
     }
   }
 
