@@ -21,7 +21,8 @@ Charts calculate from the signed-in user's records. Check-ins and preferences sa
 
 ## One-time project setup
 
-1. Open the SQL Editor for the project and execute `supabase/migrations/202610260001_macromate.sql` once. It creates five tables, indexes, validated atomic save functions and owner-only policies in a transaction. It revokes anonymous access and explicitly grants the required operations to authenticated users. Do not disable RLS or use a secret key in the browser.
+1. Open the SQL Editor for the project and execute any unapplied files in `supabase/migrations/` in filename order. For an existing installation created from `202610260001_macromate.sql`, apply `202611020001_allow_clearing_checkin_mood.sql`, `202611020002_unlimited_water_intake.sql`, and `202611020003_customize_daily_checklist_goals.sql`. The last migration is required for custom checklist goal IDs and up to 20 goals; without it, the original constraint rejects checklist saves. Do not disable RLS or use a secret key in the browser.
+
 2. Under **Authentication → URL Configuration**, set the Site URL to the app's intended address. For this local setup use `http://127.0.0.1:5173`, and add `http://127.0.0.1:5173/**` and `http://localhost:5173/**` as allowed redirect URLs for confirmation and password recovery. Add the real HTTPS site when deploying.
 3. Keep Email/Password authentication and email confirmation enabled. Verify the project's email delivery settings and limits before inviting users. This code handles both confirmation-required signup and projects that immediately return a session.
 4. Do not automatically deploy SQL changes through a GitHub connection until your team has chosen a deployment workflow. The application connection uses the project URL and public key; linking a repository in the Supabase dashboard is optional.

@@ -55,6 +55,8 @@ export default function useWellness(date) {
         const backendMessage = [err?.message, err?.details, err?.hint].filter(Boolean).join(' ');
         const message = /daily_checkins_water_glasses_check/i.test(backendMessage)
           ? 'Water intake is still limited by the database schema. Apply the 202611020002_unlimited_water_intake.sql migration, then try again.'
+          : /daily_checkins_completed_goals_check/i.test(backendMessage)
+            ? 'Custom goals are blocked by an outdated database schema. In Supabase SQL Editor, run supabase/migrations/202611020003_customize_daily_checklist_goals.sql, then retry. This change was not saved.'
           : `Your change was not saved. ${backendMessage || 'Check your connection and try again.'}`;
         setError(message);
         throw err;
@@ -66,6 +68,12 @@ export default function useWellness(date) {
   }
   function updateDay(patch, targetDate = date) {
     if (!cloudEnabled) { setDays((current) => ({ ...current, [targetDate]: { ...current[targetDate], ...patch } })); return; }
+    if (patch.completedGoals && uid && ready) {
+      setDays((current) => ({
+        ...current,
+        [targetDate]: { ...defaultDay, ...current[targetDate], completedGoals: patch.completedGoals },
+      }));
+    }
     void enqueue(async () => {
       if (patch.mood === null) {
         const row = unwrap(await supabase.from('daily_checkins').update({ mood: null })

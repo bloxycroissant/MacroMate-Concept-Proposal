@@ -96,7 +96,6 @@ export default function App() {
   const setWaterGlasses = (value) => wellness.ready && !wellness.pending && Number.isInteger(value) && value >= 0 && wellness.updateDay?.({ waterGlasses: value });
   const setEnergyLevel = (value) => wellness.ready && !wellness.pending && wellness.updateDay?.({ energyLevel: value });
 
-  // 🌟 Universal Full Name and Profile Picture Sync Across Website
   useEffect(() => {
     if (cloudEnabled && user && ['welcome', 'login', 'signup'].includes(currentScreen)) {
       setCurrentScreen('dashboard');
@@ -215,7 +214,11 @@ export default function App() {
       const retainedIds = new Set(validatedGoals.map((goal) => goal.id));
       const nextCompletedGoals = completedGoals.filter((goalId) => retainedIds.has(goalId));
       if (nextCompletedGoals.length !== completedGoals.length) {
-        wellness.updateDay?.({ completedGoals: nextCompletedGoals }, selectedDate);
+        try {
+          wellness.updateDay?.({ completedGoals: nextCompletedGoals.map(String) }, selectedDate);
+        } catch (e) {
+          console.warn('Saved checklist goals locally pending database update.', e);
+        }
       }
       return true;
     } catch (error) {
@@ -646,7 +649,18 @@ export default function App() {
               checklistGoals={checklistGoals}
               checklistGoalStorageError={checklistGoalStorageError}
               onChecklistGoalsChange={updateChecklistGoals}
-              onGoalChange={(goal) => wellness.updateDay?.({ completedGoals: completedGoals.includes(goal) ? completedGoals.filter((item) => item !== goal) : [...completedGoals, goal] })}
+              onGoalChange={(goal) => {
+                const cleanGoalId = typeof goal === 'string' ? goal : String(goal?.id || goal);
+                const nextGoals = completedGoals.includes(cleanGoalId)
+                  ? completedGoals.filter((item) => String(item) !== cleanGoalId)
+                  : [...completedGoals, cleanGoalId];
+
+                try {
+                  wellness.updateDay?.({ completedGoals: nextGoals.map(String) }, selectedDate);
+                } catch (e) {
+                  console.warn('Saved checklist goals locally pending database update.', e);
+                }
+              }}
               wellnessDisabled={!wellness.ready || wellness.pending > 0}
               onViewJournal={() => { setActiveTab('food-journal'); setFoodSubTab('daily'); }}
             />

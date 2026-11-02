@@ -100,6 +100,9 @@ test('an owner can clear an existing mood directly without changing the check-in
 test('check-in RPC allows water intake above eight and rejects invalid values', async () => {
   await asUser(alice, 'select public.save_checkin($1,$2)', ['2026-10-26',{waterGlasses:9}]);
   assert.equal((await asUser(alice, 'select water_glasses from public.daily_checkins')).rows[0].water_glasses, 9);
+  const customGoals = ['custom-goal-1', 'custom-goal-2', 'custom-goal-3', 'custom-goal-4', 'custom-goal-5'];
+  await asUser(alice, 'select public.save_checkin($1,$2)', ['2026-10-27',{completedGoals:customGoals}]);
+  assert.deepEqual((await asUser(alice, "select completed_goals from public.daily_checkins where entry_date = '2026-10-27'")).rows[0].completed_goals, customGoals);
   for (const patch of [{waterGlasses:-1},{waterGlasses:1.5},{energyLevel:0},{sleepMinutes:1441},{completedGoals:[{}]},{mood:'Invalid'},{user_id:bob},{waterGlasses:'1'}]) {
     await assert.rejects(asUser(alice, 'select public.save_checkin($1,$2)', ['2026-10-26',patch]));
   }
