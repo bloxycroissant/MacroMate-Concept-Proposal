@@ -1196,7 +1196,7 @@ html, body {
 
 .overview-middle-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   width: 100%;
 }
@@ -1224,7 +1224,7 @@ html, body {
 
 .chart-svg {
   width: 100%;
-  height: 120px;
+  height: 220px;
   overflow: visible;
 }
 
@@ -1235,11 +1235,19 @@ html, body {
 }
 
 .chart-days {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   font-size: 10px;
   color: #687a6d;
   margin-top: 8px;
+}
+
+.chart-days > span {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .goals-checklist-card {
@@ -2455,4 +2463,244 @@ button:disabled { opacity: 0.6; cursor: wait; }
   .daily-table { min-width: 560px; }
   .meal-table-wrap { overflow-x: auto; }
   .mm-profile-page-view { padding: 16px !important; }
+}
+
+.overview-page {
+  gap: 14px;
+}
+
+.overview-page > .sub-heading {
+  margin-bottom: -12px;
+  font-size: 13px;
+}
+
+.overview-page > .page-title {
+  margin-bottom: 2px;
+}
+
+.overview-page .overview-stats {
+  gap: 12px;
+}
+
+.overview-page .overview-stat-card {
+  min-width: 0;
+  min-height: 104px;
+  padding: 15px 16px;
+  border-color: #c5dfca;
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: none;
+}
+
+.overview-page .overview-stat-card:hover,
+.overview-page .chart-card:hover,
+.overview-page .goals-checklist-card:hover,
+.overview-page .recent-activity-card:hover {
+  transform: none;
+  box-shadow: 0 5px 16px rgba(27, 73, 43, 0.08);
+}
+
+.overview-page .stat-label {
+  font-size: 12px;
+}
+
+.overview-page .stat-val {
+  margin: 4px 0;
+  font-size: clamp(18px, 2vw, 23px);
+}
+
+.overview-page .stat-sub {
+  font-size: 11px;
+}
+
+.overview-page .floating-badge {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 26px;
+}
+
+.overview-page .overview-middle-grid {
+  grid-template-columns: minmax(0, 1.8fr) minmax(260px, 1fr);
+  align-items: stretch;
+  gap: 14px;
+}
+
+.overview-page .chart-card,
+.overview-page .goals-checklist-card,
+.overview-page .recent-activity-card {
+  min-width: 0;
+  border-color: #c5dfca;
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: none;
+}
+
+.overview-page .chart-card {
+  padding: 18px 20px;
+}
+
+.overview-page .chart-header {
+  margin-bottom: 8px;
+}
+
+.overview-page .chart-header > div > strong,
+.overview-page .goals-checklist-header .card-heading,
+.overview-page .recent-header > strong {
+  color: #172a1e;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.overview-page .chart-header .stat-sub {
+  margin-top: 4px;
+}
+
+.overview-page .chart-svg {
+  display: block;
+  height: 190px;
+}
+
+.overview-page .chart-days {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.overview-page .goals-checklist-card {
+  gap: 14px;
+  padding: 18px;
+}
+
+.overview-page .goals-checklist-header {
+  min-height: 28px;
+}
+
+.overview-page .goals-saved-feedback {
+  margin: 0;
+  padding: 9px 12px;
+  border: 1px solid #b8dfc0;
+  border-radius: 10px;
+  background: #edf8ef;
+  color: #167443;
+  font-size: 12px;
+  font-weight: 800;
+  animation: anim-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), anim-fade-in-up 0.35s ease both;
+}
+
+.overview-page .goal-item {
+  gap: 10px;
+  min-height: 30px;
+  font-size: 12px;
+  animation: anim-fade-in-up 0.35s ease both;
+}
+
+.overview-page .goal-item input[type="checkbox"] {
+  appearance: none;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  border: 1px solid #78b683;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.overview-page .goal-item input[type="checkbox"]:checked {
+  border-color: #7bad80;
+  background: #7bad80;
+}
+
+.overview-page .goal-item input[type="checkbox"]:checked::after {
+  display: block;
+  color: white;
+  content: "✓";
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 20px;
+  text-align: center;
+}
+
+.overview-page .goal-item input[type="checkbox"]:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+
+.overview-page .recent-activity-card {
+  gap: 8px;
+}
+
+.overview-page .recent-header {
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.overview-page .activity-row {
+  min-height: 54px;
+  padding: 8px 4px;
+  border-bottom-color: #dcebdd;
+}
+
+.overview-page .act-icon {
+  width: 38px;
+  height: 38px;
+  border: 1px solid #cee2d0;
+  border-radius: 10px;
+  background: #edf7ee;
+}
+
+.overview-page .activity-row .act-left > div > strong {
+  font-size: 14px;
+}
+
+.overview-page .activity-row .stat-sub {
+  margin-top: 2px;
+}
+
+.overview-page .act-right {
+  min-width: 150px;
+  justify-content: flex-end;
+  font-size: 13px;
+}
+
+.overview-page .logged-tag {
+  min-width: 88px;
+  border: 1px solid #c5dfca;
+  background: #f0f8f0;
+  text-align: center;
+}
+
+@media (max-width: 992px) {
+  .overview-page .overview-middle-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .overview-page .overview-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .overview-page .chart-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .overview-page .chart-svg {
+    height: 160px;
+  }
+
+  .overview-page .chart-days {
+    font-size: 9px;
+  }
+
+  .overview-page .act-right {
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
 }

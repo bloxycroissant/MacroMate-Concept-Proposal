@@ -1,5 +1,9 @@
 import { useState } from 'react';
 
+function createChecklistGoalId() {
+  return globalThis.crypto?.randomUUID?.() || `goal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export default function OverviewPage({
   totals,
   goals,
@@ -8,6 +12,7 @@ export default function OverviewPage({
   waterGlasses,
   selectedDate,
   week,
+  chartMax,
   chartPoints,
   loading,
   error,
@@ -22,10 +27,20 @@ export default function OverviewPage({
   const [newGoalLabel, setNewGoalLabel] = useState('');
   const [newGoalTarget, setNewGoalTarget] = useState(1);
   const [checklistEditorError, setChecklistEditorError] = useState('');
+  const [savedFeedbackDate, setSavedFeedbackDate] = useState('');
+  const [goalAnimationKey, setGoalAnimationKey] = useState(0);
+  const today = new Date();
+  const todayDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const goalsHeading = selectedDate === todayDate
+    ? 'Today’s goals'
+    : `Goals for ${new Date(`${selectedDate}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+  const completedChecklistGoals = checklistGoals.filter((goal) => completedGoals.includes(goal.id));
+  const remainingChecklistGoals = checklistGoals.filter((goal) => !completedGoals.includes(goal.id));
 
   function openChecklistEditor() {
     setDraftChecklistGoals(checklistGoals.map((goal) => ({ ...goal })));
     setChecklistEditorError('');
+    setSavedFeedbackDate('');
     setEditingChecklistGoals(true);
   }
 
@@ -37,9 +52,8 @@ export default function OverviewPage({
       return;
     }
     const metric = newGoalType === 'checklist' ? null : newGoalType;
-    const id = globalThis.crypto?.randomUUID?.() || `goal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     setDraftChecklistGoals((current) => [...current, {
-      id,
+      id: createChecklistGoalId(),
       label,
       metric,
       ...(metric ? { target: Number(newGoalTarget) } : {}),
@@ -56,9 +70,20 @@ export default function OverviewPage({
       setChecklistEditorError('Each goal needs a name, and numeric targets must be whole numbers from 1 to 100000.');
       return;
     }
-    if (onChecklistGoalsChange(draftChecklistGoals)) {
+    const savedGoals = draftChecklistGoals.map((goal) => {
+      const previous = checklistGoals.find((item) => item.id === goal.id);
+      const changed = previous && (
+        previous.label.trim() !== goal.label.trim()
+        || previous.metric !== goal.metric
+        || previous.target !== goal.target
+      );
+      return changed ? { ...goal, id: createChecklistGoalId() } : goal;
+    });
+    if (onChecklistGoalsChange(savedGoals)) {
       setEditingChecklistGoals(false);
       setChecklistEditorError('');
+      setSavedFeedbackDate(selectedDate);
+      setGoalAnimationKey((current) => current + 1);
     }
   }
 
@@ -77,16 +102,16 @@ export default function OverviewPage({
   }
 
   return (
-    <div className="page-view">
+    <div className="page-view overview-page">
       <span className="sub-heading">Track your daily progress</span>
       <h1 className="page-title">Welcome back, {displayName}</h1>
 
       <div className="overview-stats">
         <div className="card overview-stat-card">
-          <span className="stat-label">Selected day calories</span>
+          <span className="stat-label">Daily calories</span>
           <div className="stat-val">{formatNumber(totals.calories)} / {goals.calories} kcal</div>
           <span className="stat-sub green-txt">{formatNumber(Math.max(0, goals.calories - totals.calories))} kcal remaining</span>
-          <span className="floating-badge">🔥 kcal</span>
+          <span className="floating-badge" aria-hidden="true">🔥</span>
         </div>
         <div className="card overview-stat-card">
           <span className="stat-label">Mood Score</span>
@@ -112,16 +137,29 @@ export default function OverviewPage({
             <span className="pill-badge">7 days ending {selectedDate}</span>
           </div>
           <svg className="chart-svg" viewBox="0 0 500 120">
-            <line x1="0" y1="30" x2="500" y2="30" stroke="#d5ebd7" strokeDasharray="4" />
-            <line x1="0" y1="60" x2="500" y2="60" stroke="#d5ebd7" strokeDasharray="4" />
-            <line x1="0" y1="90" x2="500" y2="90" stroke="#d5ebd7" strokeDasharray="4" />
-            <polyline points={loading || error ? '' : chartPoints} fill="none" stroke="#0b9b56" strokeWidth="3" />
+            <line x1="0" y1="25" x2="500" y2="25" stroke="#d5ebd7" strokeDasharray="4" />
+            <line x1="0" y1="55" x2="500" y2="55" stroke="#d5ebd7" strokeDasharray="4" />
+            <line x1="0" y1="85" x2="500" y2="85" stroke="#d5ebd7" strokeDasharray="4" />
+            {!loading && !error && (
+              <>
+                <polyline points={chartPoints} fill="none" stroke="#0b9b56" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
+                {week.map((day, index) => {
+                  const x = (index + 0.5) * (500 / 7);
+                  const y = 110 - day.calories / chartMax * 90;
+                  return (
+                    <circle key={day.date} cx={x} cy={y} r={day.calories ? 4 : 2.5} fill={day.calories ? '#0b9b56' : '#9bbfa5'}>
+                      <title>{`${day.date}: ${formatNumber(day.calories)} kcal`}</title>
+                    </circle>
+                  );
+                })}
+              </>
+            )}
           </svg>
           <div className="chart-days">
             {week.map((day) => (
-              <span key={day.date} title={`${day.date}: ${formatNumber(day.calories)} kcal`}>
-                {new Date(`${day.date}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short' })}<br />
-                {formatNumber(day.calories)} kcal
+              <span key={day.date}>
+                <span>{new Date(`${day.date}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short' })}</span>
+                <span>{formatNumber(day.calories)} kcal</span>
               </span>
             ))}
           </div>
@@ -129,11 +167,16 @@ export default function OverviewPage({
 
         <div className="card goals-checklist-card">
           <div className="goals-checklist-header">
-            <strong className="card-heading">Goals for the selected day</strong>
+            <strong className="card-heading">{goalsHeading}</strong>
             <button type="button" className="goals-edit-btn" disabled={wellnessDisabled} onClick={editingChecklistGoals ? () => setEditingChecklistGoals(false) : openChecklistEditor}>
               {editingChecklistGoals ? 'Close' : 'Customize'}
             </button>
           </div>
+          {savedFeedbackDate === selectedDate && (
+            <p className="goals-saved-feedback" role="status">
+              ✓ Goals saved for {selectedDate === todayDate ? 'today' : new Date(`${selectedDate}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}!
+            </p>
+          )}
           {editingChecklistGoals ? (
             <form className="checklist-goals-form" onSubmit={saveChecklistGoals}>
               {draftChecklistGoals.map((goal) => (
@@ -217,12 +260,21 @@ export default function OverviewPage({
             </form>
           ) : (
             <>
-              {checklistGoals.length ? checklistGoals.map((goal) => (
-                <label key={goal.id} className={`goal-item ${completedGoals.includes(goal.id) ? 'done' : ''}`}>
-                  <input type="checkbox" checked={completedGoals.includes(goal.id)} disabled={wellnessDisabled} onChange={() => onGoalChange(goal.id)} />
+              {remainingChecklistGoals.map((goal) => (
+                <label key={`${goal.id}-${goalAnimationKey}`} className="goal-item">
+                  <input type="checkbox" disabled={wellnessDisabled} onChange={() => onGoalChange(goal.id)} />
                   <span>{checklistGoalLabel(goal)}</span>
                 </label>
-              )) : <p className="stat-sub">No goals for this day yet. Customize to add one.</p>}
+              ))}
+              {checklistGoals.length === 0 && <p className="stat-sub">No goals for this day yet. Customize to add one.</p>}
+              {remainingChecklistGoals.length === 0 && checklistGoals.length > 0 && (
+                <p className="stat-sub" role="status">All goals completed for this day. Nice work!</p>
+              )}
+              {completedChecklistGoals.length > 0 && remainingChecklistGoals.length > 0 && (
+                <p className="stat-sub" role="status">
+                  {completedChecklistGoals.length} goal{completedChecklistGoals.length === 1 ? '' : 's'} completed today. Customize to view all saved goals.
+                </p>
+              )}
               {checklistGoalStorageError && <p className="daily-goals-error" role="alert">{checklistGoalStorageError}</p>}
             </>
           )}

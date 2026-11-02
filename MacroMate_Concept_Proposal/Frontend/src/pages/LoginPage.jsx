@@ -88,6 +88,7 @@ export default function LoginPage({ onNavigate, onLogin }) {
 
         .mm-fullscreen-auth {
           width: 100%;
+          min-width: 0;
           min-height: 100vh;
           min-height: 100svh;
           margin: 0;
@@ -104,6 +105,7 @@ export default function LoginPage({ onNavigate, onLogin }) {
 
         .mm-auth-left-panel {
           position: relative;
+          min-width: 0;
           min-height: calc(100svh - 48px);
           padding: clamp(20px, 3vw, 40px);
           display: flex;
@@ -139,6 +141,7 @@ export default function LoginPage({ onNavigate, onLogin }) {
 
         .mm-auth-form-card {
           width: min(100%, 440px);
+          box-sizing: border-box;
           margin: auto;
           padding: clamp(24px, 3vw, 38px);
           background: rgba(255, 255, 255, 0.94);
@@ -291,11 +294,7 @@ export default function LoginPage({ onNavigate, onLogin }) {
           align-items: center;
           justify-content: center;
           flex-direction: column;
-<<<<<<< HEAD
           gap: 26px;
-=======
-          gap: 22px;
->>>>>>> f7309a2 (Fix some errors)
           padding: 48px;
           box-sizing: border-box;
         }
@@ -303,7 +302,6 @@ export default function LoginPage({ onNavigate, onLogin }) {
         .mm-icon-float {
           position: absolute;
           z-index: 2;
-<<<<<<< HEAD
           display: block;
           width: auto;
           height: auto;
@@ -338,45 +336,18 @@ export default function LoginPage({ onNavigate, onLogin }) {
         .mm-icon-float-9 { top: 10%; right: 32%; font-size: clamp(2rem, 2.5vw, 3rem); animation: foodDriftD 6.1s infinite ease-in-out 0.3s; }
         .mm-icon-float-10 { bottom: 5%; right: 36%; font-size: clamp(2rem, 2.5vw, 3rem); animation: foodDriftC 7s infinite ease-in-out 1.7s; }
         .mm-icon-float-11 { top: 37%; left: 5%; font-size: clamp(2rem, 2.4vw, 2.8rem); animation: foodDriftC 6.6s infinite ease-in-out 0.9s; }
-=======
-          font-size: clamp(2rem, 3vw, 3.5rem);
-          line-height: 1;
-          pointer-events: none;
-          filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.16));
-        }
-        .mm-icon-float-1 { top: 16%; left: 14%; font-size: clamp(3rem, 3.8vw, 4.5rem); animation: foodDriftA 5.2s infinite ease-in-out; }
-        .mm-icon-float-2 { top: 24%; right: 12%; font-size: clamp(2.8rem, 3.5vw, 4rem); animation: foodDriftB 6s infinite ease-in-out 0.7s; }
-        .mm-icon-float-3 { bottom: 25%; left: 20%; font-size: clamp(2.8rem, 3.7vw, 4.2rem); animation: foodDriftC 5.7s infinite ease-in-out 0.3s; }
-        .mm-icon-float-4 { bottom: 18%; right: 16%; font-size: clamp(3rem, 3.9vw, 4.5rem); animation: foodDriftD 6.5s infinite ease-in-out 1s; }
-        .mm-icon-float-5 { top: 7%; left: 52%; animation: foodDriftC 6.4s infinite ease-in-out 0.4s; }
-        .mm-icon-float-6 { top: 60%; left: 5%; animation: foodDriftD 5.8s infinite ease-in-out 1.1s; }
-        .mm-icon-float-7 { top: 43%; right: 4%; animation: foodDriftA 6.8s infinite ease-in-out 0.7s; }
-        .mm-icon-float-8 { bottom: 5%; left: 43%; animation: foodDriftB 5.4s infinite ease-in-out 1.4s; }
-        .mm-icon-float-9 { top: 10%; right: 32%; animation: foodDriftD 6.1s infinite ease-in-out 0.3s; }
-        .mm-icon-float-10 { bottom: 5%; right: 34%; animation: foodDriftC 7s infinite ease-in-out 1.7s; }
-        .mm-icon-float-11 { top: 37%; left: 5%; animation: foodDriftC 6.6s infinite ease-in-out 0.9s; }
->>>>>>> f7309a2 (Fix some errors)
 
         .mm-center-brand-card {
           background: rgba(255, 255, 255, 0.95);
           backdrop-filter: blur(12px);
-<<<<<<< HEAD
           padding: 42px 54px;
           border: 1px solid rgba(255,255,255,0.75);
-=======
-          padding: 32px 48px;
-          border: 1px solid rgba(255, 255, 255, 0.75);
->>>>>>> f7309a2 (Fix some errors)
           border-radius: 32px;
           text-align: center;
           color: #102a1c;
           animation: pulseLogoGlow 6s ease-in-out infinite;
           z-index: 3;
-<<<<<<< HEAD
           box-shadow: 0 24px 70px rgba(0,0,0,0.2);
-=======
-          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2);
->>>>>>> f7309a2 (Fix some errors)
         }
 
         .mm-center-logo-img {
@@ -399,7 +370,6 @@ export default function LoginPage({ onNavigate, onLogin }) {
           color: #1e7e48;
           font-weight: 800;
         }
-<<<<<<< HEAD
 
         .mm-auth-promo-caption {
           z-index: 4;
@@ -412,25 +382,10 @@ export default function LoginPage({ onNavigate, onLogin }) {
 
         .mm-auth-promo-points {
           z-index: 4;
-=======
-        .mm-auth-promo-caption {
-          max-width: 520px;
-          margin: 0;
-          color: rgba(255, 255, 255, 0.94);
-          font-size: 1rem;
-          font-weight: 700;
-          line-height: 1.5;
-          text-align: center;
-          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-          z-index: 3;
-        }
-        .mm-auth-promo-points {
->>>>>>> f7309a2 (Fix some errors)
           display: flex;
           flex-wrap: wrap;
           justify-content: center;
           gap: 10px;
-<<<<<<< HEAD
         }
         .mm-auth-promo-points span {
           padding: 9px 13px;
@@ -509,174 +464,116 @@ export default function LoginPage({ onNavigate, onLogin }) {
             border-radius: 24px;
             padding: 28px 18px;
           }
-=======
-          z-index: 3;
-        }
-        .mm-auth-promo-points span {
-          padding: 9px 13px;
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.13);
-          color: #fff;
-          font-size: 0.78rem;
-          font-weight: 800;
-          backdrop-filter: blur(8px);
-        }
-        @media (max-width: 900px) {
-          .mm-fullscreen-auth { grid-template-columns: minmax(340px, 42%) minmax(0, 1fr); }
-          .mm-auth-left-panel { padding: 32px 28px; }
-          .mm-auth-right-waves { padding: 32px 20px; }
-        }
-        @media (max-width: 700px) {
-          .mm-fullscreen-auth { display: flex; flex-direction: column; min-height: 100svh; height: auto; }
-          .mm-auth-left-panel { min-height: 100svh; padding: 24px; }
-          .mm-auth-right-waves { min-height: 480px; padding: 28px 18px; }
->>>>>>> f7309a2 (Fix some errors)
           .mm-center-brand-card { padding: 24px 32px; border-radius: 24px; }
           .mm-center-logo-img { height: 48px; }
           .mm-center-brand-title { font-size: 1.8rem; }
           .mm-auth-promo-caption { font-size: 0.9rem; }
-<<<<<<< HEAD
           .mm-icon-float-1, .mm-icon-float-2, .mm-icon-float-3, .mm-icon-float-4 { font-size: 2.4rem; }
         }
 
-=======
-          .mm-icon-float { font-size: 2rem; }
-          .mm-icon-float-1 { top: 14%; left: 7%; }
-          .mm-icon-float-2 { top: 25%; right: 5%; }
-          .mm-icon-float-3 { bottom: 22%; left: 8%; }
-          .mm-icon-float-4 { bottom: 17%; right: 8%; }
-          .mm-icon-float-5 { top: 5%; left: 52%; }
-          .mm-icon-float-6 { top: 60%; left: 2%; }
-          .mm-icon-float-7 { top: 44%; right: 2%; }
-          .mm-icon-float-8 { bottom: 4%; left: 43%; }
-          .mm-icon-float-9 { top: 8%; right: 29%; }
-          .mm-icon-float-10 { bottom: 4%; right: 32%; }
-          .mm-icon-float-11 { top: 37%; left: 2%; }
-        }
->>>>>>> f7309a2 (Fix some errors)
         @media (prefers-reduced-motion: reduce) {
           .mm-fullscreen-auth *, .mm-fullscreen-auth *::before, .mm-fullscreen-auth *::after {
             animation-duration: 0.01ms !important;
             animation-iteration-count: 1 !important;
-<<<<<<< HEAD
             scroll-behavior: auto !important;
             transition-duration: 0.01ms !important;
           }
         }
 
-        /* Keep the original split-screen form; reserve added decoration for the showcase. */
         .mm-fullscreen-auth {
+          width: 100%;
           min-height: 100vh;
           min-height: 100svh;
           padding: 0;
           overflow: hidden;
-          background: #d4f3d2;
-          grid-template-columns: 480px minmax(0, 1fr);
+          background: #d3f2d2;
+          grid-template-columns: minmax(420px, 33%) minmax(0, 1fr);
           gap: 0;
         }
         .mm-auth-left-panel {
-          position: static;
-          min-height: 0;
-          padding: 40px 48px;
-          justify-content: space-between;
+          min-height: 100vh;
+          min-height: 100svh;
+          padding: 40px clamp(28px, 3.4vw, 56px);
+          justify-content: center;
           gap: 0;
-          background: #d4f3d2;
+          background: #d3f2d2;
           border: 0;
           border-radius: 0;
         }
         .mm-btn-back {
-          position: static;
-          background: none;
+          top: 42px;
+          left: 48px;
+          width: 36px;
+          height: 36px;
+          background: transparent;
           border: 0;
           border-radius: 0;
           font-size: 1.6rem;
-          width: 36px;
-          height: 36px;
-          justify-content: flex-start;
         }
-        .mm-btn-back:hover { background: none; }
+        .mm-btn-back:hover { background: transparent; }
         .mm-auth-form-card {
           width: 100%;
-          max-width: none;
-          margin: 0;
+          max-width: 440px;
+          margin: auto;
           padding: 0;
           background: transparent;
           border: 0;
           border-radius: 0;
           box-shadow: none;
         }
-        .mm-auth-logo-header { margin: -6px 0 24px; }
-        .mm-auth-logo-img { height: 56px; }
-        .mm-auth-head-title {
-          font-size: 2.5rem;
-          margin: 6px 0 0;
-          line-height: normal;
-        }
-        .mm-auth-sub-title {
-          color: #2c4a38;
-          font-weight: 800;
-          margin-top: 2px;
-        }
-        .mm-field-group { margin-bottom: 16px; }
-        .mm-field-label { color: #0a1f13; margin-bottom: 6px; }
+        .mm-auth-logo-header { margin: 0 0 34px; }
+        .mm-auth-logo-img { height: 52px; }
+        .mm-auth-head-title { margin-top: 20px; font-size: 2.8rem; }
+        .mm-auth-sub-title { color: #234a31; font-weight: 800; }
+        .mm-field-label { color: #071b0e; }
         .mm-form-input {
-          padding: 12px 16px;
-          border-radius: 18px;
-          border-color: #bce1c3;
+          padding: 14px 16px;
+          border-color: #b7dfbc;
+          border-radius: 20px;
           background: #edf8ee;
         }
-        .mm-eye-icon { color: inherit; opacity: 0.75; }
-        .mm-eye-icon:hover { color: inherit; opacity: 1; }
-        .mm-forgot-link { margin-top: 6px; }
-        .mm-btn-green-submit {
-          padding: 13px;
-          border-radius: 22px;
-          background: #108a43;
-          box-shadow: 0 6px 18px rgba(16, 138, 67, 0.28);
-        }
+        .mm-btn-green-submit,
+        .mm-btn-white-alt { border-radius: 24px; }
         .mm-btn-white-alt {
-          padding: 12px;
-          border-radius: 22px;
           border: 0;
           margin-top: 10px;
         }
+        .mm-auth-footer { margin-top: 28px; }
         .mm-auth-right-waves {
-          min-height: 0;
-          border-radius: 0;
-          flex-direction: column;
-          gap: 26px;
+          min-height: 100vh;
+          min-height: 100svh;
           padding: 48px;
+          border-radius: 0;
+          gap: 28px;
         }
-        .mm-center-brand-card { padding: 32px 48px; border-radius: 32px; }
-        @media (max-width: 900px) {
-          .mm-fullscreen-auth { grid-template-columns: minmax(340px, 42%) minmax(0, 1fr); padding: 0; gap: 0; }
-          .mm-auth-left-panel, .mm-auth-right-waves { min-height: 100svh; }
-          .mm-auth-left-panel { padding: 32px 28px; }
-        }
-        @media (max-width: 700px) {
-          .mm-fullscreen-auth { display: flex; flex-direction: column; padding: 0; gap: 0; }
-          .mm-auth-left-panel { min-height: 100svh; padding: 24px; }
-          .mm-btn-back { position: static; width: 36px; height: 36px; }
-          .mm-auth-right-waves { min-height: 420px; padding: 28px 18px; }
-          .mm-icon-float { font-size: 2.25rem; }
-          .mm-icon-float-1 { top: 18%; left: 8%; }
-          .mm-icon-float-2 { top: 25%; right: 8%; }
-          .mm-icon-float-3 { bottom: 24%; left: 12%; }
-          .mm-icon-float-4 { bottom: 17%; right: 10%; }
-          .mm-icon-float-5 { top: 5%; left: 52%; }
-          .mm-icon-float-6 { top: 58%; left: 3%; }
-          .mm-icon-float-7 { top: 43%; right: 3%; }
-          .mm-icon-float-8 { bottom: 4%; left: 43%; }
-          .mm-icon-float-9 { top: 8%; right: 29%; }
-          .mm-icon-float-10 { bottom: 4%; right: 34%; }
-          .mm-icon-float-11 { top: 36%; left: 2%; }
-        }
-=======
-            transition-duration: 0.01ms !important;
+        .mm-center-brand-card { padding: 34px 46px; }
+        .mm-auth-promo-caption,
+        .mm-auth-promo-points { display: none; }
+
+        @media (max-width: 760px) {
+          .mm-fullscreen-auth {
+            display: flex;
+            flex-direction: column;
+            min-height: 100svh;
+            overflow-y: auto;
           }
+          .mm-auth-left-panel {
+            min-height: 100svh;
+            padding: 72px 28px 28px;
+          }
+          .mm-btn-back { top: 24px; left: 28px; }
+          .mm-auth-form-card { margin: auto; }
+          .mm-auth-right-waves {
+            min-height: 70svh;
+            padding: 36px 20px;
+          }
+          .mm-center-brand-card { padding: 28px 36px; }
+          .mm-icon-float-1 { top: 14%; left: 10%; }
+          .mm-icon-float-2 { top: 18%; right: 10%; }
+          .mm-icon-float-3 { bottom: 18%; left: 12%; }
+          .mm-icon-float-4 { bottom: 16%; right: 12%; }
         }
->>>>>>> f7309a2 (Fix some errors)
+
       `}</style>
 
       {/* Left Form Panel */}
@@ -722,7 +619,6 @@ export default function LoginPage({ onNavigate, onLogin }) {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
-                <button type="button" className="mm-eye-icon" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>👁️</button>
                 <button type="button" className="mm-eye-icon" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword((visible) => !visible)}>
                   👁️
                 </button>
@@ -765,7 +661,9 @@ export default function LoginPage({ onNavigate, onLogin }) {
           <h2 className="mm-center-brand-title">MacroMate</h2>
           <p className="mm-center-brand-sub">Your macros, mastered.</p>
         </div>
-        <p className="mm-auth-promo-caption">A calmer way to build healthy habits, one small check-in at a time.</p>
+        <p className="mm-auth-promo-caption">
+          Track meals and macros, check in on your wellness, and build healthier habits one day at a time.
+        </p>
         <div className="mm-auth-promo-points" aria-label="MacroMate benefits">
           <span>🥗 Nutrition tracking</span>
           <span>💚 Wellness journal</span>

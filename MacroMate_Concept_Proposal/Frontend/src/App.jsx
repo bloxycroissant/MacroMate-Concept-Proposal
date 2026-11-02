@@ -150,18 +150,22 @@ export default function App() {
   const goalStorageError = currentGoalWriteError || (isCurrentGoalOverride ? '' : goalPreference.error);
   const checklistGoalPreference = useMemo(() => {
     try {
-      const saved = localStorage.getItem(`macromate.checklist-goals-by-date.${goalsOwner}`);
-      if (!saved) return { values: defaultChecklistGoals, error: '' };
-      const byDate = JSON.parse(saved);
-      if (!byDate || typeof byDate !== 'object' || Array.isArray(byDate)) {
-        throw new Error('Saved daily checklist goals have an invalid format.');
+      const savedByDate = localStorage.getItem(`macromate.checklist-goals-by-date.${goalsOwner}`);
+      if (savedByDate) {
+        const goalsByDate = JSON.parse(savedByDate);
+        if (!goalsByDate || typeof goalsByDate !== 'object' || Array.isArray(goalsByDate)) {
+          throw new Error('Saved daily checklist goals have an invalid format.');
+        }
+        if (goalsByDate[selectedDate] !== undefined) {
+          return { values: validateChecklistGoals(goalsByDate[selectedDate]), error: '' };
+        }
       }
-      return {
-        values: byDate[selectedDate] === undefined
-          ? defaultChecklistGoals
-          : validateChecklistGoals(byDate[selectedDate]),
-        error: '',
-      };
+
+      if (selectedDate === localDate()) {
+        const savedGoals = localStorage.getItem(`macromate.checklist-goals.${goalsOwner}`);
+        if (savedGoals) return { values: validateChecklistGoals(JSON.parse(savedGoals)), error: '' };
+      }
+      return { values: defaultChecklistGoals, error: '' };
     } catch (error) {
       console.error('Could not load checklist goals for this date.', error);
       return { values: defaultChecklistGoals, error: 'Checklist goals for this date could not be loaded from this browser.' };
@@ -215,11 +219,11 @@ export default function App() {
       }
       return true;
     } catch (error) {
-      console.error('Could not save checklist goals for this date.', error);
+      console.error('Could not save checklist goals.', error);
       setChecklistGoalWriteError({
         owner: goalsOwner,
         date: selectedDate,
-        message: 'Checklist goals for this date could not be saved in this browser.',
+        message: 'Your checklist goals could not be saved in this browser.',
       });
       return false;
     }
@@ -241,8 +245,8 @@ export default function App() {
     return { date, calories: (journal.entries || []).filter((entry) => entry.entryDate === date)
       .reduce((sum, entry) => sum + entry.calories, 0) };
   });
-  const chartMax = Math.max(1, ...week.map((day) => day.calories));
-  const chartPoints = week.map((day, index) => `${20 + index * 70},${100 - day.calories / chartMax * 90}`).join(' ');
+  const chartMax = Math.max(100, Math.ceil(Math.max(...week.map((day) => day.calories)) / 100) * 100);
+  const chartPoints = week.map((day, index) => `${(index + 0.5) * (500 / 7)},${110 - day.calories / chartMax * 90}`).join(' ');
 
   async function saveFood(entry) {
     if (journal.save) {
@@ -602,7 +606,7 @@ export default function App() {
               <button type="button" disabled={journal.loading || journal.busy} onClick={journal.reload}>Retry</button>
             </div>
           )}
-          {activeTab !== 'health-journal' && <p className="journal-selected-date">Food journal: {dateLabel}</p>}
+          {activeTab !== 'health-journal' && activeTab !== 'overview' && <p className="journal-selected-date">Food journal: {dateLabel}</p>}
           
           {activeTab === 'health-journal' && (
             <HealthJournalPage
@@ -630,6 +634,7 @@ export default function App() {
               waterGlasses={waterGlasses}
               selectedDate={selectedDate}
               week={week}
+              chartMax={chartMax}
               chartPoints={chartPoints}
               loading={journal.loading}
               error={journal.error}
