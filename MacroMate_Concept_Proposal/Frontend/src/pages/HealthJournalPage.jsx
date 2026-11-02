@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { useState } from 'react';
 import JournalDateSelector from '../components/JournalDateSelector';
 import { localDate, shiftDate } from '../utils/journalDates';
@@ -5,6 +6,13 @@ import { localDate, shiftDate } from '../utils/journalDates';
 const moods = ['Low', 'Okay', 'Good', 'Great'];
 const faces = ['😞', '😐', '🙂', '😄'];
 
+function averageMood(entries) {
+  const values = entries.map(([, value]) => moods.indexOf(value.mood)).filter((value) => value >= 0);
+  if (!values.length) return null;
+  return moods[Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)];
+}
+
+export function HealthJournalCalendar({ date, onDateChange, day, days, onChange, disabled }) {
 export default function HealthJournalPage({ date = localDate(), onDateChange, day = {}, days = {}, onChange, disabled }) {
   const [period, setPeriod] = useState('month');
   const [month, setMonth] = useState(date ? date.slice(0, 7) : localDate().slice(0, 7));

@@ -26,6 +26,7 @@ export default function useFoodEntries() {
         if (err.name !== 'AbortError') {
           setErrorState({ uid, message: `Could not load your journal. ${err.message}` });
           setLoadedUid(uid);
+          setEntries([]);
         }
       })
       .finally(() => {
