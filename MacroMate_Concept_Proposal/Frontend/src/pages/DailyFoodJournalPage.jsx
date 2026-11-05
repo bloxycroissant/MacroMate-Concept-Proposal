@@ -287,6 +287,8 @@ export default function DailyFoodJournalPage({
     5: 'Great',
   };
 
+  const totalWaterSlots = Math.max(8, waterGlasses + 1);
+
   return (
     <div className="page-view daily-food-journal-page">
       <style>{`
@@ -865,12 +867,23 @@ export default function DailyFoodJournalPage({
         .goal-lbl { font-size: 0.68rem; font-weight: 800; color: #4a6c4f; }
         .goal-val { font-size: 0.95rem; font-weight: 800; color: #102a1c; }
 
-        /* Water Intake */
+        /* Unlimited Water Intake Strip */
         .water-glasses-strip {
           display: flex;
-          justify-content: center;
+          align-items: center;
           gap: 8px;
-          margin-bottom: 14px;
+          padding: 6px 4px 12px 4px;
+          overflow-x: auto;
+          margin-bottom: 10px;
+          scroll-behavior: smooth;
+        }
+
+        .water-glasses-strip::-webkit-scrollbar {
+          height: 6px;
+        }
+        .water-glasses-strip::-webkit-scrollbar-thumb {
+          background: #b8dbba;
+          border-radius: 4px;
         }
 
         .water-droplet-btn {
@@ -879,6 +892,7 @@ export default function DailyFoodJournalPage({
           border-radius: 50%;
           width: 34px;
           height: 34px;
+          flex-shrink: 0;
           display: grid;
           place-items: center;
           font-size: 1.1rem;
@@ -950,6 +964,111 @@ export default function DailyFoodJournalPage({
 
         .energy-sublabel { font-size: 0.65rem; font-weight: 700; color: #6a8c6c; }
         .motivation-box p { font-size: 0.85rem; color: #3b5747; line-height: 1.55; margin: 0; }
+
+        /* ----------------------------------------------------
+           HIGH CONTRAST & DARK MODE OVERRIDES
+        ---------------------------------------------------- */
+        .wellness-high-contrast .page-view {
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .meal-block,
+        .wellness-high-contrast .right-widget,
+        .wellness-high-contrast .journal-date-strip,
+        .wellness-high-contrast .daily-calendar-modal {
+          background-color: #0f172a !important;
+          border-color: #94a3b8 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .meal-sidebar-tab {
+          background: linear-gradient(180deg, #1e293b, #0f172a) !important;
+          border-right: 1px solid #94a3b8;
+        }
+        .wellness-high-contrast .daily-table th {
+          background-color: #1e293b !important;
+          color: #f8fafc !important;
+          border-color: #475569 !important;
+        }
+        .wellness-high-contrast .daily-table td {
+          border-color: #334155 !important;
+          color: #e2e8f0 !important;
+        }
+        .wellness-high-contrast .daily-table tr:hover td {
+          background-color: #1e293b !important;
+        }
+        .wellness-high-contrast .food-name-cell,
+        .wellness-high-contrast .widget-title,
+        .wellness-high-contrast .goal-val,
+        .wellness-high-contrast .total-label,
+        .wellness-high-contrast .total-cell strong {
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .daily-total-bar {
+          background: #1e293b !important;
+          border-color: #94a3b8 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .goal-box {
+          background-color: #1e293b !important;
+          border-color: #475569 !important;
+        }
+        .wellness-high-contrast .goal-lbl,
+        .wellness-high-contrast .energy-sublabel,
+        .wellness-high-contrast .date-day-btn .day-name,
+        .wellness-high-contrast .total-cell {
+          color: #94a3b8 !important;
+        }
+        .wellness-high-contrast .date-day-btn .day-num {
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .date-day-btn.active {
+          background: #38bdf8 !important;
+          color: #0f172a !important;
+        }
+        .wellness-high-contrast .date-day-btn.active .day-name,
+        .wellness-high-contrast .date-day-btn.active .day-num {
+          color: #0f172a !important;
+        }
+        .wellness-high-contrast .energy-num {
+          background-color: #1e293b !important;
+          border-color: #475569 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .energy-num.active {
+          background-color: #38bdf8 !important;
+          color: #0f172a !important;
+          border-color: #38bdf8 !important;
+        }
+        .wellness-high-contrast .water-droplet-btn {
+          background-color: #1e293b !important;
+          border-color: #475569 !important;
+        }
+        .wellness-high-contrast .water-droplet-btn.filled {
+          background-color: #0284c7 !important;
+          border-color: #38bdf8 !important;
+        }
+        .wellness-high-contrast .daily-view-calendar-btn,
+        .wellness-high-contrast .date-arrow-btn,
+        .wellness-high-contrast .water-counter button,
+        .wellness-high-contrast .goals-edit-btn,
+        .wellness-high-contrast .calendar-arrow-btn,
+        .wellness-high-contrast .calendar-close-btn,
+        .wellness-high-contrast .calendar-nav-title-btn,
+        .wellness-high-contrast .calendar-day-btn,
+        .wellness-high-contrast .calendar-selector-btn {
+          background-color: #1e293b !important;
+          border-color: #94a3b8 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .date-picker-input-group input {
+          background-color: #1e293b !important;
+          border-color: #94a3b8 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .calendar-day-btn.selected,
+        .wellness-high-contrast .calendar-selector-btn.selected {
+          background-color: #38bdf8 !important;
+          color: #0f172a !important;
+        }
 
         @media (max-width: 992px) {
           .daily-journal-grid { grid-template-columns: 1fr; }
@@ -1084,7 +1203,7 @@ export default function DailyFoodJournalPage({
           <div className="card right-widget water-card">
             <div className="widget-title">WATER INTAKE 💧</div>
             <div className="water-glasses-strip">
-              {Array.from({ length: 8 }).map((_, index) => {
+              {Array.from({ length: totalWaterSlots }).map((_, index) => {
                 const isFilled = index < waterGlasses;
                 return (
                   <button
