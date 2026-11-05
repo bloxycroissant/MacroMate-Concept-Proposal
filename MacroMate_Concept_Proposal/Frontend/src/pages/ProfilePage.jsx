@@ -1,4 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { NumberField, TextField, ToggleField } from '../components/FormControls';
+import { DEFAULT_EXTRAS, loadExtras, saveExtras } from '../utils/profileHandler';
 
 export default function ProfilePage({ profile = {}, email = '', onSave, busy = false }) {
   const [message, setMessage] = useState('');
@@ -6,6 +8,16 @@ export default function ProfilePage({ profile = {}, email = '', onSave, busy = f
   const [selectedProfileImage, setSelectedProfileImage] = useState(null);
   const profileImage = selectedProfileImage || profile?.pfpUrl || null;
   const fileInputRef = useRef(null);
+  const [extras, setExtras] = useState(DEFAULT_EXTRAS);
+
+  useEffect(() => {
+    loadExtras().then(setExtras);
+  }, []);
+
+  const changeExtra = (e) => {
+    const { name, value, type, checked } = e.target;
+    setExtras((x) => ({ ...x, [name]: type === 'checkbox' ? checked : value }));
+  };
 
   const getInitials = (name) => {
     if (!name) return 'MM';
@@ -66,6 +78,7 @@ export default function ProfilePage({ profile = {}, email = '', onSave, busy = f
     }
 
     try {
+      await saveExtras(extras);
       if (onSave) {
         const savePromise = onSave(data);
         const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 2500));
@@ -467,6 +480,21 @@ export default function ProfilePage({ profile = {}, email = '', onSave, busy = f
                   className="mm-profile-input-styled"
                 />
               </div>
+
+              <h3 className="mm-section-head-title" style={{ marginTop: 24 }}>Daily Target Goals</h3>
+              <div className="mm-form-row-2col">
+                <NumberField label="Calories (kcal)" name="calorieGoal" value={extras.calorieGoal} onChange={changeExtra} />
+                <NumberField label="Protein (g)" name="proteinGoal" value={extras.proteinGoal} onChange={changeExtra} />
+              </div>
+              <div className="mm-form-row-2col">
+                <NumberField label="Carbs (g)" name="carbsGoal" value={extras.carbsGoal} onChange={changeExtra} />
+                <NumberField label="Fat (g)" name="fatGoal" value={extras.fatGoal} onChange={changeExtra} />
+              </div>
+
+              <h3 className="mm-section-head-title" style={{ marginTop: 24 }}>Health Preferences</h3>
+              <TextField label="Dietary Preference" name="dietaryPreference" value={extras.dietaryPreference} onChange={changeExtra} placeholder="e.g. Vegetarian" />
+              <TextField label="Allergies" name="allergies" value={extras.allergies} onChange={changeExtra} placeholder="e.g. Peanuts" />
+              <ToggleField label="Daily Reminders" name="remindersEnabled" checked={extras.remindersEnabled} onChange={changeExtra} />
 
               <button type="submit" className="mm-btn-save-profile" disabled={saving}>
                 {saving ? 'Saving...' : 'Save Profile'}
