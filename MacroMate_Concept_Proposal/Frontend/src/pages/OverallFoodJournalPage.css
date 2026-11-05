@@ -1,3 +1,87 @@
+/* ----------------------------------------------------
+   KEYFRAMES & ANIMATION DEFINITIONS
+---------------------------------------------------- */
+@keyframes journalFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes titlePulseGlow {
+  0%, 100% {
+    text-shadow: 0 0 0px rgba(8, 160, 69, 0);
+  }
+  50% {
+    text-shadow: 0 2px 14px rgba(8, 160, 69, 0.25);
+  }
+}
+
+@keyframes btnPulseLoop {
+  0%, 100% {
+    box-shadow: 0 4px 14px rgba(111, 159, 114, 0.3);
+    transform: translateY(0);
+  }
+  50% {
+    box-shadow: 0 8px 24px rgba(111, 159, 114, 0.55);
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes iconFloatingLoop {
+  0%, 100% {
+    transform: scale(0.546875) translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: scale(0.58) translateY(-4px) rotate(6deg);
+  }
+}
+
+@keyframes iconFloatingLunchLoop {
+  0%, 100% {
+    transform: scale(0.514706) translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: scale(0.55) translateY(-4px) rotate(-6deg);
+  }
+}
+
+@keyframes progressBarShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes rowSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes addIconRotate {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(12deg) scale(1.1);
+  }
+}
+
+/* ----------------------------------------------------
+   BASE LAYOUT & ANIMATION BINDINGS
+---------------------------------------------------- */
 body:has(.overall-journal) {
   min-width: 0;
 }
@@ -5,6 +89,7 @@ body:has(.overall-journal) {
 .main-content:has(.overall-journal) {
   min-width: 0;
   background-image: linear-gradient(180deg, #f8fcf8, #a8d9ad 79%, #08a045);
+  transition: background 0.4s ease;
 }
 
 .wellness-high-contrast .main-content:has(.overall-journal) {
@@ -18,6 +103,7 @@ body:has(.overall-journal) {
   color: #142116;
   gap: 32px;
   padding-bottom: clamp(32px, 14vw, 260px);
+  animation: journalFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) ease-out;
 }
 
 .overall-journal .overall-header {
@@ -32,11 +118,23 @@ body:has(.overall-journal) {
 .overall-journal .page-title {
   font: 400 clamp(30px, 4vw, 48px)/1.15 'Otomanopee One', Georgia, serif;
   margin-bottom: 4px;
+  animation: titlePulseGlow 4s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+
+.overall-journal .page-title:hover {
+  transform: translateX(4px) scale(1.02);
 }
 
 .overall-header time {
   display: block;
   font-size: clamp(15px, 2vw, 20px);
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.overall-header time:hover {
+  transform: translateX(2px);
+  color: #1e5c2b;
 }
 
 .overall-journal .overall-add-food {
@@ -48,23 +146,54 @@ body:has(.overall-journal) {
   background: var(--journal-green);
   border-radius: 14px;
   font: 600 24px/1.15 'Momo Trust Sans', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(111, 159, 114, 0.3);
+  animation: btnPulseLoop 3.5s ease-in-out infinite;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.overall-journal .overall-add-food:hover:not(:disabled) {
+  background: #5b875e;
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 10px 24px rgba(111, 159, 114, 0.5);
+}
+
+.overall-journal .overall-add-food:active:not(:disabled) {
+  transform: translateY(0) scale(0.96);
 }
 
 .overall-add-food img {
   flex: none;
+  animation: addIconRotate 4s ease-in-out infinite;
+  transition: transform 0.3s ease;
 }
 
+.overall-add-food:hover img {
+  transform: rotate(90deg) scale(1.15);
+}
+
+/* ----------------------------------------------------
+   CARDS & WEEK STRIP ANIMATIONS
+---------------------------------------------------- */
 .overall-journal .overall-week,
 .overall-journal .card {
   background: var(--journal-surface);
   border: 1px solid var(--journal-line);
   border-radius: 14px;
+  backdrop-filter: blur(8px);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .overall-journal .overall-week {
   display: block;
   padding: 6px 16px 8px;
-  animation: none;
+  animation: journalFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+}
+
+.overall-journal .overall-week:hover {
+  border-color: #8bb789;
+  box-shadow: 0 8px 24px rgba(20, 33, 22, 0.08);
+  transform: translateY(-2px);
 }
 
 .overall-week-controls {
@@ -84,6 +213,14 @@ body:has(.overall-journal) {
   border-radius: 6px;
   padding: 4px 6px;
   font-size: clamp(14px, 2vw, 20px);
+  transition: all 0.25s ease;
+}
+
+.overall-week-controls input:hover,
+.overall-week-controls input:focus {
+  border-color: var(--journal-green);
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(1.02);
 }
 
 .overall-week-controls button {
@@ -97,14 +234,34 @@ body:has(.overall-journal) {
   border-radius: 14px;
   background: var(--journal-surface);
   cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.overall-week-controls button:hover {
+  transform: scale(1.12);
+  background: #ffffff;
+}
+
+.overall-week-controls button:active {
+  transform: scale(0.92);
 }
 
 .overall-week-controls button:first-child img {
   transform: rotate(-90deg);
+  transition: transform 0.25s ease;
+}
+
+.overall-week-controls button:first-child:hover img {
+  transform: rotate(-90deg) translateX(2px);
 }
 
 .overall-week-controls button:last-child img {
   transform: rotate(90deg);
+  transition: transform 0.25s ease;
+}
+
+.overall-week-controls button:last-child:hover img {
+  transform: rotate(90deg) translateX(2px);
 }
 
 .overall-week-days {
@@ -127,15 +284,18 @@ body:has(.overall-journal) {
   background: transparent;
   color: inherit;
   cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .overall-week-days button span {
   font-size: clamp(11px, 1.6vw, 20px);
   text-transform: uppercase;
+  transition: transform 0.2s ease;
 }
 
 .overall-week-days button strong {
   font: 400 clamp(18px, 2.6vw, 32px)/1.12 'Otomanopee One', Georgia, serif;
+  transition: transform 0.2s ease;
 }
 
 .overall-week-days button::after {
@@ -144,20 +304,30 @@ body:has(.overall-journal) {
   height: 8px;
   margin-top: 7px;
   border-radius: 50%;
+  transition: all 0.3s ease;
 }
 
 .overall-week-days button[aria-pressed='true'] {
   background: #4d7951;
   color: #fff;
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 8px 18px rgba(77, 121, 81, 0.35);
 }
 
 .overall-week-days button[aria-pressed='true']::after {
   background: #fff;
+  transform: scale(1.3);
 }
 
-.overall-week-days button:not([aria-pressed='true']):hover,
-.overall-week-controls button:hover {
+.overall-week-days button:not([aria-pressed='true']):hover {
+  background: rgba(111, 159, 114, 0.15);
+  transform: translateY(-2px);
   box-shadow: inset 0 0 0 2px var(--journal-green);
+}
+
+.overall-week-days button:hover span,
+.overall-week-days button:hover strong {
+  transform: scale(1.06);
 }
 
 .overall-journal :focus-visible {
@@ -165,6 +335,9 @@ body:has(.overall-journal) {
   outline-offset: 2px;
 }
 
+/* ----------------------------------------------------
+   MACROS & STAT CARDS ANIMATIONS
+---------------------------------------------------- */
 .overall-journal .overall-macros-grid,
 .overall-journal .overall-columns-grid {
   display: grid;
@@ -172,9 +345,13 @@ body:has(.overall-journal) {
   gap: clamp(14px, 2vw, 30px);
 }
 
+.overall-journal .overall-macros-grid {
+  animation: journalFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s backwards;
+}
+
 .overall-journal .card {
-  box-shadow: none;
-  transform: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  transform: translateY(0);
 }
 
 .overall-journal .macro-stat-box {
@@ -183,11 +360,25 @@ body:has(.overall-journal) {
   justify-content: end;
   min-height: 125px;
   padding: 12px 8px 18px;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.overall-journal .macro-stat-box:hover {
+  transform: translateY(-6px);
+  border-color: #8bb789;
+  box-shadow: 0 12px 28px rgba(20, 33, 22, 0.1);
+  background: rgba(255, 255, 255, 0.75);
 }
 
 .overall-journal .macro-stat-box h2 {
   font: 600 clamp(17px, 2.2vw, 25px)/1.2 'Momo Trust Sans', sans-serif;
   color: #435e47;
+  transition: transform 0.3s ease;
+}
+
+.overall-journal .macro-stat-box:hover h2 {
+  transform: translateX(2px);
+  color: #1b4522;
 }
 
 .overall-journal .macro-stat-box p {
@@ -196,21 +387,55 @@ body:has(.overall-journal) {
   font-size: clamp(13px, 1.4vw, 17px);
   font-weight: 600;
   text-align: right;
+  transition: transform 0.3s ease;
+}
+
+.overall-journal .macro-stat-box:hover p {
+  transform: scale(1.03);
 }
 
 .overall-journal .progress-bar,
 .overall-journal .progress-bar span {
   height: 19px;
   border-radius: 10px;
-  animation: none;
 }
 
 .overall-journal .progress-bar {
   background: #dedad1;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.overall-journal .progress-bar span {
+  display: block;
+  transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: progressBarShimmer 3s infinite linear;
+}
+
+/* ----------------------------------------------------
+   MEAL COLUMNS & ENTRY ITEMS ANIMATIONS
+---------------------------------------------------- */
+.overall-journal .overall-columns-grid {
+  animation: journalFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s backwards;
 }
 
 .overall-journal .column-card {
   padding: 0;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.overall-journal .column-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 32px rgba(20, 33, 22, 0.12);
+  border-color: #7ca87a;
 }
 
 .overall-journal .column-header-banner {
@@ -225,6 +450,11 @@ body:has(.overall-journal) {
   background: var(--journal-green);
   color: #fff;
   font: 400 clamp(24px, 2.6vw, 36px)/1.2 'Otomanopee One', Georgia, serif;
+  transition: background 0.3s ease;
+}
+
+.overall-journal .column-card:hover .column-header-banner {
+  background: #5b875e;
 }
 
 .overall-meal-icon {
@@ -240,10 +470,21 @@ body:has(.overall-journal) {
   position: absolute;
   max-width: none;
   transform: scale(0.546875);
+  animation: iconFloatingLoop 4s ease-in-out infinite;
+  transition: transform 0.3s ease;
 }
 
 .overall-meal-icon img[width='68'] {
   transform: scale(0.514706);
+  animation: iconFloatingLunchLoop 4s ease-in-out infinite;
+}
+
+.overall-journal .column-card:hover .overall-meal-icon img {
+  transform: scale(0.68) rotate(12deg);
+}
+
+.overall-journal .column-card:hover .overall-meal-icon img[width='68'] {
+  transform: scale(0.65) rotate(-12deg);
 }
 
 .overall-journal .column-body {
@@ -264,6 +505,7 @@ body:has(.overall-journal) {
   display: flex;
   align-items: center;
   color: #435e47;
+  transition: opacity 0.3s ease;
 }
 
 .overall-journal .column-item-row {
@@ -273,10 +515,24 @@ body:has(.overall-journal) {
   gap: 8px;
   border-bottom: 1px solid var(--journal-line);
   background: #e6f4e6;
+  animation: rowSlideIn 0.35s ease-out backwards;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.overall-journal .column-item-row:hover {
+  background: #d4ebd4;
+  transform: scale(1.015) translateX(2px);
+  box-shadow: 0 4px 12px rgba(20, 33, 22, 0.08);
 }
 
 .overall-entry-calories {
   text-align: right;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.overall-journal .column-item-row:hover .overall-entry-calories {
+  color: #1e5c2b;
 }
 
 .overall-journal .entry-delete-btn {
@@ -285,6 +541,22 @@ body:has(.overall-journal) {
   padding: 0;
   font-size: 20px;
   line-height: 1;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.overall-journal .entry-delete-btn:hover:not(:disabled) {
+  background: #ff4d4d;
+  color: #ffffff;
+  transform: scale(1.2) rotate(90deg);
+  box-shadow: 0 4px 10px rgba(255, 77, 77, 0.35);
+}
+
+.overall-journal .entry-delete-btn:active:not(:disabled) {
+  transform: scale(0.9) rotate(90deg);
 }
 
 .overall-journal button:disabled {
@@ -292,6 +564,9 @@ body:has(.overall-journal) {
   cursor: default;
 }
 
+/* ----------------------------------------------------
+   HIGH CONTRAST & ACCESSIBILITY ANIMATIONS
+---------------------------------------------------- */
 .wellness-high-contrast .page-view.overall-journal {
   --journal-green: #294b38;
   --journal-line: #627586;
@@ -311,6 +586,9 @@ body:has(.overall-journal) {
   background: #334155;
 }
 
+/* ----------------------------------------------------
+   RESPONSIVE LAYOUT STYLES
+---------------------------------------------------- */
 @media (max-width: 1150px) {
   .overall-journal .overall-macros-grid,
   .overall-journal .overall-columns-grid {
