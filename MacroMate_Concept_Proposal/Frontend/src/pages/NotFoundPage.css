@@ -1,0 +1,270 @@
+@font-face {
+  font-family: 'Otomanopee One';
+  src: url('../assets/not-found/fonts/otomanopee-one.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Momo Trust Display';
+  src: url('../assets/not-found/fonts/momo-trust-display.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Momo Trust Sans';
+  src: url('../assets/not-found/fonts/momo-trust-sans-semibold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+body.not-found-active {
+  min-width: 0;
+}
+
+.not-found-page {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: max(806px, 100svh);
+  padding: 25px 19px 34px 18px;
+  color: #000;
+  background: linear-gradient(180deg, #b2b2b2 0%, #89fc90 100%);
+}
+
+.not-found-card {
+  position: relative;
+  display: grid;
+  width: 100%;
+  max-width: 1243px;
+  min-height: 747px;
+  border-radius: 20px;
+  background: #fff;
+  isolation: isolate;
+}
+
+.not-found-copy {
+  position: relative;
+  z-index: 2;
+  padding: 56px 15px 48px;
+}
+
+.not-found-brand {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  width: fit-content;
+  margin-left: 22px;
+  color: #000;
+  font: 400 16px/23px 'Otomanopee One', sans-serif;
+  text-decoration: none;
+  letter-spacing: 0;
+}
+
+.not-found-brand img {
+  display: block;
+  object-fit: cover;
+}
+
+/* The app-wide reset assigns a font to every element instead of inheriting. */
+.not-found-brand span,
+.not-found-title span,
+.not-found-description p {
+  font-family: inherit;
+}
+
+.not-found-badge {
+  display: grid;
+  place-items: center;
+  width: 182px;
+  height: 40px;
+  margin: 9px 0 0;
+  border-radius: 100px;
+  color: #ae1417;
+  background: #ffcfcf;
+  font: 600 20px/28px 'Momo Trust Sans', sans-serif;
+  letter-spacing: 0;
+}
+
+.not-found-title {
+  width: min(915px, 100%);
+  margin: 53px 0 0;
+  color: #000;
+  font: 400 clamp(48px, 5.46875vw, 70px)/1.2 'Otomanopee One', sans-serif;
+  letter-spacing: 0;
+}
+
+.not-found-title:focus {
+  outline: none;
+}
+
+.not-found-title span {
+  display: block;
+}
+
+.not-found-highlight {
+  color: #08a045;
+}
+
+.not-found-description {
+  width: min(656px, 100%);
+  margin: 70px 0 0 5px;
+  font: 400 36px/28px 'Momo Trust Display', sans-serif;
+  letter-spacing: 0;
+}
+
+.not-found-description p {
+  margin: 0;
+}
+
+.not-found-description p + p {
+  margin-top: 28px;
+}
+
+.not-found-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 44px 0 0 5px;
+  font: 600 16px/24px 'Momo Trust Sans', sans-serif;
+  letter-spacing: 0;
+}
+
+.not-found-actions a,
+.not-found-actions button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 10px 22px;
+  border: 2px solid #087733;
+  border-radius: 100px;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.not-found-home {
+  color: #fff;
+  background: #087733;
+}
+
+.not-found-back {
+  color: #075c29;
+  background: #fff;
+}
+
+.not-found-home:hover {
+  background: #055727;
+}
+
+.not-found-back:hover {
+  background: #e4f8e6;
+}
+
+.not-found-brand:focus-visible,
+.not-found-actions a:focus-visible,
+.not-found-actions button:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 5px;
+}
+
+.not-found-art {
+  position: absolute;
+  z-index: 1;
+  inset: auto 0 0 auto;
+  width: 46.0177%;
+  aspect-ratio: 572 / 747;
+  margin: 0;
+  pointer-events: none;
+}
+
+.not-found-portrait {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.not-found-glasses {
+  position: absolute;
+  right: 17.3077%;
+  top: 31.3253%;
+  width: 86.8881%;
+  height: auto;
+  aspect-ratio: 497 / 279;
+  object-fit: cover;
+}
+
+@media (max-width: 1150px) {
+  .not-found-page {
+    min-height: 100svh;
+    padding: 16px;
+  }
+
+  .not-found-card {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .not-found-copy {
+    padding: 28px 22px 36px;
+  }
+
+  .not-found-brand {
+    margin-left: 0;
+  }
+
+  .not-found-badge {
+    margin-top: 20px;
+  }
+
+  .not-found-title {
+    margin-top: 32px;
+    font-size: clamp(28px, 6vw, 52px);
+    line-height: 1.3;
+  }
+
+  .not-found-description {
+    width: 100%;
+    margin: 28px 0 0;
+    font-size: clamp(22px, 4vw, 30px);
+    line-height: 1.2;
+  }
+
+  .not-found-description p + p {
+    margin-top: 20px;
+  }
+
+  .not-found-actions {
+    margin: 28px 0 0;
+  }
+
+  .not-found-art {
+    position: relative;
+    inset: auto;
+    justify-self: center;
+    width: min(100%, 360px);
+    aspect-ratio: 572 / 747;
+  }
+
+}
+
+@media (forced-colors: active) {
+  .not-found-card,
+  .not-found-badge,
+  .not-found-actions a,
+  .not-found-actions button {
+    border: 2px solid CanvasText;
+  }
+}

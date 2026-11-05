@@ -1,52 +1,115 @@
-import { useEffect, useState } from 'react';
-import { collection, doc, onSnapshot, setDoc } from 'firebase/firestore';
-import { auth, cloudEnabled, firestore } from '../firebase/client';
+import { useEffect, useRef, useState } from 'react';
+import { cloudEnabled, supabase } from '../supabase/client';
+import { useAuth } from '../supabase/authContext';
+import { allRows, dayFromRow, preferencesFromRow, profileFromRow, unwrap } from '../supabase/database';
 
 export const defaultDay = { mood: 'Okay', energyLevel: 3, sleepMinutes: 0, waterGlasses: 0, completedGoals: [] };
 export const defaultPreferences = { highContrast: false, reduceMotion: false, enhancedFocus: false, announcements: true };
 
 export default function useWellness(date) {
+  const { user } = useAuth() || {};
   const [days, setDays] = useState({});
-  const [profile, setProfile] = useState({});
+  const [profile, setProfile] = useState({ fullName: user?.user_metadata?.full_name || '' });
   const [preferences, setPreferences] = useState(defaultPreferences);
-  const [ready, setReady] = useState(!cloudEnabled);
+  const [loadedUid, setLoadedUid] = useState(null);
   const [error, setError] = useState('');
   const [pending, setPending] = useState(0);
-  const uid = auth?.currentUser?.uid;
+  const [reloadToken, setReloadToken] = useState(0);
+  const queue = useRef(Promise.resolve());
+  const uid = user?.id;
+  const fullName = user?.user_metadata?.full_name || '';
+  const ready = !cloudEnabled || (!!uid && loadedUid === uid);
   useEffect(() => {
     if (!cloudEnabled || !uid) return;
-    const loaded = new Set();
-    const mark = (part) => { loaded.add(part); if (loaded.size === 3) setReady(true); };
-    const failed = () => setError('Cloud records could not load. Check your connection and Firebase access configuration, then reload.');
-    const stops = [
-      onSnapshot(collection(firestore, 'users', uid, 'days'), (snapshot) => {
-        setDays(Object.fromEntries(snapshot.docs.map((item) => [item.id, item.data()]))); mark('days');
-      }, failed),
-      onSnapshot(doc(firestore, 'users', uid, 'settings', 'profile'), (snapshot) => { setProfile(snapshot.data() || {}); mark('profile'); }, failed),
-      onSnapshot(doc(firestore, 'users', uid, 'settings', 'preferences'), (snapshot) => { setPreferences({ ...defaultPreferences, ...snapshot.data() }); mark('preferences'); }, failed),
-    ];
-    return () => stops.forEach((stop) => stop());
-  }, [uid]);
+    let alive = true;
+    Promise.all([
+      allRows(() => supabase.from('daily_checkins').select('*').eq('user_id', uid).order('entry_date')),
+      supabase.from('profiles').select('*').eq('user_id', uid).maybeSingle(),
+      supabase.from('preferences').select('*').eq('user_id', uid).maybeSingle(),
+    ]).then((results) => {
+      if (!alive) return;
+      const [dailyRows, profileResult, preferenceResult] = results;
+      const profileRow = unwrap(profileResult);
+      const preferenceRow = unwrap(preferenceResult);
+      setDays(Object.fromEntries(dailyRows.map((row) => [row.entry_date, dayFromRow(row)])));
+      setProfile(profileRow ? profileFromRow(profileRow) : { fullName });
+      setPreferences({ ...defaultPreferences, ...preferencesFromRow(preferenceRow) });
+      setError('');
+      setLoadedUid(uid);
+    }).catch(() => {
+      if (alive) {
+        setError('Could not load your saved records. Check the connection and try again.');
+      }
+    });
+    return () => { alive = false; };
+  }, [uid, reloadToken, fullName]);
 
-  async function write(path, data) {
-    if (!cloudEnabled) return;
-    if (!uid || !ready) throw new Error('Cloud records are still loading.');
-    setPending((count) => count + 1); setError('');
-    try { await setDoc(doc(firestore, 'users', uid, ...path), data, { merge: true }); }
-    catch (err) { setError('Your change was not saved to Firebase. Check your connection and try again.'); throw err; }
-    finally { setPending((count) => count - 1); }
+  function enqueue(action) {
+    if (!uid || !ready) return Promise.reject(new Error('Wait for your records to finish loading.'));
+    setPending((count) => count + 1);
+    const task = queue.current.then(async () => {
+      setError('');
+      try { return await action(); }
+      catch (err) {
+        console.error('Could not save wellness changes.', err);
+        const backendMessage = [err?.message, err?.details, err?.hint].filter(Boolean).join(' ');
+        const message = /daily_checkins_water_glasses_check/i.test(backendMessage)
+          ? 'Water intake is still limited by the database schema. Apply the 202611020002_unlimited_water_intake.sql migration, then try again.'
+          : /daily_checkins_completed_goals_check/i.test(backendMessage)
+            ? 'Custom goals are blocked by an outdated database schema. In Supabase SQL Editor, run supabase/migrations/202611020003_customize_daily_checklist_goals.sql, then retry. This change was not saved.'
+          : `Your change was not saved. ${backendMessage || 'Check your connection and try again.'}`;
+        setError(message);
+        throw err;
+      }
+      finally { setPending((count) => count - 1); }
+    });
+    queue.current = task.catch(() => {});
+    return task;
   }
-  function updateDay(patch) {
-    if (!cloudEnabled) { setDays((current) => ({ ...current, [date]: { ...current[date], ...patch } })); return; }
-    void write(['days', date], patch).catch(() => {});
+  function updateDay(patch, targetDate = date) {
+    if (!cloudEnabled) { setDays((current) => ({ ...current, [targetDate]: { ...current[targetDate], ...patch } })); return; }
+    if (patch.completedGoals && uid && ready) {
+      setDays((current) => ({
+        ...current,
+        [targetDate]: { ...defaultDay, ...current[targetDate], completedGoals: patch.completedGoals },
+      }));
+    }
+    void enqueue(async () => {
+      if (patch.mood === null) {
+        const row = unwrap(await supabase.from('daily_checkins').update({ mood: null })
+          .eq('user_id', uid).eq('entry_date', targetDate).select('*').maybeSingle());
+        setDays((current) => {
+          if (row) return { ...current, [targetDate]: dayFromRow(row) };
+          const next = { ...current };
+          delete next[targetDate];
+          return next;
+        });
+        return;
+      }
+      const row = unwrap(await supabase.rpc('save_checkin', { p_date: targetDate, p_patch: patch }));
+      setDays((current) => ({ ...current, [targetDate]: dayFromRow(row) }));
+    }).catch(() => {});
   }
   async function saveProfile(data) {
-    await write(['settings', 'profile'], data);
-    if (!cloudEnabled) setProfile(data);
+    if (!cloudEnabled) { setProfile(data); return; }
+    return enqueue(async () => {
+      const row = unwrap(await supabase.from('profiles').upsert({ user_id: uid, full_name: data.fullName,
+        age: data.age, height_cm: data.heightCm, weight_kg: data.weightKg, activity_level: data.activityLevel,
+        wellness_goal: data.wellnessGoal, avatar_data_url: data.pfpUrl || null }).select('*').single());
+      setProfile(profileFromRow(row));
+    });
   }
   function updatePreference(key, value) {
     if (!cloudEnabled) { setPreferences((current) => ({ ...current, [key]: value })); return; }
-    void write(['settings', 'preferences'], { [key]: value }).catch(() => {});
+    void enqueue(async () => {
+      const row = unwrap(await supabase.rpc('save_preference', { p_key: key, p_value: value }));
+      setPreferences(preferencesFromRow(row));
+    }).catch(() => {});
   }
-  return { days, day: { ...defaultDay, ...days[date] }, profile, preferences, ready, error, pending, updateDay, saveProfile, updatePreference };
+  const activeDays = cloudEnabled && loadedUid !== uid ? {} : days;
+  const activeProfile = cloudEnabled && loadedUid !== uid ? { fullName } : profile;
+  const activePreferences = cloudEnabled && loadedUid !== uid ? defaultPreferences : preferences;
+  return { days: activeDays, day: { ...defaultDay, ...activeDays[date], mood: activeDays[date]?.mood || defaultDay.mood },
+    profile: activeProfile, preferences: activePreferences, ready, pending, error,
+    updateDay, updatePreference, saveProfile, reload: () => { setLoadedUid(null); setReloadToken((value) => value + 1); } };
 }
