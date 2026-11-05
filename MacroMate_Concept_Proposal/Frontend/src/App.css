@@ -2215,6 +2215,62 @@ input:checked + .slider:before { transform: translateX(20px); }
 .entry-delete-btn { padding: 5px 8px; border: 1px solid #c7d8cb; border-radius: 6px; background: #fff; color: #1a251e; cursor: pointer; }
 button:disabled { opacity: 0.6; cursor: wait; }
 .food-form-fields { border: 0; display: grid; gap: 8px; }
+.food-catalog-list {
+  display: grid;
+  gap: 6px;
+  max-height: 210px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid #c7d8cb;
+  border-radius: 10px;
+  background: #f3f8f3;
+  scrollbar-color: #83aa8b #e6ede8;
+}
+.food-catalog-option {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #d5e5d7;
+  border-radius: 8px;
+  background: #fff;
+  color: #1a251e;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.food-catalog-option:hover { border-color: #83aa8b; background: #edf6ee; }
+.food-catalog-option.selected { border-color: #0b9b56; background: #e2f2e5; }
+.food-catalog-option:focus-visible, .food-catalog-manual:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+.food-catalog-option-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; font-weight: 700; }
+.food-catalog-serving, .food-catalog-nutrients { color: #526357; font-size: 12px; }
+.food-catalog-nutrients { line-height: 1.4; }
+.food-catalog-empty { margin: 0; padding: 12px; color: #526357; font-size: 13px; text-align: center; }
+.food-catalog-manual {
+  justify-self: start;
+  padding: 5px 0;
+  border: 0;
+  background: transparent;
+  color: #087c46;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.food-catalog-manual:hover { color: #055b34; text-decoration: underline; }
+.food-catalog-note { margin: 0; color: #435447; font-size: 12px; line-height: 1.45; }
+.wellness-high-contrast .food-catalog-list { border-color: #64748b; background: #1e293b; }
+.wellness-high-contrast .food-catalog-option { border-color: #475569; background: #334155; color: #f8fafc; }
+.wellness-high-contrast .food-catalog-option:hover,
+.wellness-high-contrast .food-catalog-option.selected { border-color: #34d399; background: #065f46; }
+.wellness-high-contrast .food-catalog-serving,
+.wellness-high-contrast .food-catalog-nutrients,
+.wellness-high-contrast .food-catalog-empty,
+.wellness-high-contrast .food-catalog-note { color: #cbd5e1 !important; }
+.wellness-high-contrast .food-catalog-manual { color: #6ee7b7; }
 
 .goals-page-header, .workout-list-header, .workout-chart-header, .workout-row-details, .workout-form-actions {
   display: flex;
