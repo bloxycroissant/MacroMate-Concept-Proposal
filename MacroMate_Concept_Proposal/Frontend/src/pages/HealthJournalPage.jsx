@@ -119,7 +119,7 @@ export default function HealthJournalPage({ date = localDate(), onDateChange, da
   };
 
   return (
-    <div className="page-view health-journal-page" style={{ position: 'relative', width: '100%', maxWidth: '1200px', margin: '0 auto', boxSizing: 'border-box' }}>
+    <div className="page-view health-journal-page" style={{ position: 'relative', width: '100%', maxWidth: '1200px', margin: '0 auto', boxSizing: 'border-box', containerType: 'inline-size' }}>
       <style>{`
         @keyframes popIn {
           from { opacity: 0; transform: scale(0.85) translateY(6px); }
@@ -197,12 +197,14 @@ export default function HealthJournalPage({ date = localDate(), onDateChange, da
           font-weight: 800;
         }
         .health-grid-top {
+          display: grid;
           grid-template-columns: minmax(0, 1.15fr) minmax(270px, 0.85fr) !important;
           gap: 12px !important;
           margin: 0 !important;
           align-items: stretch;
         }
         .health-grid-bottom {
+          display: grid;
           grid-template-columns: minmax(0, 1.15fr) minmax(270px, 0.85fr) !important;
           gap: 12px !important;
           align-items: stretch;
@@ -379,19 +381,128 @@ export default function HealthJournalPage({ date = localDate(), onDateChange, da
           border: 2px solid #0b9b56 !important;
           background: #fff !important;
         }
-        @media (max-width: 1100px) {
+
+        /* ----------------------------------------------------
+           HIGH CONTRAST & DARK MODE OVERRIDES
+        ---------------------------------------------------- */
+        .wellness-high-contrast .health-journal-page {
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .checkin-card,
+        .wellness-high-contrast .snapshot-card,
+        .wellness-high-contrast .mood-history-card,
+        .wellness-high-contrast .avg-mood-card {
+          background-color: #0f172a !important;
+          border: 1px solid #94a3b8 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .checkin-heading {
+          background: #1e293b !important;
+          border-bottom: 1px solid #475569;
+        }
+        .wellness-high-contrast .checkin-heading h2,
+        .wellness-high-contrast .checkin-heading p {
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .mood-selector .mood-btn {
+          background-color: #1e293b !important;
+          border-color: #475569 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .mood-selector .mood-btn.selected {
+          border-color: #38bdf8 !important;
+          background-color: #0284c7 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .sleep-control,
+        .wellness-high-contrast .water-control {
+          background-color: #1e293b !important;
+          border-color: #475569 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .sleep-control select {
+          background-color: #0f172a !important;
+          border-color: #475569 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .water-counter button {
+          background-color: #334155 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .water-counter span {
+          color: #38bdf8 !important;
+        }
+        .wellness-high-contrast .snapshot-card {
+          background-color: #0f172a !important;
+          border: 1px solid #94a3b8 !important;
+        }
+        .wellness-high-contrast .snapshot-stat {
+          background-color: #1e293b !important;
+          border: 1px solid #475569 !important;
+        }
+        .wellness-high-contrast .mood-period-controls button {
+          background-color: #1e293b !important;
+          color: #f8fafc !important;
+          border: 1px solid #475569 !important;
+        }
+        .wellness-high-contrast .mood-period-controls button[aria-pressed="true"] {
+          background-color: #38bdf8 !important;
+          color: #0f172a !important;
+          border-color: #38bdf8 !important;
+        }
+        .wellness-high-contrast .mood-month-controls button {
+          background-color: #1e293b !important;
+          color: #f8fafc !important;
+          border: 1px solid #475569 !important;
+        }
+        .wellness-high-contrast .mood-month-controls button[aria-pressed="true"] {
+          background-color: #38bdf8 !important;
+          color: #0f172a !important;
+        }
+        .wellness-high-contrast .mood-calendar-grid {
+          background-color: #1e293b !important;
+          border: 1px solid #475569 !important;
+        }
+        .wellness-high-contrast .mood-calendar-grid .mood-circle-btn {
+          background-color: #334155 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .mood-calendar-grid .mood-circle-btn.has-recorded-mood {
+          background-color: #0284c7 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .average-mood-circle {
+          background-color: #1e293b !important;
+          border-color: #38bdf8 !important;
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .health-page-heading h1,
+        .wellness-high-contrast .mood-history-card h2,
+        .wellness-high-contrast .avg-mood-card h2 {
+          color: #f8fafc !important;
+        }
+        .wellness-high-contrast .health-page-heading p,
+        .wellness-high-contrast .avg-mood-card p {
+          color: #94a3b8 !important;
+        }
+
+        /* ----------------------------------------------------
+           ZOOM & RESPONSIVE COMPONENT STRUCTURE BREAKPOINTS
+        ---------------------------------------------------- */
+        @media (max-width: 1100px), (max-device-width: 1100px) {
           .health-grid-top,
           .health-grid-bottom {
-            grid-template-columns: minmax(0, 1.1fr) minmax(250px, 0.9fr) !important;
+            grid-template-columns: minmax(0, 1fr) !important;
           }
         }
-        @media (max-width: 800px) {
+        @media (max-width: 800px), (max-device-width: 800px) {
           .health-page-header { align-items: flex-start; flex-direction: column; }
           .health-page-header .date-strip-card { align-self: stretch; justify-content: center; }
           .health-grid-top,
           .health-grid-bottom { grid-template-columns: minmax(0, 1fr) !important; }
+          .health-journal-page .checkin-controls-grid { grid-template-columns: minmax(0, 1fr) !important; }
         }
-        @media (max-width: 500px) {
+        @media (max-width: 500px), (max-device-width: 500px) {
           .health-journal-page { padding: 0 !important; }
           .health-page-header .date-strip-card { padding: 6px !important; }
           .health-page-header .journal-date-label { flex-wrap: wrap; justify-content: center; }
@@ -402,6 +513,7 @@ export default function HealthJournalPage({ date = localDate(), onDateChange, da
           .health-journal-page .checkin-heading { margin: -12px -12px 12px; }
           .health-journal-page .checkin-controls-grid { grid-template-columns: minmax(0, 1fr) !important; }
         }
+
         .health-journal-page .health-animated-card:hover {
           transform: translateY(-2px);
           box-shadow: 0 8px 18px rgba(16, 42, 28, 0.1);
@@ -815,4 +927,4 @@ export default function HealthJournalPage({ date = localDate(), onDateChange, da
       </div>
     </div>
   );
-} 
+}
