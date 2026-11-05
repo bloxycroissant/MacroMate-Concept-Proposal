@@ -1814,69 +1814,6 @@ html, body {
   animation: anim-pulse-subtle 4s infinite ease-in-out;
 }
 
-.overall-macros-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  width: 100%;
-}
-
-.macro-stat-box {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.align-right {
-  text-align: right;
-}
-
-.overall-columns-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  width: 100%;
-}
-
-.column-card {
-  padding: 0;
-  overflow: hidden;
-  transition: transform 0.3s ease;
-}
-
-.column-card:hover {
-  transform: translateY(-4px);
-}
-
-.column-header-banner {
-  background: #689f78;
-  color: white;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  font-weight: 800;
-  font-size: 13px;
-}
-
-.column-body {
-  padding: 12px;
-  min-height: 180px;
-  color: #1a251e;
-}
-
-.column-item-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 10px;
-  color: #1a251e;
-  margin-bottom: 6px;
-  transition: transform 0.2s ease;
-}
-
-.column-item-row:hover {
-  transform: translateX(3px);
-}
-
 /* MY GOALS PAGE */
 .goals-grid {
   display: grid;
@@ -2457,8 +2394,6 @@ button:disabled { opacity: 0.6; cursor: wait; }
   .mood-calendar { gap: 5px; padding: 8px; }
   .mood-calendar-weekday { font-size: 10px; }
   .mood-month-grid, .year-average-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .overall-macros-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .overall-columns-grid { grid-template-columns: 1fr; }
   .meal-sidebar-tab { min-width: 62px; }
   .daily-table { min-width: 560px; }
   .meal-table-wrap { overflow-x: auto; }

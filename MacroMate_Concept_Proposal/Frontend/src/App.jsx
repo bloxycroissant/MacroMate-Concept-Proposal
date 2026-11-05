@@ -72,6 +72,7 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState('overview');
   const [foodSubTab, setFoodSubTab] = useState('hub');
+  const showingOverallJournal = activeTab === 'food-journal' && foodSubTab === 'overall';
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [foodJournalMenuOpen, setFoodJournalMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -603,13 +604,13 @@ export default function App() {
             </div>
           )}
           {journal.loading && <p className="journal-notice" role="status">Loading saved food entries…</p>}
-          {journal.error && cloudEnabled && user && (
+          {journal.error && (showingOverallJournal || (cloudEnabled && user)) && (
             <div className="journal-notice journal-error" role="alert">
               <p>{journal.error}</p>
               <button type="button" disabled={journal.loading || journal.busy} onClick={journal.reload}>Retry</button>
             </div>
           )}
-          {activeTab !== 'health-journal' && activeTab !== 'overview' && <p className="journal-selected-date">Food journal: {dateLabel}</p>}
+          {!showingOverallJournal && activeTab !== 'health-journal' && activeTab !== 'overview' && <p className="journal-selected-date">Food journal: {dateLabel}</p>}
           
           {activeTab === 'health-journal' && (
             <HealthJournalPage
@@ -696,7 +697,7 @@ export default function App() {
             />
           )}
 
-          {activeTab === 'food-journal' && foodSubTab === 'overall' && (
+          {showingOverallJournal && (
             <OverallFoodJournalPage
               selectedDate={selectedDate}
               onDateChange={setSelectedDate}
