@@ -39,6 +39,7 @@ export default function OverviewPage({
   const [checklistEditorError, setChecklistEditorError] = useState('');
   const [savedFeedbackDate, setSavedFeedbackDate] = useState('');
   const [goalAnimationKey, setGoalAnimationKey] = useState(0);
+  const [selectedChartDay, setSelectedChartDay] = useState(null);
 
   const today = new Date();
   const todayDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -142,6 +143,26 @@ export default function OverviewPage({
         }
         .chart-date-desc {
           animation: fadeInDate 0.35s ease-out both;
+        }
+        .chart-node-circle {
+          cursor: pointer;
+          transition: r 0.2s ease, fill 0.2s ease;
+        }
+        .chart-node-circle:hover {
+          r: 7px;
+          fill: #065f30 !important;
+        }
+        .day-details-modal {
+          background: #ffffff;
+          border: 1px solid #c2dec9;
+          border-radius: 12px;
+          padding: 12px 16px;
+          margin-bottom: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          animation: fadeInDate 0.3s ease-out both;
+          box-shadow: 0 4px 14px rgba(20, 33, 22, 0.05);
         }
         .overview-stats {
           display: grid;
@@ -489,6 +510,19 @@ export default function OverviewPage({
             </div>
             <span className="pill-badge">This Week</span>
           </div>
+
+          {selectedChartDay && (
+            <div className="day-details-modal">
+              <div>
+                <strong>{selectedChartDay.date ? new Date(`${selectedChartDay.date}T12:00:00`).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }) : 'Selected Day'}</strong>
+                <div className="stat-sub" style={{ marginTop: '4px' }}>
+                  🔥 {formatNumber(selectedChartDay.calories || 0)} kcal | 🥩 Protein: {formatNumber(selectedChartDay.protein || 0)}g | 🍞 Carbs: {formatNumber(selectedChartDay.carbs || 0)}g | 🥑 Fat: {formatNumber(selectedChartDay.fat || 0)}g
+                </div>
+              </div>
+              <button type="button" className="entry-delete-btn" onClick={() => setSelectedChartDay(null)}>×</button>
+            </div>
+          )}
+
           <svg className="chart-svg" viewBox="0 0 500 120" preserveAspectRatio="none">
             <line x1="0" y1="25" x2="500" y2="25" stroke="#d5ebd7" strokeDasharray="4" />
             <line x1="0" y1="55" x2="500" y2="55" stroke="#d5ebd7" strokeDasharray="4" />
@@ -500,8 +534,16 @@ export default function OverviewPage({
                   const x = (index + 0.5) * (500 / 7);
                   const y = 110 - ((day?.calories || 0) / chartMax) * 90;
                   return (
-                    <circle key={day?.date || index} cx={x} cy={y} r={day?.calories ? 4 : 2.5} fill={day?.calories ? '#0b9b56' : '#9bbfa5'}>
-                      <title>{`${day?.date || ''}: ${formatNumber(day?.calories || 0)} kcal`}</title>
+                    <circle
+                      key={day?.date || index}
+                      cx={x}
+                      cy={y}
+                      r={day?.calories ? 5 : 3}
+                      fill={day?.calories ? '#0b9b56' : '#9bbfa5'}
+                      className="chart-node-circle"
+                      onClick={() => setSelectedChartDay(day)}
+                    >
+                      <title>{`${day?.date || ''}: ${formatNumber(day?.calories || 0)} kcal (Click for details)`}</title>
                     </circle>
                   );
                 })}
@@ -514,7 +556,7 @@ export default function OverviewPage({
                 ? new Date(`${day.date}T12:00:00`).toLocaleDateString(undefined, { weekday: 'long' }) 
                 : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][index];
               return (
-                <span key={day?.date || index}>
+                <span key={day?.date || index} onClick={() => setSelectedChartDay(day)} style={{ cursor: 'pointer' }}>
                   <span>{dayName}</span>
                 </span>
               );
